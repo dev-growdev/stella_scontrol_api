@@ -2,74 +2,68 @@ version: "3.8"
 
 services:
   nest-api:
-      container_name: nest-api
-      image: nestjs-api-dev:1.0.0
-      build:
-          context: .
-          dockerfile: Dockerfile
-          target: development
-      volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules      
-      command: yarn start:dev
-      ports:
-            - 8080:8080
-      networks:
-            - pocnest
-      restart: always
-      depends_on:
-        - pg-db-dev
-        - redis
-      env_file:
-        - .env
-  
+    container_name: scontrol-api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+    ports:
+      - 8080:8080
+    networks:
+      - scontrol
+    tty: true
+    depends_on:
+      - pg-db-dev
+      - pg-db-test
+      - redis
 
   pg-db-dev:
-    image: postgres:13
-    container_name: pg-db-dev
+    image: postgres:14
+    container_name: scontrol-db-dev
     restart: always
     environment:
-      POSTGRES_PASSWORD: pocnest2023
+      POSTGRES_PASSWORD: growdev2023
       POSTGRES_USER: growdev
-      POSTGRES_DB: poc-nest
+      POSTGRES_DB: scontrol
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - 5432:5432
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - scontrol_postgres:/var/lib/postgresql/data
     networks:
-      - pocnest
+      - scontrol
 
-
-  # db_test:
-  #   image: postgres
-  #   restart: always
-  #   container_name: test-postgres-growpeople
-  #   deploy:
-  #     resources:
-  #       limits:
-  #         memory: 512M
-  #   environment:
-  #     POSTGRES_PASSWORD: test2022
-  #     POSTGRES_USER: test
-  #     POSTGRES_DB: test_app
-  #   ports:
-  #     - 5433:5432
-  #   networks:
-  #     - growpeople
+  pg-db-test:
+    image: postgres:14
+    restart: always
+    container_name: scontrol-db-test
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    environment:
+      POSTGRES_PASSWORD: test2022
+      POSTGRES_USER: test
+      POSTGRES_DB: test_app
+    ports:
+      - 5433:5432
+    networks:
+      - scontrol
 
   redis:
     image: redis
-    container_name: redis-poc-nest
+    container_name: scontrol-redis
     command: redis-server --requirepass growdev2023
     ports:
-      - 6377:6379
+      - 6379:6379
     networks:
-      - pocnest
+      - scontrol
 
 networks:
-  pocnest:
+  scontrol:
     driver: bridge
 
 volumes:
-  postgres:
+  scontrol_postgres:

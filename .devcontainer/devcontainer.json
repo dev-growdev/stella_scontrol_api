@@ -31,10 +31,10 @@
 	// "shutdownAction": "none",
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "apk update && apk add git && npm install -g @nestjs/cli && npm install -g prisma",
+	"postCreateCommand": "npm install -g @nestjs/cli",
 
 	// run commands after container is started
-	"postStartCommand": "yarn start",
+	// "postStartCommand": "yarn start:dev",
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "root",
@@ -48,7 +48,8 @@
 				"GitHub.vscode-pull-request-github",
 				"mhutchie.git-graph",
 				"esbenp.prettier-vscode",
-				"Prisma.prisma"
+				"Prisma.prisma",
+				"humao.rest-client"
 			]
 		}
 	}
