@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  nest-api:
+      container_name: nest-api
+      image: nestjs-api-dev:1.0.0
+      build:
+          context: .
+          dockerfile: Dockerfile
+          target: development
+      volumes:
+            - .:/usr/src/app
+            - /usr/src/app/node_modules      
+      command: yarn start:dev
+      ports:
+            - 8080:8080
+      networks:
+            - pocnest
+      restart: always
+      depends_on:
+        - pg-db-dev
+        - redis
+      env_file:
+        - .env
+  
+
+  pg-db-dev:
+    image: postgres:13
+    container_name: pg-db-dev
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: pocnest2023
+      POSTGRES_USER: growdev
+      POSTGRES_DB: poc-nest
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - pocnest
+
+
+  # db_test:
+  #   image: postgres
+  #   restart: always
+  #   container_name: test-postgres-growpeople
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 512M
+  #   environment:
+  #     POSTGRES_PASSWORD: test2022
+  #     POSTGRES_USER: test
+  #     POSTGRES_DB: test_app
+  #   ports:
+  #     - 5433:5432
+  #   networks:
+  #     - growpeople
+
+  redis:
+    image: redis
+    container_name: redis-poc-nest
+    command: redis-server --requirepass growdev2023
+    ports:
+      - 6377:6379
+    networks:
+      - pocnest
+
+networks:
+  pocnest:
+    driver: bridge
+
+volumes:
+  postgres:

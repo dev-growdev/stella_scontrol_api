@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// binaryTargets: 
+// Specify the OS on which the Prisma Client will run to ensure compatibility of the query engine. 
+
+// value => Build OS
+
+// linux-musl-openssl-3.0.x => Linux Alpine v3.17 x86_x64 (Docker Container uses Alpine)
+// darwin => macOS Intel x86 | darwin-arm64 => macOS ARM64
+// windows => Windows
+// debian-openssl-1.1.x => Ubuntu v18 - v20| Mint v19 - v20
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] 
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  uid String @id @default(uuid())
+
+  email          String  @unique
+  password       String
+  enable         Boolean @default(true)
+  dataProfileUid String  @unique @default(uuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile DataProfile @relation(fields: [dataProfileUid], references: [uid])
+
+  userRole UserRole?
+
+  @@map("users")
+}
+
+model DataProfile {
+  uid String @id @default(uuid())
+
+  name     String
+  email    String
+  document String? @unique
+  phone    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User?
+
+  @@map("data_profiles")
+}
+
+model Role {
+  uid String @id @default(uuid())
+
+  name   String
+  type   Int
+  enable Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  uid String @id @default(uuid())
+
+  userUid String  @unique @default(uuid())
+  roleUid String  @default(uuid())
+  actions Json   @db.Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User?  @relation(fields: [userUid], references: [uid])
+  role Role? @relation(fields: [roleUid], references: [uid])
+
+  @@map("user_roles")
+}
+
+// model Category {}
+
+// model Product {}
