@@ -11,8 +11,6 @@ interface CustomResponseDTO {
   success: boolean;
   code: number;
   data: any;
-  message: string;
-  request: { url: string; method: string };
 }
 
 @Injectable()
@@ -20,7 +18,6 @@ export class CustomResponseInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
-    const { url, method } = req;
 
     return next.handle().pipe(
       map((data) => {
@@ -28,8 +25,6 @@ export class CustomResponseInterceptor implements NestInterceptor {
           success: true,
           code: res.statusCode,
           data,
-          message: 'Ok',
-          request: { url, method },
         };
         return response;
       }),
