@@ -33,13 +33,13 @@ import { JwtAuthGuard } from 'src/shared/guards';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('signup')
-  signup(@Body() dto: AuthDTO) {
-    return this.authService.signup(dto);
-  }
+  // @Post('signup')
+  // signup(@Body() dto: AuthDTO) {
+  //   return this.authService.signup(dto);
+  // }
 
-  @Post('signin')
-  signin(@Body() dto: Pick<AuthDTO, 'email' | 'password'>) {
-    return this.authService.signin(dto);
-  }
+  // @Post('signin')
+  // signin(@Body() dto: Pick<AuthDTO, 'email' | 'password'>) {
+  //   return this.authService.signin(dto);
+  // }
 }
