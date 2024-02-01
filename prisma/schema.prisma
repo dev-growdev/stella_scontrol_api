@@ -12,8 +12,8 @@
 // debian-openssl-1.1.x => Ubuntu v18 - v20| Mint v19 - v20
 
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] 
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -21,71 +21,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  uid String @id @default(uuid())
+model PaymentRequestsGeneral {
+  uid               String   @id @default(uuid()) 
+  
+  description       String? 
+  requiredReceipt   Boolean  @default(false) @map("required_receipt")
+  totalRequestValue Float    @map("total_request_value")
+  duoDate           DateTime @map("duo_date")
 
-  email          String  @unique
-  password       String
-  enable         Boolean @default(true)
-  dataProfileUid String  @unique @default(uuid())
+  createdAt         DateTime @default(now()) @map("create_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("update_at")
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile DataProfile @relation(fields: [dataProfileUid], references: [uid])
-
-  userRole UserRole?
-
-  @@map("users")
+  @@map("payment_requests_general")
 }
-
-model DataProfile {
-  uid String @id @default(uuid())
-
-  name     String
-  email    String
-  document String? @unique
-  phone    String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User?
-
-  @@map("data_profiles")
-}
-
-model Role {
-  uid String @id @default(uuid())
-
-  name   String
-  type   Int
-  enable Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userRoles UserRole[]
-
-  @@map("roles")
-}
-
-model UserRole {
-  uid String @id @default(uuid())
-
-  userUid String  @unique @default(uuid())
-  roleUid String  @default(uuid())
-  actions Json   @db.Json
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User?  @relation(fields: [userUid], references: [uid])
-  role Role? @relation(fields: [roleUid], references: [uid])
-
-  @@map("user_roles")
-}
-
-// model Category {}
-
-// model Product {}
