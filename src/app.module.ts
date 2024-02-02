@@ -16,7 +16,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
-import { PaymentRequestsModule } from './payment-requests/payment-requests.module';
+import { PaymentRequestsModule } from './payment-requests-general/payment-requests-general.module';
 
 /**
  *
