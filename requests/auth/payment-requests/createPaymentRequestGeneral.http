@@ -6,9 +6,9 @@ Content-Type: application/json
 # Campos obrigatórios: todos
 
 {
-  "description": "Descrição da transação",
-  "requiredReceipt": true,
-  "totalRequestValue": "100.50",
-  "dueDate": "2024-02-01T12:00:00.000Z"
+  "description": "Solicito pagamento para um equipamento novo.",
+  "sendReceipt": true,
+  "totalRequestValue": "300",
+  "dueDate": "2024-02-02T12:00:00.000Z"
 }
 
