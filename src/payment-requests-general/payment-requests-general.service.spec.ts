@@ -6,7 +6,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 
 const makePaymentRequestGeneralDTO = (): PaymentRequestGeneralDTO => {
   return {
-    description: 'any_description',
+    description: 'Solicito pagamento para um equipamento novo.',
     sendReceipt: true,
     totalRequestValue: '100.50',
     dueDate: new Date(),
