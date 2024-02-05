@@ -1,1 +1,1 @@
-export * from './payment-requests.dto';
+export * from './payment-requests-general.dto';

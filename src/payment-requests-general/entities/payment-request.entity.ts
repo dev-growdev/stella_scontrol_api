@@ -1,1 +1,1 @@
-export class PaymentRequest {}
+export class PaymentRequestGeneral {}
