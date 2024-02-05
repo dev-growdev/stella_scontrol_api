@@ -24,6 +24,7 @@ datasource db {
 model User {
   uid String @id @default(uuid())
 
+  name           String
   email          String  @unique
   password       String
   token          String 
