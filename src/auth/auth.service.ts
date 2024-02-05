@@ -18,7 +18,7 @@ export class AuthService {
       if (!existingUser) {
         const createdUser = await this.prisma.$transaction(
           async (transaction) => {
-            const user = await transaction.user.create({
+            await transaction.user.create({
               data: {
                 name: dto.name,
                 email: dto.email,
