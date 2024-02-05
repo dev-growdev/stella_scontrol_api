@@ -10,19 +10,21 @@ import { User } from 'src/shared/models';
  *
  */
 export class AuthDTO {
+  @IsString({ message: 'Nome deve ser do tipo string' })
+  @IsNotEmpty({ message: 'Nome é obrigatório' })
+  name: string;
+
   @IsEmail({}, { message: 'E-mail inválido' })
   @IsNotEmpty({ message: 'E-mail é obrigatório' })
   email: string;
 
   @IsString({ message: 'Campo senha deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Senha é obrigatório' })
-  password: string;
+  password?: string; 
 
   @IsString({ message: 'Token deve ser do tipo string' })
   @IsNotEmpty({ message: 'Token é obrigatório' })
   token: string;
 }
-
 export interface AuthUser {
   user: User;
   token: string;

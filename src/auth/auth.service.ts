@@ -27,6 +27,7 @@ export class AuthService {
         async (transaction) => {
           const user = await transaction.user.create({
             data: {
+              name: dto.name,
               email: dto.email,
               password: dto.password,
               token: dto.token,
