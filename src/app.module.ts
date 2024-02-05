@@ -16,6 +16,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
+import { GreetingsModule } from './greetings/greetings.module';
 
 /**
  *
@@ -61,6 +62,7 @@ import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
     EmailModule,
     PrismaModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    GreetingsModule,
   ],
   controllers: [AppController],
   providers: [
