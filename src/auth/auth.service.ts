@@ -1,11 +1,7 @@
-import {
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { AuthDTO } from './dtos';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthDTO } from './dtos';
 
 @Injectable()
 export class AuthService {
@@ -19,31 +15,36 @@ export class AuthService {
         },
       });
 
-      if (existingUser) {
-        throw new ConflictException('Usuário com este email já existe.');
+      if (!existingUser) {
+        const createdUser = await this.prisma.$transaction(
+          async (transaction) => {
+            const user = await transaction.user.create({
+              data: {
+                name: dto.name,
+                email: dto.email,
+                password: dto.password,
+                token: dto.token,
+              },
+            });
+
+            const access_token = await this.jwt.signAsync({
+              uid: createdUser.uid,
+            });
+
+            return {
+              createdUser,
+              access_token,
+            };
+          },
+        );
       }
 
-      const createdUser = await this.prisma.$transaction(
-        async (transaction) => {
-          const user = await transaction.user.create({
-            data: {
-              name: dto.name,
-              email: dto.email,
-              password: dto.password,
-              token: dto.token,
-            },
-          });
+      const access_token = await this.jwt.signAsync({ uid: existingUser.uid });
 
-          const access_token = await this.jwt.signAsync({uid: user.uid});
-
-          return {
-            user,
-            access_token,
-          };
-        },
-      );
-
-      return createdUser;
+      return {
+        existingUser,
+        access_token,
+      };
     } catch (error: any) {
       throw new InternalServerErrorException(error.message);
     }
