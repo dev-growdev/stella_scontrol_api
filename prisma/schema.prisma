@@ -27,7 +27,7 @@ model PaymentRequestsGeneral {
   description       String? 
   sendReceipt   Boolean  @default(false) @map("send_receipt")
   totalRequestValue Float    @map("total_request_value")
-  duoDate           DateTime @map("duo_date")
+  dueDate           DateTime @map("due_date")
 
   createdAt         DateTime @default(now()) @map("create_at")
   updatedAt         DateTime @default(now()) @updatedAt @map("update_at")
