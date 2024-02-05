@@ -26,66 +26,7 @@ model User {
 
   email          String  @unique
   password       String
-  enable         Boolean @default(true)
-  dataProfileUid String  @unique @default(uuid())
+  token          String 
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile DataProfile @relation(fields: [dataProfileUid], references: [uid])
-
-  userRole UserRole?
-
-  @@map("users")
+  @@map("user")
 }
-
-model DataProfile {
-  uid String @id @default(uuid())
-
-  name     String
-  email    String
-  document String? @unique
-  phone    String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User?
-
-  @@map("data_profiles")
-}
-
-model Role {
-  uid String @id @default(uuid())
-
-  name   String
-  type   Int
-  enable Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userRoles UserRole[]
-
-  @@map("roles")
-}
-
-model UserRole {
-  uid String @id @default(uuid())
-
-  userUid String  @unique @default(uuid())
-  roleUid String  @default(uuid())
-  actions Json   @db.Json
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User?  @relation(fields: [userUid], references: [uid])
-  role Role? @relation(fields: [roleUid], references: [uid])
-
-  @@map("user_roles")
-}
-
-// model Category {}
-
-// model Product {}
