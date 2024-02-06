@@ -29,10 +29,18 @@ model PaymentRequestsGeneral {
   totalRequestValue Float    @map("total_request_value")
   dueDate           DateTime @map("due_date")
 
+  createdAt DateTime @default(now()) @map("create_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("update_at")
+
+  @@map("payment_requests_general")
+}
+
+model User {
+  uid String @id @default(uuid())
+
+  idUserAd String @unique @map("id_user_ad")
   name     String
-  email    String  @unique
-  password String?
-  token    String
+  email    String @unique
 
   @@map("user")
 }
