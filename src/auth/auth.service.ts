@@ -5,7 +5,7 @@ import { AuthDTO } from './dtos';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(private prisma: PrismaService, private jwt: JwtService) { }
 
   async signin(dto: AuthDTO) {
     try {

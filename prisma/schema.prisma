@@ -12,8 +12,8 @@
 // debian-openssl-1.1.x => Ubuntu v18 - v20| Mint v19 - v20
 
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] 
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -21,13 +21,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  name           String
-  email          String  @unique
-  password       String?
-  token          String 
+  description       String?
+  sendReceipt       Boolean  @default(false) @map("send_receipt")
+  totalRequestValue Float    @map("total_request_value")
+  dueDate           DateTime @map("due_date")
+
+  name     String
+  email    String  @unique
+  password String?
+  token    String
 
   @@map("user")
 }

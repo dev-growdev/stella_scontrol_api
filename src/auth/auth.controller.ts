@@ -1,6 +1,6 @@
 import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { CustomResponseInterceptor } from 'src/shared/response/custom-response.interceptor';
+import { AuthService } from './auth.service';
 import { AuthDTO } from './dtos';
 
 /**
@@ -23,7 +23,7 @@ import { AuthDTO } from './dtos';
 // @UseGuards(JwtAuthGuard)
 @UseInterceptors(new CustomResponseInterceptor())
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('login')
   signin(@Body() loginDto: AuthDTO) {

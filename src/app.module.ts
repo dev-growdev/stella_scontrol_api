@@ -4,19 +4,20 @@ import {
   ValidationError,
   ValidationPipe,
 } from '@nestjs/common';
-import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from './prisma/prisma.module';
 
-import { UsersModule } from './users/user.module';
-import { CategoriesModule } from './categories/categories.module';
-import { ProductsModule } from './products/products.module';
-import { AuthModule } from './auth/auth.module';
-import { EmailModule } from './shared/email/email.module';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
+import { AuthModule } from './auth/auth.module';
+import { CategoriesModule } from './categories/categories.module';
 import { GreetingsModule } from './greetings/greetings.module';
+import { PaymentRequestsGeneralModule } from './payment-requests-general/payment-requests-general.module';
+import { ProductsModule } from './products/products.module';
+import { EmailModule } from './shared/email/email.module';
+import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
+import { UsersModule } from './users/user.module';
 
 /**
  *
@@ -63,6 +64,7 @@ import { GreetingsModule } from './greetings/greetings.module';
     PrismaModule,
     ConfigModule.forRoot({ isGlobal: true }),
     GreetingsModule,
+    PaymentRequestsGeneralModule,
   ],
   controllers: [AppController],
   providers: [
@@ -98,4 +100,4 @@ import { GreetingsModule } from './greetings/greetings.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
