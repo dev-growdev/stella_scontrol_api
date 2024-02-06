@@ -18,12 +18,15 @@ export class AuthDTO {
   @IsNotEmpty({ message: 'E-mail é obrigatório' })
   email: string;
 
-  @IsString({ message: 'Campo senha deve ser do tipo string' })
-  password?: string; 
+  // @IsString({ message: 'Campo senha deve ser do tipo string' })
+  // password?: string;
 
-  @IsString({ message: 'Token deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Token é obrigatório' })
-  token: string;
+  // @IsString({ message: 'Token deve ser do tipo string' })
+  // //@IsNotEmpty({ message: 'Token é obrigatório' })
+  // token?: string;
+
+  @IsString({ message: 'ID deve ser do tipo string' })
+  idUserAd?: string
 }
 export interface AuthUser {
   user: User;

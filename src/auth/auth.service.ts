@@ -11,41 +11,46 @@ export class AuthService {
     try {
       const existingUser = await this.prisma.user.findUnique({
         where: {
-          email: dto.email,
-        },
+          email: dto.email
+        }
       });
 
       if (!existingUser) {
-        const createdUser = await this.prisma.$transaction(
-          async (transaction) => {
-            await transaction.user.create({
-              data: {
-                name: dto.name,
-                email: dto.email,
-                password: dto.password,
-                token: dto.token,
-              },
-            });
 
-            const access_token = await this.jwt.signAsync({
-              uid: createdUser.uid,
-            });
+        const createdUser = await this.prisma.user.create({
+          data: {
+            idUserAd: dto.idUserAd,
+            email: dto.email,
+            name: dto.name
+          }
+        });
 
-            return {
-              createdUser,
-              access_token,
-            };
-          },
-        );
+        const access_token = await this.jwt.signAsync({
+          uid: createdUser.uid,
+          name: createdUser.name,
+          email: createdUser.email,
+          idUserAd: createdUser.idUserAd
+        });
+
+        return {
+          user: createdUser,
+          access_token
+        };
       }
 
-      const access_token = await this.jwt.signAsync({ uid: existingUser.uid });
+      const access_token = await this.jwt.signAsync({
+        uid: existingUser.uid,
+        name: existingUser.name,
+        email: existingUser.email,
+        idUserAd: existingUser.idUserAd
+      });
 
       return {
-        existingUser,
-        access_token,
+        user: existingUser,
+        access_token
       };
-    } catch (error: any) {
+
+    } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
