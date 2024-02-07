@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDTO } from './dtos';
@@ -53,5 +53,29 @@ export class AuthService {
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  async getUserByUid(userId: string) {
+    const userDB = await this.prisma.user.findUnique({
+      where: { uid: userId }
+    });
+
+    if (!userDB) {
+      throw new UnauthorizedException('Usuário não autorizado.');
+    }
+
+    const user: any = {
+      uuid: userDB.uid,
+      idUserAd: userDB.idUserAd,
+      data: {
+        displayName: userDB.name,
+        email: userDB.email,
+        photoURL: '',
+        shortcuts: [],
+      },
+      role: ['admin'],
+    };
+
+    return { user };
   }
 }
