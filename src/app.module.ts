@@ -12,7 +12,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
-import { GreetingsModule } from './greetings/greetings.module';
 import { PaymentRequestsGeneralModule } from './payment-requests-general/payment-requests-general.module';
 import { ProductsModule } from './products/products.module';
 import { EmailModule } from './shared/email/email.module';
@@ -63,7 +62,6 @@ import { UsersModule } from './users/user.module';
     EmailModule,
     PrismaModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    GreetingsModule,
     PaymentRequestsGeneralModule,
   ],
   controllers: [AppController],
