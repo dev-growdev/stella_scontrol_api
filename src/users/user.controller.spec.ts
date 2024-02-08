@@ -6,11 +6,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
 const mockIdUserAd = 'mockUserIdAd';
-const mockDeletedUser = {
+const mockDisableUser = {
   uid: 'mockUserId',
   name: 'Mock User',
   email: 'mockuser@example.com',
   idUserAd: 'mockUserIdAd',
+  enable: false
 };
 
 describe('UserController', () => {
@@ -31,47 +32,47 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('Remove - DELETE', () => {
-    it('should call userService.remove with the provided id_user_ad and return the deleted user', async () => {
-      jest.spyOn(service, 'remove').mockResolvedValue(mockDeletedUser);
+  describe('Disable - PUT', () => {
+    it('should call userService.disableUser with the provided id_user_ad and return the disable user', async () => {
+      jest.spyOn(service, 'disableUser').mockResolvedValue(mockDisableUser);
 
-      const result = await controller.remove(mockIdUserAd);
+      const result = await controller.disable(mockIdUserAd);
 
-      expect(service.remove).toHaveBeenCalledWith(mockIdUserAd);
-      expect(result).toEqual(mockDeletedUser);
+      expect(service.disableUser).toHaveBeenCalledWith(mockIdUserAd);
+      expect(result).toEqual(mockDisableUser);
     });
 
     it('should handle BadRequestException when id_user_ad is not provided', async () => {
-      jest.spyOn(service, 'remove').mockImplementation(() => {
+      jest.spyOn(service, 'disableUser').mockImplementation(() => {
         throw new BadRequestException('ID do usuário não fornecido');
       });
 
       try {
-        await controller.remove('');
+        await controller.disable('');
       } catch (error) {
         expect(error.message).toBe('ID do usuário não fornecido');
       }
     });
 
     it('should handle NotFoundException when the user with the provided id_user_ad is not found', async () => {
-      jest.spyOn(service, 'remove').mockImplementation(() => {
+      jest.spyOn(service, 'disableUser').mockImplementation(() => {
         throw new NotFoundException('Usuário não encontrado!');
       });
 
       try {
-        await controller.remove(mockIdUserAd);
+        await controller.disable(mockIdUserAd);
       } catch (error) {
         expect(error.message).toBe('Usuário não encontrado!');
       }
     });
 
     it('should handle InternalServerErrorException for other unexpected errors', async () => {
-      jest.spyOn(service, 'remove').mockImplementation(() => {
+      jest.spyOn(service, 'disableUser').mockImplementation(() => {
         throw new InternalServerErrorException('Some error');
       });
 
       try {
-        await controller.remove(mockIdUserAd);
+        await controller.disable(mockIdUserAd);
       } catch (error) {
         expect(error.message).toBe('Some error');
       }
