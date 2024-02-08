@@ -10,8 +10,18 @@ import {
 
 const mockPrismaService = {
   user: {
-    delete: jest.fn(),
+    update: jest.fn(),
   },
+};
+
+const mockIdUserAd = 'mockUserIdAd';
+
+const mockDisableUser = {
+  uid: 'mockUserId',
+  name: 'Mock User',
+  email: 'mockuser@example.com',
+  idUserAd: 'mockUserIdAd',
+  enable: false
 };
 
 describe('UserController', () => {
@@ -35,52 +45,46 @@ describe('UserController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('remove', () => {
-    const deleteSpy = jest.spyOn(mockPrismaService.user, 'delete');
+  describe('Disable - PUT', () => {
+    const updateSpy = jest.spyOn(mockPrismaService.user, 'update');
 
     afterEach(() => {
-      deleteSpy.mockClear();
+      updateSpy.mockClear();
     });
-
-    it('should remove a user by id_user_ad', async () => {
-      const idUserAd = 'someUserIdAd';
-      const deletedUser = { /* Mock your deleted user data here */ };
-
-      deleteSpy.mockResolvedValue(deletedUser);
-
-      const result = await controller.remove(idUserAd);
-
-      expect(deleteSpy).toHaveBeenCalledWith({ where: { idUserAd } });
-      expect(result).toEqual(deletedUser);
-    });
-
-    it('should handle BadRequestException when id_user_ad is not provided', async () => {
-      const idUserAd = ''; // Empty id_user_ad
-
-      await expect(controller.remove(idUserAd)).rejects.toThrowError(
-        new BadRequestException('ID do usuário não fornecido'),
-      );
-    });
-
-    it('should handle NotFoundException when user is not found', async () => {
-      const idUserAd = 'nonExistentUserIdAd';
-
-      deleteSpy.mockResolvedValue(null);
-
-      await expect(controller.remove(idUserAd)).rejects.toThrowError(
-        new NotFoundException('Usuário não encontrado!'),
-      );
-    });
-
-    it('should handle InternalServerErrorException on unexpected errors', async () => {
-      const idUserAd = 'someUserIdAd';
-
-      deleteSpy.mockImplementation(() => {
-        throw new Error('Some unexpected error');
+  
+    it('should disable a user by id_user_ad', async () => {
+      updateSpy.mockResolvedValue(mockDisableUser);
+  
+      const result = await controller.disable(mockIdUserAd);
+  
+      expect(updateSpy).toHaveBeenCalledWith({
+        where: { idUserAd: mockIdUserAd },
+        data: { enable: false },
       });
-
-      await expect(controller.remove(idUserAd)).rejects.toThrowError(
-        new InternalServerErrorException('Some unexpected error'),
+      expect(result).toEqual(mockDisableUser);
+    });
+  
+    it('should handle BadRequestException when id_user_ad is not provided', async () => {
+      updateSpy.mockRejectedValue(new BadRequestException('ID do usuário não fornecido'));
+  
+      await expect(controller.disable(mockIdUserAd)).rejects.toThrowError(
+        new BadRequestException('ID do usuário não fornecido')
+      );
+    });
+  
+    it('should handle NotFoundException when user is not found', async () => {
+      updateSpy.mockResolvedValue(null);
+  
+      await expect(controller.disable(mockIdUserAd)).rejects.toThrowError(
+        new NotFoundException('Usuário não encontrado!')
+      );
+    });
+  
+    it('should handle InternalServerErrorException on unexpected errors', async () => {
+      updateSpy.mockRejectedValue(new InternalServerErrorException('Some unexpected error'));
+  
+      await expect(controller.disable(mockIdUserAd)).rejects.toThrowError(
+        new InternalServerErrorException('Some unexpected error')
       );
     });
   });
