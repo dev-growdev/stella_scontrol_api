@@ -1,9 +1,8 @@
-import {
-  Controller,
-  UseInterceptors,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { User } from '../shared/decorators/user.decorator';
+import { JwtAuthGuard } from '..//shared/guards/auth.guard';
 import { AuthService } from './auth.service';
-import { CustomResponseInterceptor } from 'src/shared/response/custom-response.interceptor';
+import { AuthDTO } from './dtos';
 
 /**
  * ? @Controller(prefix: string)
@@ -21,9 +20,20 @@ import { CustomResponseInterceptor } from 'src/shared/response/custom-response.i
  *
  */
 
-@Controller('auth')
+@Controller()
 // @UseGuards(JwtAuthGuard)
-@UseInterceptors(new CustomResponseInterceptor())
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
+
+  @Post('login')
+  signin(@Body() loginDto: AuthDTO) {
+
+    return this.authService.signin(loginDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('auth')
+  token(@User() user: any) {
+    return this.authService.getUserByUid(user.uid);
+  }
 }
