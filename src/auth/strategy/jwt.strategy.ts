@@ -11,4 +11,13 @@ export class JwStrategy extends PassportStrategy(Strategy) {
       secretOrKey: config.get('JWT_SECRET'),
     });
   }
+
+  async validate(payload: any) {
+    return {
+      uid: payload.uid,
+      name: payload.name,
+      email: payload.email,
+      idUserAd: payload.idUserAd,
+    };
+  }
 }

@@ -1,0 +1,6 @@
+@HOST = http://localhost:8080/api
+
+GET {{HOST}}/auth HTTP/1.1
+Content-Type: application/json
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIyZjZlZmE3Yy1hOTBhLTQ5NGUtYmUyZC01ODEzNDgwNGJjZWEiLCJuYW1lIjoiR3Jvd2RldiAtIFMuQ29udHJvbCIsImVtYWlsIjoiZ3Jvd2Rldl9zY29udHJvbEBzdGVsbGEuY29tLmJyIiwiaWRVc2VyQWQiOiJhbGd1bWlkdXNlcmFkIiwiaWF0IjoxNzA3MzE3MTkwLCJleHAiOjE3MDc0MDM1OTB9.P43guzUt9eCP3YGDStqZKf3csJiP5tRIC5CsxcKzbAM

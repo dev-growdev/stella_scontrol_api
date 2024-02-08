@@ -1,6 +1,6 @@
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
 import { CustomExceptionFilter } from './shared/exceptions';
 import { CustomResponseInterceptor } from './shared/response';
 
@@ -27,7 +27,9 @@ async function bootstrap() {
   logger.log('App started at http://localhost:8080/api');
 
   app.useGlobalFilters(new CustomExceptionFilter());
-  
+
+  app.enableCors()
+
   app.useGlobalInterceptors(new CustomResponseInterceptor());
 
   app.setGlobalPrefix('api');
