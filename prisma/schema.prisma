@@ -42,5 +42,7 @@ model User {
   name     String
   email    String @unique
 
+  enable Boolean @default(true)
+
   @@map("user")
 }
