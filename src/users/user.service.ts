@@ -1,9 +1,10 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -11,6 +12,10 @@ export class UserService {
 
   async remove(idUserAd: string) {
     try {
+      if (!idUserAd) {
+        throw new BadRequestException('ID do usuário não fornecido');
+      }
+
       const deletedUser = await this.prisma.user.delete({
         where: {
           idUserAd: idUserAd,
@@ -18,7 +23,7 @@ export class UserService {
       });
 
       if (!deletedUser) {
-        throw new NotFoundException(`Usuário não encontrado!`);
+        throw new NotFoundException('Usuário não encontrado!');
       }
 
       return deletedUser;
