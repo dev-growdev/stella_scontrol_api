@@ -10,23 +10,26 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async remove(idUserAd: string) {
+  async disableUser(idUserAd: string) {
     try {
       if (!idUserAd) {
         throw new BadRequestException('ID do usuário não fornecido');
       }
 
-      const deletedUser = await this.prisma.user.delete({
+      const updatedUser = await this.prisma.user.update({
         where: {
           idUserAd: idUserAd,
         },
+        data: {
+          enable: false,
+        },
       });
 
-      if (!deletedUser) {
+      if (!updatedUser) {
         throw new NotFoundException('Usuário não encontrado!');
       }
 
-      return deletedUser;
+      return updatedUser;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
