@@ -1,0 +1,4 @@
+@HOST = http://localhost:8080/api
+
+POST {{HOST}}/users/delete/idUserAd HTTP/1.1
+Content-Type: application/json
