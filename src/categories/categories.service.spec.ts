@@ -55,6 +55,14 @@ describe('CategoriesService', () => {
       expect(result).toEqual(categoryDTO);
     });
 
+    it('should throw InternalServerErrorException on error during category creation', async () => {
+      prismaServiceMock.categories.findFirst.mockRejectedValueOnce(
+        new InternalServerErrorException('Mocked error')
+      );
+
+      await expect(service.create(categoryDTO)).rejects.toThrow(InternalServerErrorException);
+    });
+
     it('should throw BadRequestException if category already exists', async () => {
       prismaServiceMock.categories.findFirst.mockResolvedValueOnce(categoryDTO);
 
