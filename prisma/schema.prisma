@@ -39,10 +39,22 @@ model User {
   uid String @id @default(uuid())
 
   idUserAd String @unique @map("id_user_ad")
-  name     String
+  name     String 
   email    String @unique
 
   enable Boolean @default(true)
 
   @@map("user")
+}
+
+model Categories {
+  uid String @id @default(uuid())
+
+  name String @db.VarChar(50)
+  enable Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("create_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("update_at")
+  
+  @@map("categories")
 }
