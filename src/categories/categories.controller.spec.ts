@@ -12,10 +12,12 @@ import { ConfigService } from '@nestjs/config';
 
 const makeCategoriesDTO = (): CategoriesDTO => {
   return {
-    name: 'Test Category',
+    name: 'Eletrônicos',
     enable: true
   };
 };
+
+const uid = 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11';
 
 describe('CategoriesController', () => {
   let controller: CategoriesController;
@@ -41,8 +43,8 @@ describe('CategoriesController', () => {
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         return Promise.resolve({
-          uid: '1',
-          name: 'Test Category',
+          uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+          name: 'Eletrônicos',
           enable: true,
         });
       });
@@ -50,7 +52,7 @@ describe('CategoriesController', () => {
       const result = await controller.create(categoryDTO);
 
       expect(result).toBeDefined();
-      expect(result.uid).toEqual('1');
+      expect(result.uid).toEqual('fcca0cf5-4e29-41e1-83ec-ce14fa973b11');
     });
 
     it('should handle duplicate category and return BadRequestException on failure', async () => {
@@ -87,8 +89,8 @@ describe('CategoriesController', () => {
   describe('FindAll - GET', () => {
     it('should get all categories on success', async () => {
       const categoriesData = [
-        { uid: '1', name: 'Category 1', enable: true },
-        { uid: '2', name: 'Category 2', enable: true },
+        { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11', name: 'Eletrônicos', enable: true },
+        { uid: '4f8f05a2-c694-4e7f-b972-4bad692e0ca5', name: 'Moda', enable: true },
       ];
 
       jest.spyOn(service, 'findAll').mockImplementation(async () => {
@@ -117,13 +119,12 @@ describe('CategoriesController', () => {
 
   describe('Update - PUT', () => {
     it('should update a category and return the updated data on success', async () => {
-      const uid = '1';
       const categoryDTO = makeCategoriesDTO();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {
         return Promise.resolve({
-          uid: '1',
-          name: 'Updated Test Category',
+          uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+          name: 'Eletrônicos',
           enable: true,
         });
       });
@@ -131,12 +132,11 @@ describe('CategoriesController', () => {
       const result = await controller.update(uid, categoryDTO);
 
       expect(result).toBeDefined();
-      expect(result.uid).toEqual('1');
-      expect(result.name).toEqual('Updated Test Category');
+      expect(result.uid).toEqual('fcca0cf5-4e29-41e1-83ec-ce14fa973b11');
+      expect(result.name).toEqual('Eletrônicos');
     });
 
     it('should handle not found category and return NotFoundException on failure', async () => {
-      const uid = '1';
       const categoryDTO = makeCategoriesDTO();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {
@@ -152,7 +152,6 @@ describe('CategoriesController', () => {
     });
 
     it('should handle errors and return InternalServerErrorException on failure', async () => {
-      const uid = '1';
       const categoryDTO = makeCategoriesDTO();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {

@@ -8,17 +8,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-const uid = '1';
+const uid = 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11';
 
 const categoryDTO: CategoriesDTO = {
-  name: 'Test Category',
+  name: 'Eletrônicos',
   enable: true,
 };
 
 describe('CategoriesService', () => {
   let service: CategoriesService;
 
-  // Mock PrismaService
   const prismaServiceMock = {
     categories: {
       findFirst: jest.fn(),
@@ -73,8 +72,8 @@ describe('CategoriesService', () => {
   describe('findAll', () => {
     it('should return an array of categories', async () => {
       const mockCategories = [
-        { uid: '1', name: 'Category1', enable: true },
-        { uid: '2', name: 'Category2', enable: true },
+        { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11', name: 'Eletrônicos', enable: true },
+        { uid: '4f8f05a2-c694-4e7f-b972-4bad692e0ca5', name: 'Moda', enable: true },
       ];
       prismaServiceMock.categories.findMany.mockResolvedValueOnce(mockCategories);
 
@@ -92,7 +91,7 @@ describe('CategoriesService', () => {
 
   describe('update', () => {
     it('should update a category', async () => {
-      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({ uid, name: 'Old Category', enable: false });
+      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({ uid, name: 'Eletrônicos', enable: false });
 
       prismaServiceMock.categories.update.mockResolvedValueOnce({ uid, ...categoryDTO });
 
@@ -108,7 +107,7 @@ describe('CategoriesService', () => {
     });
 
     it('should throw InternalServerErrorException on error', async () => {
-      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({ uid, name: 'Old Category', enable: false });
+      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({ uid, name: 'Eletrônicos', enable: false });
 
       prismaServiceMock.categories.update.mockRejectedValueOnce(new Error('Mocked error'));
 
