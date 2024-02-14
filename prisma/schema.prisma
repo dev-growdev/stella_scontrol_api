@@ -46,3 +46,35 @@ model User {
 
   @@map("user")
 }
+
+model Categories {
+  uid String @id @default(uuid())
+
+  name   String  @db.VarChar(50)
+  enable Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("create_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("update_at")
+
+  products Products[]
+
+  @@map("categories")
+}
+
+model Products {
+  uid String @id @default(uuid())
+
+  categoryId String
+  category   Categories @relation(fields: [categoryId], references: [uid])
+
+  code         String  @db.VarChar(50)
+  name         String  @db.VarChar(50)
+  enable       Boolean @default(true)
+  measurement String? @db.VarChar(50)
+  quantity     Int?
+
+  createdAt DateTime @default(now()) @map("create_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("update_at")
+
+  @@map("products")
+}
