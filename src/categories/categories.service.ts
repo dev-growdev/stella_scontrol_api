@@ -61,6 +61,16 @@ export class CategoriesService {
       throw new NotFoundException('Categoria não encontrada.');
     }
 
+    const findCategory = await this.prisma.categories.findFirst({
+      where: {
+        name: categoryDTO.name,
+      },
+    });
+
+    if (findCategory) {
+      throw new BadRequestException('Essa categoria já existe.');
+    }
+
     try {
       const findCategory = await this.prisma.categories.update({
         where: { uid: category.uid },
