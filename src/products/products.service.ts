@@ -12,13 +12,13 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(productDTO: ProductDTO) {
-    const findProduct = await this.prisma.products.findFirst({
+    const existingProduct = await this.prisma.products.findFirst({
       where: {
         name: productDTO.name,
       },
     });
 
-    if (findProduct) {
+    if (existingProduct) {
       throw new BadRequestException('Esse produto já existe.');
     }
 
@@ -101,7 +101,7 @@ export class ProductsService {
         throw new BadRequestException('Categoria não encontrada.');
       }
 
-      const findProduct = await this.prisma.products.update({
+      const updatedProduct = await this.prisma.products.update({
         where: { uid: product.uid },
         data: {
           categoryId: findCategory.uid,
@@ -114,13 +114,13 @@ export class ProductsService {
       });
 
       const data = {
-        uid: findProduct.uid,
-        categoryId: findProduct.categoryId,
-        code: findProduct.code,
-        name: findProduct.name,
-        enable: findProduct.enable,
-        measurement: findProduct.measurement,
-        quantity: findProduct.quantity,
+        uid: updatedProduct.uid,
+        categoryId: updatedProduct.categoryId,
+        code: updatedProduct.code,
+        name: updatedProduct.name,
+        enable: updatedProduct.enable,
+        measurement: updatedProduct.measurement,
+        quantity: updatedProduct.quantity,
       };
 
       return data;
