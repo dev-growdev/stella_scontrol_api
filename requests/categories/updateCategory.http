@@ -1,12 +1,12 @@
 @HOST = http://localhost:8080/api
 
-PUT  {{HOST}}/categories/9b153362-bc60-4669-b9dc-42718c0e0a0e HTTP/1.1
+PUT  {{HOST}}/categories/4e292f89-ef81-41f4-8be8-da44c0012f8b HTTP/1.1
 Content-Type: application/json
 
 # Campos obrigatórios: todos
 
 {
-    "name": "escritório update",
-    "enable": false
+    "name": "papelaria",
+    "enable": true
 }
 

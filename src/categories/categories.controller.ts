@@ -17,7 +17,12 @@ export class CategoriesController {
   }
 
   @Put(':uid')
-  update(@Param('uid') uid: string, @Body() categoryDTO: CategoriesDTO) {
-    return this.categoriesService.update(uid, categoryDTO);
+  update(@Param('uid') uid: string, @Body() categoryDto: CategoriesDTO) {
+    return this.categoriesService.update(uid, categoryDto.name);
+  }
+
+  @Put(':uid/disable')
+  dissable(@Param('uid') uid: string, @Body() categoryDto: CategoriesDTO) {
+    return this.categoriesService.disable(uid, categoryDto.enable);
   }
 }
