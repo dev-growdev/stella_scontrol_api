@@ -82,6 +82,16 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado.');
     }
 
+    const findProduct = await this.prisma.products.findFirst({
+      where: {
+        name: productDTO.name,
+      },
+    });
+
+    if (findProduct) {
+      throw new BadRequestException('Esse produto já existe.');
+    }
+    
     try {
       const findCategory = await this.prisma.categories.findUnique({
         where: { uid: productDTO.categoryId },
