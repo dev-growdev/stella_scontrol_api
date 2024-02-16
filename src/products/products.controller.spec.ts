@@ -21,7 +21,7 @@ const makeProductsDTO = (): ProductDTO => {
   };
 };
 
-const uid = '2a4cdbad-aab0-470a-ae48-e4693d62ce9e'
+const uid = '2a4cdbad-aab0-470a-ae48-e4693d62ce9e';
 
 describe('ProductsController', () => {
   let controller: ProductsController;
@@ -238,19 +238,21 @@ describe('ProductsController', () => {
           quantity: 10,
         });
       });
-  
-      const result = await controller.disable(uid, { enable: false } as ProductDTO);
-  
+
+      const result = await controller.disable(uid, {
+        enable: false,
+      } as ProductDTO);
+
       expect(result).toBeDefined();
       expect(result.uid).toEqual('2a4cdbad-aab0-470a-ae48-e4693d62ce9e');
       expect(result.enable).toEqual(false);
     });
-  
+
     it('should handle not found product and return NotFoundException on failure', async () => {
       jest.spyOn(service, 'disable').mockImplementation(async () => {
         throw new NotFoundException('Produto não encontrado.');
       });
-  
+
       try {
         await controller.disable(uid, { enable: false } as ProductDTO);
       } catch (error) {
@@ -258,12 +260,12 @@ describe('ProductsController', () => {
         expect(error.message).toEqual('Produto não encontrado.');
       }
     });
-  
+
     it('should handle errors and return InternalServerErrorException on failure', async () => {
       jest.spyOn(service, 'disable').mockImplementation(async () => {
         throw new InternalServerErrorException('Test error');
       });
-  
+
       try {
         await controller.disable(uid, { enable: false } as ProductDTO);
       } catch (error) {
@@ -271,5 +273,5 @@ describe('ProductsController', () => {
         expect(error.message).toEqual('Test error');
       }
     });
-  });  
+  });
 });
