@@ -95,7 +95,7 @@ describe('CategoriesService', () => {
 
       prismaServiceMock.categories.update.mockResolvedValueOnce({ uid, ...categoryDTO });
 
-      const result = await service.update(uid, categoryDTO);
+      const result = await service.update(uid, categoryDTO.name);
 
       expect(result).toEqual({ uid, ...categoryDTO });
     });
@@ -103,7 +103,7 @@ describe('CategoriesService', () => {
     it('should throw NotFoundException if category is not found', async () => {
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, categoryDTO)).rejects.toThrow(NotFoundException);
+      await expect(service.update(uid, categoryDTO.name)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw InternalServerErrorException on error', async () => {
@@ -111,7 +111,39 @@ describe('CategoriesService', () => {
 
       prismaServiceMock.categories.update.mockRejectedValueOnce(new Error('Mocked error'));
 
-      await expect(service.update(uid, categoryDTO)).rejects.toThrow(InternalServerErrorException);
+      await expect(service.update(uid, categoryDTO.name)).rejects.toThrow(InternalServerErrorException);
+    });
+  });
+
+  describe('disable', () => {
+    it('should disable a category', async () => {
+      const existingCategory = { uid, name: 'Eletrônicos', enable: true };
+
+      prismaServiceMock.categories.findUnique.mockResolvedValueOnce(existingCategory);
+
+      const updatedCategory = { ...existingCategory, enable: false };
+
+      prismaServiceMock.categories.update.mockResolvedValueOnce(updatedCategory);
+
+      const result = await service.disable(uid, false);
+
+      expect(result).toEqual(updatedCategory);
+    });
+
+    it('should throw NotFoundException if category is not found', async () => {
+      prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.disable(uid, false)).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw InternalServerErrorException on error', async () => {
+      const existingCategory = { uid, name: 'Eletrônicos', enable: true };
+
+      prismaServiceMock.categories.findUnique.mockResolvedValueOnce(existingCategory);
+
+      prismaServiceMock.categories.update.mockRejectedValueOnce(new Error('Mocked error'));
+
+      await expect(service.disable(uid, false)).rejects.toThrow(InternalServerErrorException);
     });
   });
 });
