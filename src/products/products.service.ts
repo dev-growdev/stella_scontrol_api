@@ -77,21 +77,21 @@ export class ProductsService {
     const product = await this.prisma.products.findUnique({
       where: { uid },
     });
-
+  
     if (!product) {
       throw new NotFoundException('Produto não encontrado.');
     }
-
+  
     const findProduct = await this.prisma.products.findFirst({
       where: {
         name: productDTO.name,
       },
     });
-
+  
     if (findProduct) {
       throw new BadRequestException('Esse produto já existe.');
     }
-    
+  
     try {
       const findCategory = await this.prisma.categories.findUnique({
         where: { uid: productDTO.categoryId },
@@ -100,30 +100,55 @@ export class ProductsService {
       if (!findCategory) {
         throw new BadRequestException('Categoria não encontrada.');
       }
-
+  
+      const updatedData: Partial<ProductDTO> = {
+        categoryId: findCategory.uid,
+        code: productDTO.code,
+        name: productDTO.name,
+        measurement: productDTO.measurement,
+        quantity: productDTO.quantity,
+      };
+  
       const updatedProduct = await this.prisma.products.update({
         where: { uid: product.uid },
-        data: {
-          categoryId: findCategory.uid,
-          code: productDTO.code,
-          name: productDTO.name,
-          enable: productDTO.enable,
-          measurement: productDTO.measurement,
-          quantity: productDTO.quantity,
-        },
+        data: updatedData,
       });
-
+  
       const data = {
         uid: updatedProduct.uid,
         categoryId: updatedProduct.categoryId,
         code: updatedProduct.code,
         name: updatedProduct.name,
-        enable: updatedProduct.enable,
         measurement: updatedProduct.measurement,
         quantity: updatedProduct.quantity,
+        enable: product.enable,
       };
-
+  
       return data;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
+  
+
+  async disable(uid: string, enable: boolean) {
+    const product = await this.prisma.products.findUnique({
+      where: { uid },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    try {
+      const disableProduct = await this.prisma.products.update({
+        where: { uid },
+        data: {
+          enable,
+        },
+      });
+
+      return disableProduct;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

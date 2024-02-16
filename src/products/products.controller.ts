@@ -20,4 +20,9 @@ export class ProductsController {
   update(@Param('uid') uid: string, @Body() productDTO: ProductDTO) {
     return this.productsService.update(uid, productDTO);
   }
+
+  @Put(':uid/disable')
+  disable(@Param('uid') uid: string, @Body() productDTO: ProductDTO) {
+    return this.productsService.disable(uid, productDTO.enable);
+  }
 }
