@@ -178,4 +178,44 @@ describe('ProductsService', () => {
       );
     });
   });
+
+  describe('disable', () => {
+    it('should disable a product', async () => {
+      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
+        uid,
+        ...productDTO,
+      });
+  
+      prismaServiceMock.products.update.mockResolvedValueOnce({
+        uid,
+        ...productDTO,
+        enable: false,
+      });
+  
+      const result = await service.disable(uid, false);
+  
+      expect(result).toEqual({ uid, ...productDTO, enable: false });
+    });
+  
+    it('should throw NotFoundException if product is not found', async () => {
+      prismaServiceMock.products.findUnique.mockResolvedValueOnce(null);
+  
+      await expect(service.disable(uid, false)).rejects.toThrow(NotFoundException);
+    });
+  
+    it('should throw InternalServerErrorException on error', async () => {
+      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
+        uid,
+        ...productDTO,
+      });
+  
+      prismaServiceMock.products.update.mockRejectedValueOnce(
+        new Error('Mocked error'),
+      );
+  
+      await expect(service.disable(uid, false)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
 });

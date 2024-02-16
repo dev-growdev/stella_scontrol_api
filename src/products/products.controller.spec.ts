@@ -224,4 +224,52 @@ describe('ProductsController', () => {
       }
     });
   });
+
+  describe('Disable - PUT', () => {
+    it('should disable a product and return the updated data on success', async () => {
+      jest.spyOn(service, 'disable').mockImplementation(async () => {
+        return Promise.resolve({
+          uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
+          categoryId: '4e292f89-ef81-41f4-8be8-da44c0012f8b',
+          code: 'P12345',
+          name: 'Caneta Esferográfica',
+          enable: false,
+          measurement: 'unidades',
+          quantity: 10,
+        });
+      });
+  
+      const result = await controller.disable(uid, { enable: false } as ProductDTO);
+  
+      expect(result).toBeDefined();
+      expect(result.uid).toEqual('2a4cdbad-aab0-470a-ae48-e4693d62ce9e');
+      expect(result.enable).toEqual(false);
+    });
+  
+    it('should handle not found product and return NotFoundException on failure', async () => {
+      jest.spyOn(service, 'disable').mockImplementation(async () => {
+        throw new NotFoundException('Produto não encontrado.');
+      });
+  
+      try {
+        await controller.disable(uid, { enable: false } as ProductDTO);
+      } catch (error) {
+        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error.message).toEqual('Produto não encontrado.');
+      }
+    });
+  
+    it('should handle errors and return InternalServerErrorException on failure', async () => {
+      jest.spyOn(service, 'disable').mockImplementation(async () => {
+        throw new InternalServerErrorException('Test error');
+      });
+  
+      try {
+        await controller.disable(uid, { enable: false } as ProductDTO);
+      } catch (error) {
+        expect(error).toBeInstanceOf(InternalServerErrorException);
+        expect(error.message).toEqual('Test error');
+      }
+    });
+  });  
 });
