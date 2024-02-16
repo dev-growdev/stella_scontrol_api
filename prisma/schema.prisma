@@ -39,7 +39,7 @@ model User {
   uid String @id @default(uuid())
 
   idUserAd String @unique @map("id_user_ad")
-  name     String
+  name     String 
   email    String @unique
 
   enable Boolean @default(true)

@@ -1,0 +1,12 @@
+@HOST = http://localhost:8080/api
+
+PUT  {{HOST}}/categories/4e292f89-ef81-41f4-8be8-da44c0012f8b HTTP/1.1
+Content-Type: application/json
+
+# Campos obrigatórios: todos
+
+{
+    "name": "papelaria",
+    "enable": true
+}
+

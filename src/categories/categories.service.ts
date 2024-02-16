@@ -1,26 +1,121 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { CategoriesDTO } from './dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(private prisma: PrismaService) {}
+
+  async create(categoryDto: CategoriesDTO) {
+    const findCategory = await this.prisma.categories.findFirst({
+      where: {
+        name: categoryDto.name,
+      },
+    });
+
+    if (findCategory) {
+      throw new BadRequestException('Essa categoria já existe.');
+    }
+
+    const createdCategory = await this.prisma.categories.create({
+      data: {
+        name: categoryDto.name,
+      },
+      select: {
+        uid: true,
+        name: true,
+        enable: true,
+      },
+    });
+
+    return createdCategory;
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  async findAll() {
+    try {
+      const findAllCategories = await this.prisma.categories.findMany({
+        select: {
+          uid: true,
+          name: true,
+          enable: true,
+        },
+      });
+
+      return findAllCategories;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async update(uid: string, name: string) {
+    const category = await this.prisma.categories.findUnique({
+      where: { uid },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Categoria não encontrada.');
+    }
+
+    const findCategoryByName = await this.prisma.categories.findFirst({
+      where: {
+        name,
+        uid: { not: uid },
+      },
+    });
+
+    if (findCategoryByName) {
+      throw new BadRequestException('Essa categoria já existe.');
+    }
+
+    try {
+      const updatedCategory = await this.prisma.categories.update({
+        where: { uid },
+        data: {
+          name,
+        },
+        select: {
+          uid: true,
+          name: true,
+          enable: true,
+        },
+      });
+
+      return updatedCategory;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
-  }
+  async disable(uid: string, enable: boolean) {
+    const category = await this.prisma.categories.findUnique({
+      where: { uid },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+    if (!category) {
+      throw new NotFoundException('Categoria não encontrada.');
+    }
+
+    try {
+      const updatedCategory = await this.prisma.categories.update({
+        where: { uid },
+        data: {
+          enable,
+        },
+        select: {
+          uid: true,
+          name: true,
+          enable: true,
+        },
+      });
+
+      return updatedCategory;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
