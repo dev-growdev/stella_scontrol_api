@@ -29,8 +29,8 @@ model PaymentRequestsGeneral {
   totalRequestValue Float    @map("total_request_value")
   dueDate           DateTime @map("due_date")
 
-  created_at DateTime @default(now()) @map("create_at")
-  updated_at DateTime @default(now()) @updatedAt @map("update_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("payment_requests_general")
 }
@@ -39,13 +39,13 @@ model User {
   uid String @id @default(uuid())
 
   idUserAd String @unique @map("id_user_ad")
-  name     String 
+  name     String
   email    String @unique
 
   enable Boolean @default(true)
 
-  created_at DateTime @default(now()) @map("create_at")
-  updated_at DateTime @default(now()) @updatedAt @map("update_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("user")
 }
@@ -56,8 +56,8 @@ model Categories {
   name   String  @db.VarChar(50)
   enable Boolean @default(true)
 
-  created_at DateTime @default(now()) @map("create_at")
-  updated_at DateTime @default(now()) @updatedAt @map("update_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   products Products[]
 
@@ -76,8 +76,8 @@ model Products {
   measurement String? @db.VarChar(50)
   quantity    Int?
 
-  created_at DateTime @default(now()) @map("create_at")
-  updated_at DateTime @default(now()) @updatedAt @map("update_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("products")
 }
