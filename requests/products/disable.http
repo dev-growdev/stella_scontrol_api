@@ -1,0 +1,15 @@
+@HOST = http://localhost:8080/api
+
+PUT  {{HOST}}/products/33653305-5a37-43ee-8ca3-9da0e98e613a/disable HTTP/1.1
+Content-Type: application/json
+
+# Campos obrigatórios: todos
+
+{
+  "categoryId": "4e292f89-ef81-41f4-8be8-da44c0012f8b",
+  "code": "67890", 
+  "name": "Calça Masculina",
+  "enable": true,
+  "measurement": "Units",
+  "quantity": 50
+}
