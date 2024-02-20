@@ -17,6 +17,7 @@ import { ProductsModule } from './products/products.module';
 import { EmailModule } from './shared/email/email.module';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
 import { UsersModule } from './users/user.module';
+import { IntegrationsModule } from './integrations/integrations.module';
 
 /**
  *
@@ -63,6 +64,7 @@ import { UsersModule } from './users/user.module';
     PrismaModule,
     ConfigModule.forRoot({ isGlobal: true }),
     PaymentRequestsGeneralModule,
+    IntegrationsModule,
   ],
   controllers: [AppController],
   providers: [

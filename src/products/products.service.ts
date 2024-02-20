@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(productDTO: ProductDTO) {
     const existingProduct = await this.prisma.products.findFirst({
