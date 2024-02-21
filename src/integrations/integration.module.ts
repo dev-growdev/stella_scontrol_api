@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { KnexModule } from 'nestjs-knex';
 
 import { SiegerRepository } from './sieger.repository';
+import { ReceitawsRepository } from './receitaws.repository';
 import { knexConfig } from './knexconfig';
 
 @Module({
@@ -10,7 +11,7 @@ import { knexConfig } from './knexconfig';
       config: knexConfig,
     }),
   ],
-  providers: [SiegerRepository],
-  exports: [SiegerRepository],
+  providers: [SiegerRepository, ReceitawsRepository],
+  exports: [SiegerRepository, ReceitawsRepository],
 })
 export class IntegrationsModule { }
