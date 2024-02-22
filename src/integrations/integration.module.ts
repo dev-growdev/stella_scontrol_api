@@ -11,7 +11,7 @@ import { knexConfig } from './knexconfig';
       config: knexConfig,
     }),
   ],
-  providers: [SiegerRepository, ReceitawsRepository],
-  exports: [SiegerRepository, ReceitawsRepository],
+  providers: [Function, SiegerRepository, ReceitawsRepository],
+  exports: [Function, SiegerRepository, ReceitawsRepository],
 })
-export class IntegrationsModule { }
+export class IntegrationsModule {}
