@@ -17,7 +17,8 @@ import { ProductsModule } from './products/products.module';
 import { EmailModule } from './shared/email/email.module';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
 import { UsersModule } from './users/user.module';
-import { IntegrationsModule } from './integrations/integrations.module';
+import { IntegrationsModule } from './integrations/integration.module';
+import { SupplierModule } from './supplier/supplier.module';
 
 /**
  *
@@ -65,6 +66,7 @@ import { IntegrationsModule } from './integrations/integrations.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PaymentRequestsGeneralModule,
     IntegrationsModule,
+    SupplierModule,
   ],
   controllers: [AppController],
   providers: [
@@ -100,4 +102,4 @@ import { IntegrationsModule } from './integrations/integrations.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
