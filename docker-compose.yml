@@ -1,23 +1,23 @@
 version: "3.8"
 
 services:
-  nest-api:
-    container_name: scontrol-api
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - .:/home/node/app
-    working_dir: /home/node/app
-    ports:
-      - 8080:8080
-    networks:
-      - scontrol
-    tty: true
-    depends_on:
-      - pg-db-dev
-      - pg-db-test
-      - redis
+  # nest-api:
+  #   container_name: scontrol-api
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - .:/home/node/app
+  #   working_dir: /home/node/app
+  #   ports:
+  #     - 8080:8080
+  #   networks:
+  #     - scontrol
+  #   tty: true
+  #   depends_on:
+  #     - pg-db-dev
+  #     - pg-db-test
+  #     - redis
 
   pg-db-dev:
     image: postgres:14
