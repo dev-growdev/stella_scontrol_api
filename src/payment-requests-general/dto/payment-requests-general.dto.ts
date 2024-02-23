@@ -1,6 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
 export class PaymentRequestGeneralDTO {
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  supplier: string;
+
   @IsNotEmpty({ message: 'A descrição é obrigatória' })
   description: string;
 

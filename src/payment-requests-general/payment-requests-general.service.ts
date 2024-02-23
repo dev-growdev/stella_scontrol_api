@@ -8,19 +8,24 @@ export class PaymentRequestsGeneralService {
 
   async create(paymentRequestGeneralDTO: PaymentRequestGeneralDTO) {
     try {
-      const createdPaymentRequestGeneral = await this.prisma.$transaction(async (transaction) => {
+      const createdPaymentRequestGeneral = await this.prisma.$transaction(
+        async (transaction) => {
+          const paymentRequestGeneral =
+            await transaction.paymentRequestsGeneral.create({
+              data: {
+                supplier: paymentRequestGeneralDTO.supplier,
+                description: paymentRequestGeneralDTO.description,
+                sendReceipt: paymentRequestGeneralDTO.sendReceipt,
+                totalRequestValue: parseFloat(
+                  paymentRequestGeneralDTO.totalRequestValue,
+                ),
+                dueDate: paymentRequestGeneralDTO.dueDate,
+              },
+            });
 
-        const paymentRequestGeneral = await transaction.paymentRequestsGeneral.create({
-          data: {
-            description: paymentRequestGeneralDTO.description,
-            sendReceipt: paymentRequestGeneralDTO.sendReceipt,
-            totalRequestValue: parseFloat(paymentRequestGeneralDTO.totalRequestValue),
-            dueDate: paymentRequestGeneralDTO.dueDate,
-          },
-        });
-
-        return paymentRequestGeneral;
-      });
+          return paymentRequestGeneral;
+        },
+      );
 
       return createdPaymentRequestGeneral;
     } catch (error: any) {
@@ -28,4 +33,3 @@ export class PaymentRequestsGeneralService {
     }
   }
 }
-
