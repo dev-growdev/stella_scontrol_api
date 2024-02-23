@@ -6,6 +6,7 @@ Content-Type: application/json
 # Campos obrigatórios: todos
 
 {
+  "supplier": "12345678",
   "description": "Solicito pagamento para um equipamento novo.",
   "sendReceipt": true,
   "totalRequestValue": "300",
