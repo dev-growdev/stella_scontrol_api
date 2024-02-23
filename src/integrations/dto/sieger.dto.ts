@@ -1,5 +1,4 @@
 export interface SupplierSieger {
-  cnpj: string;
+  cpfCnpj: string;
   name: string;
-  tradeName: string;
 }

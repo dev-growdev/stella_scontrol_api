@@ -20,7 +20,6 @@ export class ReceitawsRepository {
       return {
         cnpj: response.data.cnpj,
         name: response.data.nome,
-        tradeName: response.data.fantasia,
       };
     } catch (error) {
       return undefined;
