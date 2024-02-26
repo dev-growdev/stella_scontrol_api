@@ -1,6 +1,6 @@
 @HOST = http://localhost:8080/api
 
-GET  {{HOST}}/supplier/90025057000138 HTTP/1.1
+POST  {{HOST}}/supplier/33683111000280 HTTP/1.1
 Content-Type: application/json
 
 
