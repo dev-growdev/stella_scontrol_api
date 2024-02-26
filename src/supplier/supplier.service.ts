@@ -13,7 +13,6 @@ export class SupplierService {
 
   async findSupplierByCPForCNPJ(cpfOrCnpj: string) {
     try {
-      console.log('chegou');
       const supplierSieger =
         await this.siegerRepository.findSupplierByCPForCNPJ(cpfOrCnpj);
 
