@@ -16,28 +16,30 @@ export class SupplierService {
       const supplierSieger =
         await this.siegerRepository.findSupplierByCPForCNPJ(cpfOrCnpj);
 
-      console.log(supplierSieger);
       if (!supplierSieger) {
-        const supplierReceita =
-          await this.receitawsRepository.findSupplierByCNPJ(cpfOrCnpj);
+        const existingSupplier = await this.prisma.tempSuppliersData.findUnique(
+          {
+            where: { cnpj: cpfOrCnpj },
+            select: {
+              uid: true,
+              name: true,
+              cnpj: true,
+              source: true,
+            },
+          },
+        );
 
-        if (supplierReceita) {
-          const existingSupplier =
-            await this.prisma.tempSuppliersData.findUnique({
-              where: { cnpj: supplierReceita.cnpj },
-              select: {
-                uid: true,
-                name: true,
-                cnpj: true,
-                source: true,
-              },
-            });
+        if (!existingSupplier) {
+          const supplierReceita =
+            await this.receitawsRepository.findSupplierByCNPJ(cpfOrCnpj);
 
-          if (!existingSupplier) {
+          if (supplierReceita) {
+            const formatCnpj = cpfOrCnpj.replace(/\D/g, '');
+
             const createdSupplier = await this.prisma.tempSuppliersData.create({
               data: {
                 name: supplierReceita.name,
-                cnpj: supplierReceita.cnpj,
+                cnpj: formatCnpj,
                 source: 'receita',
               },
               select: {
@@ -50,9 +52,9 @@ export class SupplierService {
 
             return createdSupplier;
           }
-
-          return existingSupplier;
         }
+
+        return existingSupplier;
       }
 
       return supplierSieger;
