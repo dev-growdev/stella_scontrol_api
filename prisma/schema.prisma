@@ -24,16 +24,30 @@ datasource db {
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  supplier          String
-  description       String?
-  sendReceipt       Boolean  @default(false) @map("send_receipt")
-  totalRequestValue Float    @map("total_request_value")
-  dueDate           DateTime @map("due_date")
+  supplier        String
+  description     String?
+  requiredReceipt Boolean @default(false) @map("send_receipt")
+
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
+  PaymentSchedule PaymentSchedule[]
+
+  @@map("payment_requests_general")
+}
+
+model PaymentSchedule {
+  uid String @id @default(uuid())
+
+  paymentRequestUid         PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  paymentRequestsGeneralUid String
+
+  value   Float    @map("total_request_value")
+  dueDate DateTime @map("due_date")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("payment_requests_general")
+  @@map("payments_schedule")
 }
 
 model User {
