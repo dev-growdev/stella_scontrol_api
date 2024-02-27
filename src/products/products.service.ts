@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(productDTO: ProductDTO) {
     const existingProduct = await this.prisma.products.findFirst({
@@ -41,12 +41,18 @@ export class ProductsService {
       },
       select: {
         uid: true,
-        categoryId: true,
         code: true,
         name: true,
         enable: true,
         measurement: true,
         quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
       },
     });
 
@@ -58,12 +64,18 @@ export class ProductsService {
       const findAllProducts = await this.prisma.products.findMany({
         select: {
           uid: true,
-          categoryId: true,
           code: true,
           name: true,
           enable: true,
           measurement: true,
           quantity: true,
+          category: {
+            select: {
+              uid: true,
+              name: true,
+              enable: true,
+            },
+          },
         },
       });
 
@@ -112,19 +124,24 @@ export class ProductsService {
       const updatedProduct = await this.prisma.products.update({
         where: { uid: product.uid },
         data: updatedData,
+        select: {
+          uid: true,
+          code: true,
+          name: true,
+          enable: true,
+          measurement: true,
+          quantity: true,
+          category: {
+            select: {
+              uid: true,
+              name: true,
+              enable: true,
+            },
+          },
+        },
       });
 
-      const data = {
-        uid: updatedProduct.uid,
-        categoryId: updatedProduct.categoryId,
-        code: updatedProduct.code,
-        name: updatedProduct.name,
-        measurement: updatedProduct.measurement,
-        quantity: updatedProduct.quantity,
-        enable: product.enable,
-      };
-
-      return data;
+      return updatedProduct;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -147,12 +164,18 @@ export class ProductsService {
         },
         select: {
           uid: true,
-          categoryId: true,
           code: true,
           name: true,
           enable: true,
           measurement: true,
           quantity: true,
+          category: {
+            select: {
+              uid: true,
+              name: true,
+              enable: true,
+            },
+          },
         },
       });
 
