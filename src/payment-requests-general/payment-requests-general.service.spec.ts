@@ -7,6 +7,7 @@ import { PaymentRequestGeneralDTO } from './dto';
 const makePaymentRequestGeneralDTO = (): PaymentRequestGeneralDTO => {
   return {
     description: 'Solicito pagamento para um equipamento novo.',
+    supplier: '1234567891011',
     sendReceipt: true,
     totalRequestValue: '100.50',
     dueDate: new Date(),
@@ -30,7 +31,9 @@ describe('PaymentRequestsGeneralService', () => {
       ],
     }).compile();
 
-    service = module.get<PaymentRequestsGeneralService>(PaymentRequestsGeneralService);
+    service = module.get<PaymentRequestsGeneralService>(
+      PaymentRequestsGeneralService,
+    );
     prismaService = module.get<PrismaService>(PrismaService);
   });
 
@@ -45,15 +48,20 @@ describe('PaymentRequestsGeneralService', () => {
       jest.spyOn(prismaService, '$transaction').mockImplementation(async () => {
         const createdPaymentRequestGeneral = {
           description: paymentRequestGeneralDTO.description,
+          supplier: paymentRequestGeneralDTO.supplier,
           sendReceipt: paymentRequestGeneralDTO.sendReceipt,
-          totalRequestValue: parseFloat(paymentRequestGeneralDTO.totalRequestValue),
+          totalRequestValue: parseFloat(
+            paymentRequestGeneralDTO.totalRequestValue,
+          ),
           dueDate: paymentRequestGeneralDTO.dueDate,
         };
 
         return createdPaymentRequestGeneral;
       });
 
-      const createdPaymentRequestGeneral = await service.create(paymentRequestGeneralDTO);
+      const createdPaymentRequestGeneral = await service.create(
+        paymentRequestGeneralDTO,
+      );
 
       expect(createdPaymentRequestGeneral).toBeDefined();
     });

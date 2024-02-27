@@ -9,6 +9,7 @@ import { PaymentRequestsGeneralController } from './payment-requests-general.con
 const makePaymentRequestGeneralDTO = (): PaymentRequestGeneralDTO => {
   return {
     description: 'Solicito pagamento para um equipamento novo.',
+    supplier: '1234567891011',
     sendReceipt: true,
     totalRequestValue: '100.50',
     dueDate: new Date(),
@@ -28,7 +29,9 @@ describe('PaymentRequestsGeneralController', () => {
     controller = module.get<PaymentRequestsGeneralController>(
       PaymentRequestsGeneralController,
     );
-    service = module.get<PaymentRequestsGeneralService>(PaymentRequestsGeneralService);
+    service = module.get<PaymentRequestsGeneralService>(
+      PaymentRequestsGeneralService,
+    );
   });
 
   it('should be defined', () => {
@@ -43,6 +46,7 @@ describe('PaymentRequestsGeneralController', () => {
         return Promise.resolve({
           uid: '1',
           description: 'Solicito pagamento para um equipamento novo.',
+          supplier: '1234567891011',
           sendReceipt: true,
           totalRequestValue: 100.5,
           dueDate: new Date(),

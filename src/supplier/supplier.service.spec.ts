@@ -8,7 +8,6 @@ import { KnexModule } from 'nestjs-knex';
 import { knexConfig } from '../integrations/knexconfig';
 import { ConfigService } from '@nestjs/config';
 import { truncatePrisma } from 'test/setup/truncate-database';
-import prisma from 'test/setup/client';
 
 describe('SupplierService', () => {
   let service: SupplierService;
@@ -57,6 +56,37 @@ describe('SupplierService', () => {
       expect(result).toBe(expectedResult);
     });
 
+    it('should find supplier by CPF or CNPJ in the database successfully', async () => {
+      const cpfOrCnpj = '1234567891011';
+      const expectedResult = {
+        uid: '78f8906e-b7be-4929-8e17-5f633cf482ec',
+        name: 'EMPRESA LTDA',
+        cnpj: '1234567891011',
+        source: 'receita',
+        createdAt: new Date('2024-02-27T10:30:00Z'),
+        updatedAt: new Date('2024-02-27T10:30:00Z'),
+      };
+
+      jest
+        .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .mockResolvedValue(null);
+
+      jest
+        .spyOn(service['prisma'].tempSuppliersData, 'findUnique')
+        .mockResolvedValue(expectedResult);
+
+      const result = await service.findSupplierByCPForCNPJ(cpfOrCnpj);
+
+      expect(result).toHaveProperty('name', expectedResult.name);
+      expect(result).toHaveProperty('cnpj', expectedResult.cnpj);
+      expect(result).toHaveProperty('source', expectedResult.source);
+
+      if ('uid' in result) {
+        expect(result.uid).not.toBeNull();
+        expect(result.uid).not.toBeUndefined();
+      }
+    });
+
     it('should find supplier by CPF or CNPJ successfully from ReceitawsRepository', async () => {
       const cpfOrCnpj = '1234567891011';
       const expectedResult = {
@@ -75,6 +105,11 @@ describe('SupplierService', () => {
       expect(result).toHaveProperty('name', expectedResult.name);
       expect(result).toHaveProperty('cnpj', expectedResult.cnpj);
       expect(result).toHaveProperty('source', expectedResult.source);
+
+      if ('uid' in result) {
+        expect(result.uid).not.toBeNull();
+        expect(result.uid).not.toBeUndefined();
+      }
     });
 
     it('should handle errors when finding supplier by CPF or CNPJ', async () => {

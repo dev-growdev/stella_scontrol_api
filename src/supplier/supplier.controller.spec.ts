@@ -38,51 +38,92 @@ describe('SupplierController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should find supplier by CPF or CNPJ successfully from SiegerRepository', async () => {
-    const cpfOrCnpj = '1234567891011';
-    const expectedResult = {
-      cpfCnpj: '1234567891011',
-      name: 'EMPRESA LTDA',
-    };
+  describe('FindSupplierByCPForCNPJ - POST', () => {
+    it('should find supplier by CPF or CNPJ successfully from SiegerRepository', async () => {
+      const cpfOrCnpj = '1234567891011';
+      const expectedResult = {
+        cpfCnpj: '1234567891011',
+        name: 'EMPRESA LTDA',
+      };
 
-    jest
-      .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
-      .mockResolvedValue(expectedResult);
+      jest
+        .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .mockResolvedValue(expectedResult);
 
-    const result = await controller.findSupplierByCPForCNPJ(cpfOrCnpj);
+      const result = await controller.findSupplierByCPForCNPJ(cpfOrCnpj);
 
-    expect(result).toBe(expectedResult);
-  });
+      expect(result).toBe(expectedResult);
+    });
 
-  it('should find supplier by CPF or CNPJ successfully from ReceitawsRepository', async () => {
-    const cpfOrCnpj = '1234567891011';
-    const expectedResult = {
-      uid: '1bba2a6b-dbd1-442c-aae3-8f080f441d7d',
-      name: 'EMPRESA LTDA',
-      cnpj: '1234567891011',
-      source: 'receita',
-    };
+    it('should find supplier by CPF or CNPJ in the database successfully', async () => {
+      const cpfOrCnpj = '1234567891011';
+      const expectedResult = {
+        uid: '78f8906e-b7be-4929-8e17-5f633cf482ec',
+        name: 'EMPRESA LTDA',
+        cnpj: '1234567891011',
+        source: 'receita',
+        createdAt: new Date('2024-02-27T10:30:00Z'),
+        updatedAt: new Date('2024-02-27T10:30:00Z'),
+      };
 
-    jest
-      .spyOn(service['receitawsRepository'], 'findSupplierByCNPJ')
-      .mockResolvedValue(expectedResult);
+      jest
+        .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .mockResolvedValue(null);
 
-    const result = await controller.findSupplierByCPForCNPJ(cpfOrCnpj);
-    expect(result).toStrictEqual(expectedResult);
-  });
+      jest
+        .spyOn(service['prisma'].tempSuppliersData, 'findUnique')
+        .mockResolvedValue(expectedResult);
 
-  it('should handle errors when finding supplier by CPF or CNPJ', async () => {
-    const cpfOrCnpj = 'invalid-value';
+      const result = await controller.findSupplierByCPForCNPJ(cpfOrCnpj);
 
-    jest
-      .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
-      .mockRejectedValue(new InternalServerErrorException('Error message'));
-    jest
-      .spyOn(service['receitawsRepository'], 'findSupplierByCNPJ')
-      .mockRejectedValue(new InternalServerErrorException('Error message'));
+      expect(result).toHaveProperty('name', expectedResult.name);
+      expect(result).toHaveProperty('cnpj', expectedResult.cnpj);
+      expect(result).toHaveProperty('source', expectedResult.source);
 
-    await expect(controller.findSupplierByCPForCNPJ(cpfOrCnpj)).rejects.toThrow(
-      InternalServerErrorException,
-    );
+      if ('uid' in result) {
+        expect(result.uid).not.toBeNull();
+        expect(result.uid).not.toBeUndefined();
+      }
+    });
+
+    it('should find supplier by CPF or CNPJ successfully from ReceitawsRepository', async () => {
+      const cpfOrCnpj = '1234567891011';
+      const expectedResult = {
+        uid: '78f8906e-b7be-4929-8e17-5f633cf482ec',
+        name: 'EMPRESA LTDA',
+        cnpj: '1234567891011',
+        source: 'receita',
+      };
+
+      jest
+        .spyOn(service['receitawsRepository'], 'findSupplierByCNPJ')
+        .mockResolvedValue(expectedResult);
+
+      const result = await controller.findSupplierByCPForCNPJ(cpfOrCnpj);
+
+      expect(result).toHaveProperty('name', expectedResult.name);
+      expect(result).toHaveProperty('cnpj', expectedResult.cnpj);
+      expect(result).toHaveProperty('source', expectedResult.source);
+
+      if ('uid' in result) {
+        expect(result.uid).not.toBeNull();
+        expect(result.uid).not.toBeUndefined();
+      }
+    });
+
+    it('should handle errors when finding supplier by CPF or CNPJ', async () => {
+      const cpfOrCnpj = 'invalid-value';
+
+      jest
+        .spyOn(service['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .mockRejectedValue(new InternalServerErrorException('Error message'));
+      jest
+        .spyOn(service['receitawsRepository'], 'findSupplierByCNPJ')
+        .mockRejectedValue(new InternalServerErrorException('Error message'));
+
+      await expect(
+        controller.findSupplierByCPForCNPJ(cpfOrCnpj),
+      ).rejects.toThrow(InternalServerErrorException);
+    });
   });
 });
