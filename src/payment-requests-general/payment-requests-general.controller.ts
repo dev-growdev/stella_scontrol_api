@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
@@ -9,7 +9,10 @@ export class PaymentRequestsGeneralController {
   ) {}
 
   @Post('payment-request-general')
-  create(@Body() paymentRequestGeneral: PaymentRequestGeneralDTO) {
+  create(
+    @Body()
+    paymentRequestGeneral: PaymentRequestGeneralDTO,
+  ) {
     return this.paymentRequestsGeneralService.create(paymentRequestGeneral);
   }
 }
