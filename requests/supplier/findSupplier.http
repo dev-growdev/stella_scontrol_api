@@ -1,0 +1,6 @@
+@HOST = http://localhost:8080/api
+
+POST  {{HOST}}/supplier/33683111000280 HTTP/1.1
+Content-Type: application/json
+
+

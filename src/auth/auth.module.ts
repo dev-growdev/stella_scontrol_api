@@ -30,4 +30,4 @@ import { JwtAuthGuard } from 'src/shared/guards';
     JwtAuthGuard,
   ],
 })
-export class AuthModule {}
+export class AuthModule { }

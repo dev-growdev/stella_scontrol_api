@@ -1,7 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -11,7 +15,9 @@ const mockDisableUser = {
   name: 'Mock User',
   email: 'mockuser@example.com',
   idUserAd: 'mockUserIdAd',
-  enable: false
+  enable: false,
+  createdAt: new Date('2024-02-27T10:30:00Z'),
+  updatedAt: new Date('2024-02-27T10:30:00Z'),
 };
 
 describe('UserController', () => {
@@ -23,7 +29,7 @@ describe('UserController', () => {
       controllers: [UserController],
       providers: [UserService, PrismaService, ConfigService],
     }).compile();
-  
+
     controller = module.get<UserController>(UserController);
     service = module.get<UserService>(UserService);
   });

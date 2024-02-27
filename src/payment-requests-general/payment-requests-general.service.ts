@@ -11,11 +11,13 @@ export class PaymentRequestsGeneralService {
       await this.prisma.paymentRequestsGeneral.create({
         data: {
           description: paymentRequestGeneralDTO.description,
+          supplier: paymentRequestGeneralDTO.supplier,
           requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
         },
         select: {
           uid: true,
           description: true,
+          supplier: true,
           requiredReceipt: true,
         },
       });
