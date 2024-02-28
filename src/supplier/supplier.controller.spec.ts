@@ -1,38 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SupplierController } from './supplier.controller';
-import { SupplierService } from './supplier.service';
-import { ReceitawsRepository } from '../integrations/receitaws.repository';
-import { SiegerRepository } from '../integrations/sieger.repository';
-import { InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { ConfigService } from '@nestjs/config';
-import { KnexModule } from 'nestjs-knex';
-import { knexConfig } from '../integrations/knexconfig';
+import { AppModule } from 'src/app.module';
 import { truncatePrisma } from 'test/setup/truncate-database';
 
 describe('SupplierController', () => {
-  let controller: SupplierController;
-  let service: SupplierService;
+  let app;
+  const path = 'supplier';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [SupplierController],
-      providers: [
-        SupplierService,
-        ReceitawsRepository,
-        SiegerRepository,
-        PrismaService,
-        ConfigService,
-      ],
-      imports: [
-        KnexModule.forRoot({
-          config: knexConfig,
-        }),
-      ],
+      imports: [AppModule],
     }).compile();
 
-    controller = module.get<SupplierController>(SupplierController);
-    service = module.get<SupplierService>(SupplierService);
+    const nestApp = module.createNestApplication();
+    await nestApp.init();
+
+    app = nestApp.getHttpServer();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -40,8 +26,6 @@ describe('SupplierController', () => {
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(app).toBeDefined();
   });
-
-  describe('FindSupplierByCPForCNPJ - POST', () => {});
 });
