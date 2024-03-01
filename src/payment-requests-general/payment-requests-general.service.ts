@@ -1,18 +1,49 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { AWSService } from 'src/shared/services/aws.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { PaymentRequestGeneralDTO } from './dto';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private aws: AWSService) {}
 
-  async create(paymentRequestGeneralDTO: PaymentRequestGeneralDTO) {
+  async create(paymentRequestGeneralDTO: any, files: Express.Multer.File[]) {
+    //utilizar o $transaction
+    const promise = files.map((file) => {
+      const uploadFile = {
+        file: file.buffer,
+        name: file.originalname,
+        contentType: file.mimetype,
+      };
+      return this.aws.upload(uploadFile);
+    });
+    const resolved = await Promise.all(promise);
+
+    if (!resolved) {
+      throw new BadRequestException(
+        'Não foi possível fazer o upload dos arquivos.',
+      );
+    }
+
+    const createdFilesInDB = resolved.map((file) => {
+      return this.prisma.files.create({
+        data: {
+          key: file,
+          name: 'teste',
+        },
+        select: {
+          uid: true,
+        },
+      });
+    });
+    const testeFileReturned = await Promise.all(createdFilesInDB);
+
+    const form = JSON.parse(paymentRequestGeneralDTO.document);
     const createPaymentRequest =
       await this.prisma.paymentRequestsGeneral.create({
         data: {
-          description: paymentRequestGeneralDTO.description,
-          supplier: paymentRequestGeneralDTO.supplier,
-          requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+          description: form.description,
+          supplier: form.supplier,
+          requiredReceipt: form.requiredReceipt,
         },
         select: {
           uid: true,
@@ -21,6 +52,18 @@ export class PaymentRequestsGeneralService {
           requiredReceipt: true,
         },
       });
+
+    const vinculaFileToRequest = testeFileReturned.map((file) => {
+      return this.prisma.paymentRequestsFiles.create({
+        data: {
+          filesUid: file.uid,
+          paymentRequestsGeneralUid: createPaymentRequest.uid,
+        },
+      });
+    });
+
+    const sera = await Promise.all(vinculaFileToRequest);
+    console.log(sera);
 
     if (!createPaymentRequest) {
       throw new BadRequestException(

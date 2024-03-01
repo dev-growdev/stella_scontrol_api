@@ -1,5 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { PaymentRequestGeneralDTO } from './dto';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
 @Controller()
@@ -9,10 +15,16 @@ export class PaymentRequestsGeneralController {
   ) {}
 
   @Post('payment-request-general')
+  @UseInterceptors(FilesInterceptor('file'))
   create(
     @Body()
-    paymentRequestGeneral: PaymentRequestGeneralDTO,
+    paymentRequestGeneral: any,
+    @UploadedFiles()
+    files: Express.Multer.File[],
   ) {
-    return this.paymentRequestsGeneralService.create(paymentRequestGeneral);
+    return this.paymentRequestsGeneralService.create(
+      paymentRequestGeneral,
+      files,
+    );
   }
 }
