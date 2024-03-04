@@ -109,3 +109,30 @@ model TempSuppliersData {
 
   @@map("temp_suppliers_data")
 }
+
+model PaymentsForm {
+  uid String @id @default(uuid())
+
+  name   String  @db.VarChar(50)
+  enable Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("payments_form")
+}
+
+model CardHolders {
+  uid String @id @default(uuid())
+
+  name        String   @db.VarChar(50)
+  description String
+  type        CardType
+
+  @@map("card_holders")
+}
+
+enum CardType {
+  credit
+  corporate
+}
