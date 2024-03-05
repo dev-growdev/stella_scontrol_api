@@ -125,9 +125,8 @@ model PaymentsForm {
 model CardHolders {
   uid String @id @default(uuid())
 
-  name        String   @db.VarChar(50)
-  description String
-  type        CardType
+  name String   @db.VarChar(50)
+  type CardType
 
   @@map("card_holders")
 }

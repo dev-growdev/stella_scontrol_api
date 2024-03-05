@@ -15,7 +15,6 @@ export class CardHoldersService {
           select: {
             uid: true,
             name: true,
-            description: true,
           },
         });
 
@@ -30,7 +29,6 @@ export class CardHoldersService {
           select: {
             uid: true,
             name: true,
-            description: true,
           },
         });
 
