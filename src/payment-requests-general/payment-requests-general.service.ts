@@ -1,98 +1,95 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { AWSService } from 'src/shared/services/aws.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ValidatePaymentRequestGeneralDTO } from './dto';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
-  constructor(private prisma: PrismaService, private aws: AWSService) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(paymentRequestGeneralDTO: any, files: Express.Multer.File[]) {
-    //utilizar o $transaction
-    const promise = files.map((file) => {
-      const uploadFile = {
-        file: file.buffer,
-        name: file.originalname,
-        contentType: file.mimetype,
-      };
-      return this.aws.upload(uploadFile);
-    });
-    const resolved = await Promise.all(promise);
+  async create(
+    paymentRequestGeneralDTO: ValidatePaymentRequestGeneralDTO,
+    files: Express.Multer.File[],
+  ) {
+    let createdPaymentRequest;
+    let paymentSchedules;
+    let filesDB;
 
-    if (!resolved) {
-      throw new BadRequestException(
-        'Não foi possível fazer o upload dos arquivos.',
-      );
-    }
+    try {
+      await this.prisma.$transaction(async (prisma) => {
+        const uploadedFiles = await Promise.all(
+          files.map(async (file) => {
+            const createdFile = await prisma.files.create({
+              data: {
+                key: file.filename,
+                name: file.originalname,
+              },
+              select: {
+                uid: true,
+                name: true,
+                key: true,
+              },
+            });
 
-    const createdFilesInDB = resolved.map((file) => {
-      return this.prisma.files.create({
-        data: {
-          key: file,
-          name: 'teste',
-        },
-        select: {
-          uid: true,
-        },
+            return createdFile;
+          }),
+        );
+
+        filesDB = uploadedFiles;
+
+        createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
+          data: {
+            description: paymentRequestGeneralDTO.description,
+            supplier: paymentRequestGeneralDTO.supplier,
+            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+          },
+          select: {
+            uid: true,
+            description: true,
+            supplier: true,
+            requiredReceipt: true,
+          },
+        });
+
+        const vinculaFileToRequest = await Promise.all(
+          filesDB.map((file) =>
+            prisma.paymentRequestsFiles.create({
+              data: {
+                filesUid: file.uid,
+                paymentRequestsGeneralUid: createdPaymentRequest.uid,
+              },
+            }),
+          ),
+        );
+
+        paymentSchedules = await Promise.all(
+          paymentRequestGeneralDTO.payments.map(async (payment) =>
+            prisma.paymentSchedule.create({
+              data: {
+                dueDate: payment.dueDate,
+                value: +payment.value,
+                paymentRequestsGeneralUid: createdPaymentRequest.uid,
+              },
+              select: {
+                uid: true,
+                value: true,
+                dueDate: true,
+              },
+            }),
+          ),
+        );
       });
-    });
-    const testeFileReturned = await Promise.all(createdFilesInDB);
-
-    const form = JSON.parse(paymentRequestGeneralDTO.document);
-    const createPaymentRequest =
-      await this.prisma.paymentRequestsGeneral.create({
-        data: {
-          description: form.description,
-          supplier: form.supplier,
-          requiredReceipt: form.requiredReceipt,
-        },
-        select: {
-          uid: true,
-          description: true,
-          supplier: true,
-          requiredReceipt: true,
-        },
-      });
-
-    const vinculaFileToRequest = testeFileReturned.map((file) => {
-      return this.prisma.paymentRequestsFiles.create({
-        data: {
-          filesUid: file.uid,
-          paymentRequestsGeneralUid: createPaymentRequest.uid,
-        },
-      });
-    });
-
-    const sera = await Promise.all(vinculaFileToRequest);
-    console.log(sera);
-
-    if (!createPaymentRequest) {
+    } catch (error) {
       throw new BadRequestException(
         'Algo deu errado, confira os campos e tente novamente.',
       );
     }
 
-    const paymentSchedules = await Promise.all(
-      paymentRequestGeneralDTO.payments.map(async (payment) => {
-        const createdPaymentSchedule = await this.prisma.paymentSchedule.create(
-          {
-            data: {
-              dueDate: payment.dueDate,
-              value: +payment.value,
-              paymentRequestsGeneralUid: createPaymentRequest.uid,
-            },
-            select: {
-              uid: true,
-              value: true,
-              dueDate: true,
-            },
-          },
-        );
-        return createdPaymentSchedule;
-      }),
-    );
-
     return {
-      request: { ...createPaymentRequest, payments: paymentSchedules },
+      request: {
+        ...createdPaymentRequest,
+        payments: paymentSchedules,
+        files: filesDB,
+      },
     };
   }
 }
