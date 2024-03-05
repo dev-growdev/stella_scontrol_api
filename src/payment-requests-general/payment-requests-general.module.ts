@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AWSService } from 'src/shared/services/aws.service';
+import { FilesService } from 'src/shared/services/files.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentRequestsGeneralController } from './payment-requests-general.controller';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
 @Module({
   controllers: [PaymentRequestsGeneralController],
-  providers: [PaymentRequestsGeneralService, PrismaService, AWSService],
+  providers: [PaymentRequestsGeneralService, PrismaService, FilesService],
 })
 export class PaymentRequestsGeneralModule {}
