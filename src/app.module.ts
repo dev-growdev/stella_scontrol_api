@@ -8,17 +8,18 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
+import { IntegrationsModule } from './integrations/integration.module';
 import { PaymentRequestsGeneralModule } from './payment-requests-general/payment-requests-general.module';
 import { ProductsModule } from './products/products.module';
 import { EmailModule } from './shared/email/email.module';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
-import { UsersModule } from './users/user.module';
-import { IntegrationsModule } from './integrations/integration.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { UsersModule } from './users/user.module';
 
 /**
  *
@@ -57,6 +58,9 @@ import { SupplierModule } from './supplier/supplier.module';
  */
 @Module({
   imports: [
+    MulterModule.register({
+      dest: './files',
+    }),
     UsersModule,
     CategoriesModule,
     ProductsModule,
