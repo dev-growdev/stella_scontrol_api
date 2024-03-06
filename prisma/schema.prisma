@@ -116,6 +116,8 @@ model PaymentsForm {
   name   String  @db.VarChar(50)
   enable Boolean @default(true)
 
+  cardHolders CardHolders[]
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -124,6 +126,9 @@ model PaymentsForm {
 
 model CardHolders {
   uid String @id @default(uuid())
+
+  paymentFormId String?
+  paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
 
   name String   @db.VarChar(50)
   type CardType

@@ -16,6 +16,7 @@ export class PaymentsFormService {
           uid: true,
           name: true,
           enable: true,
+          cardHolders: true,
         },
       });
 
@@ -44,6 +45,7 @@ export class PaymentsFormService {
           uid: true,
           name: true,
           enable: true,
+          cardHolders: true,
         },
       });
 
