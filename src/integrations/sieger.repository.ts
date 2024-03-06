@@ -1,13 +1,13 @@
-// sieger.repository.ts
 import { Injectable } from '@nestjs/common';
-
-import { SupplierSieger } from './dto/sieger.dto';
 import { Knex } from 'knex';
 import { InjectConnection } from 'nestjs-knex';
+import { SupplierSieger } from './dto/sieger.dto';
 
 @Injectable()
 export class SiegerRepository {
-  constructor(@InjectConnection() private readonly knex: Knex) {}
+  constructor(
+    @InjectConnection('dbConnectionSieger') private readonly knex: Knex,
+  ) { }
 
   async findSupplierByCPForCNPJ(
     cpfCnpj: string,
