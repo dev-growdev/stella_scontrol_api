@@ -13,9 +13,11 @@ export class PaymentRequestsGeneralService {
     let createdPaymentRequest;
     let paymentSchedules;
     let filesDB;
+
     if (files.length === 0) {
       throw new BadRequestException('É necessário anexar documentos.');
     }
+
     try {
       await this.prisma.$transaction(async (prisma) => {
         const uploadedFiles = await Promise.all(
