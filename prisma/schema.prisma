@@ -130,8 +130,9 @@ model CardHolders {
   paymentFormId String?
   paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
 
-  name String   @db.VarChar(50)
-  type CardType
+  name   String   @db.VarChar(50)
+  type   CardType
+  enable Boolean  @default(true)
 
   @@map("card_holders")
 }

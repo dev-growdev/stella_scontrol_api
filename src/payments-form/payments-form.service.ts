@@ -16,42 +16,83 @@ export class PaymentsFormService {
           uid: true,
           name: true,
           enable: true,
-          cardHolders: true,
         },
       });
 
-      return findAllPaymentsForm;
+      const findHolders = await this.prisma.cardHolders.findMany({
+        select: {
+          name: true,
+          uid: true,
+          enable: true,
+          type: true,
+          paymentForm: {
+            select: {
+              name: true,
+              uid: true,
+            },
+          },
+        },
+      });
+
+      const mergedTables = [...findAllPaymentsForm, ...findHolders];
+
+      return mergedTables;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
   async disablePaymentsForm(uid: string) {
-    const paymentForm = await this.prisma.paymentsForm.findUnique({
+    const holder = await this.prisma.cardHolders.findUnique({
       where: { uid },
     });
 
-    if (!paymentForm) {
-      throw new NotFoundException('Forma de pagamento não encontrado.');
-    }
+    if (!holder) {
+      const findPaymentForm = await this.prisma.paymentsForm.findUnique({
+        where: { uid },
+      });
 
-    try {
-      const disablePaymentForm = await this.prisma.paymentsForm.update({
+      if (!findPaymentForm) {
+        throw new NotFoundException(
+          'Forma de pagamento ou portador não encontrado.',
+        );
+      }
+
+      const updatePaymentForm = await this.prisma.paymentsForm.update({
         where: { uid },
         data: {
-          enable: !paymentForm.enable,
+          enable: !findPaymentForm.enable,
         },
         select: {
           uid: true,
           name: true,
           enable: true,
-          cardHolders: true,
         },
       });
 
-      return disablePaymentForm;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      return updatePaymentForm;
     }
+
+    const disableHolder = await this.prisma.cardHolders.update({
+      where: { uid },
+      data: {
+        enable: !holder.enable,
+      },
+      select: {
+        uid: true,
+        name: true,
+        enable: true,
+        type: true,
+        paymentForm: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
+      },
+    });
+
+    return disableHolder;
   }
 }
