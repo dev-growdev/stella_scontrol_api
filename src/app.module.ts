@@ -19,6 +19,7 @@ import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
 import { UsersModule } from './users/user.module';
 import { IntegrationsModule } from './integrations/integration.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { BudgetAccountModule } from './budget-account/budget-account.module';
 
 /**
  *
@@ -67,6 +68,7 @@ import { SupplierModule } from './supplier/supplier.module';
     PaymentRequestsGeneralModule,
     IntegrationsModule,
     SupplierModule,
+    BudgetAccountModule,
   ],
   controllers: [AppController],
   providers: [
