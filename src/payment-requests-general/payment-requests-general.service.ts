@@ -54,7 +54,7 @@ export class PaymentRequestsGeneralService {
           },
         });
 
-        const vinculaFileToRequest = await Promise.all(
+        await Promise.all(
           filesDB.map((file) =>
             prisma.paymentRequestsFiles.create({
               data: {
