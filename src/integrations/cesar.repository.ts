@@ -46,6 +46,6 @@ export class CesarRepository {
       .where('conta_contabil', accountingAccount)
       .first();
 
-    return { totalBudget: result ? result.total : 0 };
+    return { totalBudget: result?.total ?? 0 };
   }
 }
