@@ -34,9 +34,7 @@ export class PaymentsFormService {
         },
       });
 
-      const mergedTables = [...findAllPaymentsForm, ...findHolders];
-
-      return mergedTables;
+      return [...findAllPaymentsForm, ...findHolders];
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
