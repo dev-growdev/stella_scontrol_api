@@ -25,4 +25,18 @@ export class FilesService {
 
     return files;
   }
+
+  async createFileOnDB(file: Express.Multer.File) {
+    return await this.prisma.files.create({
+      data: {
+        key: file.filename,
+        name: file.originalname,
+      },
+      select: {
+        uid: true,
+        name: true,
+        key: true,
+      },
+    });
+  }
 }

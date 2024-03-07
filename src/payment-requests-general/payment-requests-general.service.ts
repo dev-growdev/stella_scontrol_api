@@ -1,38 +1,37 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { FilesService } from 'src/shared/services/files.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ValidatePaymentRequestGeneralDTO } from './dto';
+import {
+  FilesCreatedType,
+  PaymentRequestCreatedType,
+  PaymentScheduleCreatedType,
+  ValidatePaymentRequestGeneralDTO,
+} from './dto';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private filesService: FilesService,
+  ) {}
 
   async create(
     paymentRequestGeneralDTO: ValidatePaymentRequestGeneralDTO,
     files: Express.Multer.File[],
   ) {
-    let createdPaymentRequest;
-    let paymentSchedules;
-    let filesDB;
-
     if (files.length === 0) {
       throw new BadRequestException('É necessário anexar documentos.');
     }
+
+    let createdPaymentRequest: PaymentRequestCreatedType;
+    let paymentSchedules: PaymentScheduleCreatedType[];
+    let filesDB: FilesCreatedType[];
 
     try {
       await this.prisma.$transaction(async (prisma) => {
         const uploadedFiles = await Promise.all(
           files.map(async (file) => {
-            const createdFile = await prisma.files.create({
-              data: {
-                key: file.filename,
-                name: file.originalname,
-              },
-              select: {
-                uid: true,
-                name: true,
-                key: true,
-              },
-            });
+            const createdFile = await this.filesService.createFileOnDB(file);
 
             return createdFile;
           }),
