@@ -7,7 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-class PaymentDto {
+export class PaymentDto {
   @IsNotEmpty({ message: 'O valor do pagamento é obrigatório' })
   @IsString({ message: 'O valor do pagamento deve ser uma string' })
   value: string;
@@ -42,4 +42,23 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
+}
+
+export class PaymentRequestCreatedType {
+  uid: string;
+  description: string;
+  supplier: string;
+  requiredReceipt: boolean;
+}
+
+export class PaymentScheduleCreatedType {
+  uid: string;
+  value: number;
+  dueDate: Date;
+}
+
+export class FilesCreatedType {
+  uid: string;
+  name: string;
+  key: string;
 }
