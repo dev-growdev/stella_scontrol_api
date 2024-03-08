@@ -12,9 +12,11 @@ import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CardHoldersModule } from './card-holders/card-holders.module';
 import { CategoriesModule } from './categories/categories.module';
 import { IntegrationsModule } from './integrations/integration.module';
 import { PaymentRequestsGeneralModule } from './payment-requests-general/payment-requests-general.module';
+import { PaymentsFormModule } from './payments-form/payments-form.module';
 import { ProductsModule } from './products/products.module';
 import { EmailModule } from './shared/email/email.module';
 import { CustomExceptionFilter } from './shared/exceptions/custom.exception';
@@ -71,6 +73,8 @@ import { UsersModule } from './users/user.module';
     PaymentRequestsGeneralModule,
     IntegrationsModule,
     SupplierModule,
+    PaymentsFormModule,
+    CardHoldersModule,
   ],
   controllers: [AppController],
   providers: [
