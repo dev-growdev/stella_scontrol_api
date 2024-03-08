@@ -9,8 +9,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { randomUUID } from 'crypto';
-import { diskStorage } from 'multer';
 import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
@@ -21,17 +19,7 @@ export class PaymentRequestsGeneralController {
   ) {}
 
   @Post('payment-request-general')
-  @UseInterceptors(
-    FilesInterceptor('file', 20, {
-      storage: diskStorage({
-        destination: process.env.ROOT_PATH_FILES,
-        filename: (req, file, callback) => {
-          const randomName = `${randomUUID()}-${file.originalname}`;
-          callback(null, `${randomName}`);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FilesInterceptor('file'))
   create(
     @Body()
     paymentRequestGeneral: PaymentRequestGeneralDTO,

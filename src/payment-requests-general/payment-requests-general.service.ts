@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -27,11 +29,25 @@ export class PaymentRequestsGeneralService {
     let paymentSchedules: PaymentScheduleCreatedType[];
     let filesDB: FilesCreatedType[];
 
+    const dirPath = path.join(__dirname, '..', '..', '..', 'files');
+
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+
     try {
       await this.prisma.$transaction(async (prisma) => {
         const uploadedFiles = await Promise.all(
           files.map(async (file) => {
             const createdFile = await this.filesService.createFileOnDB(file);
+
+            const fileStream = fs.createWriteStream(
+              `${dirPath}/${createdFile.key}`,
+            );
+
+            fileStream.write(file.buffer);
+
+            fileStream.end();
 
             return createdFile;
           }),

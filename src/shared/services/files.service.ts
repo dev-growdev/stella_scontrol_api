@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -27,9 +28,10 @@ export class FilesService {
   }
 
   async createFileOnDB(file: Express.Multer.File) {
+    const randomKey = `${randomUUID()}-${file.originalname}`;
     return await this.prisma.files.create({
       data: {
-        key: file.filename,
+        key: randomKey,
         name: file.originalname,
       },
       select: {
