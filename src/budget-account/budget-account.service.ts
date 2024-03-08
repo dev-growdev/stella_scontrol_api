@@ -1,7 +1,7 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
 import { CesarRepository } from '../integrations/cesar.repository';
 
@@ -47,8 +47,15 @@ export class BudgetAccountService {
           month,
         );
 
+      if (retrievedAccountingAccount.totalBudget === 0) {
+        throw new BadRequestException('Saldo insuficiente');
+      }
+
       return retrievedAccountingAccount;
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException(error.message);
     }
   }
