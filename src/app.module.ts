@@ -20,6 +20,8 @@ import { UsersModule } from './users/user.module';
 import { IntegrationsModule } from './integrations/integration.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { BudgetAccountModule } from './budget-account/budget-account.module';
+import { PaymentsFormModule } from './payments-form/payments-form.module';
+import { CardHoldersModule } from './card-holders/card-holders.module';
 
 /**
  *
@@ -69,6 +71,8 @@ import { BudgetAccountModule } from './budget-account/budget-account.module';
     IntegrationsModule,
     SupplierModule,
     BudgetAccountModule,
+    PaymentsFormModule,
+    CardHoldersModule,
   ],
   controllers: [AppController],
   providers: [

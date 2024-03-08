@@ -109,3 +109,38 @@ model TempSuppliersData {
 
   @@map("temp_suppliers_data")
 }
+
+model PaymentsForm {
+  uid String @id @default(uuid())
+
+  name   String  @db.VarChar(50)
+  enable Boolean @default(true)
+
+  cardHolders CardHolders[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("payments_form")
+}
+
+model CardHolders {
+  uid String @id @default(uuid())
+
+  paymentFormId String?       @map("payment_form_id")
+  paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
+
+  name   String   @db.VarChar(50)
+  type   CardType
+  enable Boolean  @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("card_holders")
+}
+
+enum CardType {
+  credit
+  corporate
+}

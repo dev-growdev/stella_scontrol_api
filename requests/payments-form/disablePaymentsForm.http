@@ -1,0 +1,4 @@
+@HOST = http://localhost:8080/api
+
+PUT {{HOST}}/payments-form/6c15a077-fb98-4f97-bae3-3b79057f58a2 HTTP/1.1
+Content-Type: application/json
