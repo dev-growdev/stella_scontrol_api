@@ -1,83 +1,89 @@
+import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
-import { InternalServerErrorException } from '@nestjs/common';
+import { ValidatePaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
-import { PaymentRequestGeneralDTO } from './dto';
 
-const makePaymentRequestGeneralDTO = (): PaymentRequestGeneralDTO => {
+const makePaymentRequestGeneralDTO = (): ValidatePaymentRequestGeneralDTO => {
   return {
-    description: 'Solicito pagamento para um equipamento novo.',
     supplier: '1234567891011',
-    sendReceipt: true,
-    totalRequestValue: '100.50',
-    dueDate: new Date(),
+    description: 'Solicito pagamento para um equipamento novo.',
+    requiredReceipt: true,
+    payments: [{ value: '100.50', dueDate: new Date() }],
+    uploadedFiles: [],
   };
 };
 
 describe('PaymentRequestsGeneralService', () => {
-  let service: PaymentRequestsGeneralService;
-  let prismaService: PrismaService;
+  let sut: PaymentRequestsGeneralService;
+  let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PaymentRequestsGeneralService,
-        {
-          provide: PrismaService,
-          useValue: {
-            $transaction: jest.fn(),
-          },
-        },
-      ],
+      providers: [PrismaService, PaymentRequestsGeneralService, ConfigService],
     }).compile();
 
-    service = module.get<PaymentRequestsGeneralService>(
+    sut = module.get<PaymentRequestsGeneralService>(
       PaymentRequestsGeneralService,
     );
-    prismaService = module.get<PrismaService>(PrismaService);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(sut).toBeDefined();
   });
 
   describe('Create - POST', () => {
     it('should create a payment request general and return the created data on success', async () => {
       const paymentRequestGeneralDTO = makePaymentRequestGeneralDTO();
 
-      jest.spyOn(prismaService, '$transaction').mockImplementation(async () => {
+      jest.spyOn(prisma, '$transaction').mockImplementation(async () => {
         const createdPaymentRequestGeneral = {
-          description: paymentRequestGeneralDTO.description,
-          supplier: paymentRequestGeneralDTO.supplier,
-          sendReceipt: paymentRequestGeneralDTO.sendReceipt,
-          totalRequestValue: parseFloat(
-            paymentRequestGeneralDTO.totalRequestValue,
-          ),
-          dueDate: paymentRequestGeneralDTO.dueDate,
+          document: {
+            supplier: '1234567891011',
+            description: 'Solicito pagamento para um equipamento novo.',
+            requiredReceipt: true,
+            payments: [{ value: '100.50', dueDate: new Date() }],
+            uploadedFiles: [],
+          },
         };
 
         return createdPaymentRequestGeneral;
       });
 
-      const createdPaymentRequestGeneral = await service.create(
+      const createdPaymentRequestGeneral = await sut.create(
         paymentRequestGeneralDTO,
+        [],
       );
 
       expect(createdPaymentRequestGeneral).toBeDefined();
+      expect(createdPaymentRequestGeneral).toHaveProperty('request');
     });
 
-    it('should handle errors and throw InternalServerErrorException on failure', async () => {
-      const paymentRequestGeneralDTO = makePaymentRequestGeneralDTO();
+    it('should throw BadRequestException if there is no file', async () => {
+      const paymentRequestGeneralDTO = {
+        supplier: '1234567891011',
+        description: 'Solicito pagamento para um equipamento novo.',
+        requiredReceipt: true,
+        payments: [{ value: '100.50', dueDate: new Date() }],
+        uploadedFiles: [],
+      };
 
-      jest.spyOn(prismaService, '$transaction').mockImplementation(async () => {
-        throw new Error('Test error');
+      jest.spyOn(prisma, '$transaction').mockImplementation(async () => {
+        throw new BadRequestException(
+          'Algo deu errado, confira os campos e tente novamente.',
+        );
       });
 
       try {
-        await service.create(paymentRequestGeneralDTO);
+        await sut.create(paymentRequestGeneralDTO, []);
       } catch (error) {
-        expect(error).toBeInstanceOf(InternalServerErrorException);
-        expect(error.message).toEqual('Test error');
+        console.log(error);
+        expect(error).toBeInstanceOf(BadRequestException);
+        expect(error.message).toEqual(
+          'Algo deu errado, confira os campos e tente novamente.',
+        );
       }
     });
   });

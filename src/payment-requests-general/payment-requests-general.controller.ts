@@ -1,4 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Res,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
@@ -9,10 +19,19 @@ export class PaymentRequestsGeneralController {
   ) {}
 
   @Post('payment-request-general')
+  @UseInterceptors(FilesInterceptor('file'))
   create(
     @Body()
     paymentRequestGeneral: PaymentRequestGeneralDTO,
+    @UploadedFiles()
+    files: Express.Multer.File[],
   ) {
-    return this.paymentRequestsGeneralService.create(paymentRequestGeneral);
+    const form = JSON.parse(paymentRequestGeneral.document);
+    return this.paymentRequestsGeneralService.create(form, files);
+  }
+
+  @Get('file/:imgpath')
+  listOneFile(@Param('imgpath') image, @Res() res) {
+    return res.sendFile(image, { root: process.env.ROOT_PATH_FILES });
   }
 }
