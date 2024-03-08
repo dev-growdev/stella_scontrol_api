@@ -15,10 +15,10 @@ export class FilesService {
       },
     });
 
-    if (files.length !== keys.length) {
-      const notFoundFiles = keys.filter(
-        (imgKey) => !files.find((file) => file.key === imgKey),
-      );
+    const notFoundFiles = keys.filter(
+      (key) => !files.some((file) => file.key === key),
+    );
+    if (!notFoundFiles) {
       throw new NotFoundException(
         `Arquivos não encontrados: ${notFoundFiles.join(', ')}`,
       );
