@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CesarRepository } from '../integrations/cesar.repository';
 
@@ -26,8 +27,17 @@ export class BudgetAccountService {
           costCenterId,
         );
 
+      if (accountingAccount.length === 0) {
+        throw new NotFoundException(
+          'Conta não encontrada para o centro de custo especificado',
+        );
+      }
+
       return accountingAccount;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       throw new InternalServerErrorException(error.message);
     }
   }
