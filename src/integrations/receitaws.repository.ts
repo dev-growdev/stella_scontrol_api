@@ -1,4 +1,3 @@
-// receitaws.repository.ts
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { SupplierReceitaws } from './dto/receitaws.dto';
