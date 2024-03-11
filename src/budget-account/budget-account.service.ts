@@ -5,12 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CesarRepository } from '../integrations/cesar.repository';
+import {
+  AccountingAccounts,
+  CostCenterCesar,
+} from 'src/integrations/dto/cesar.dto.ts';
 
 @Injectable()
 export class BudgetAccountService {
   constructor(private cesarRepository: CesarRepository) {}
 
-  async getCostCenters() {
+  async getCostCenters(): Promise<CostCenterCesar[]> {
     try {
       const costCenters = await this.cesarRepository.getCostCenters();
 
@@ -20,7 +24,9 @@ export class BudgetAccountService {
     }
   }
 
-  async getAccountingAccountByCostCenter(costCenterId: number) {
+  async getAccountingAccountByCostCenter(
+    costCenterId: number,
+  ): Promise<AccountingAccounts[]> {
     try {
       const accountingAccount =
         await this.cesarRepository.getAccountingAccountsByCostCenter(
@@ -47,7 +53,7 @@ export class BudgetAccountService {
     costCenter: string,
     accountingAccount: string,
     month: string,
-  ) {
+  ): Promise<{ totalBudget: number }> {
     try {
       const retrievedAccountingAccount =
         await this.cesarRepository.checkAccountBalanceForOperation(
