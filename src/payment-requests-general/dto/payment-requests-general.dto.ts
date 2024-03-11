@@ -42,6 +42,9 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
+
+  @IsString()
+  userCreatedUid: string;
 }
 
 export class PaymentRequestCreatedType {

@@ -60,12 +60,22 @@ export class PaymentRequestsGeneralService {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+            userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
           },
           select: {
             uid: true,
             description: true,
             supplier: true,
             requiredReceipt: true,
+            createdAt: true,
+            user: {
+              select: {
+                uid: true,
+                name: true,
+                enable: true,
+                email: true,
+              },
+            },
           },
         });
 
@@ -110,5 +120,63 @@ export class PaymentRequestsGeneralService {
         files: filesDB,
       },
     };
+  }
+
+  async listByUser(userUid: string) {
+    const findUser = await this.prisma.user.findUnique({
+      where: {
+        uid: userUid,
+      },
+    });
+    if (!findUser) {
+      throw new BadRequestException('Não foi possível encontrar um usuário.');
+    }
+
+    const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
+      where: {
+        userCreatedUid: findUser.uid,
+      },
+      select: {
+        uid: true,
+        description: true,
+        supplier: true,
+        requiredReceipt: true,
+        createdAt: true,
+        user: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+            email: true,
+          },
+        },
+        PaymentSchedule: {
+          select: {
+            uid: true,
+            value: true,
+            dueDate: true,
+          },
+        },
+        PaymentRequestsFiles: {
+          select: {
+            fileUid: true,
+          },
+        },
+      },
+    });
+
+    if (!findRequests.length) {
+      throw new BadRequestException(
+        'Você não tem nenhuma solicitação geral de pagamento.',
+      );
+    }
+
+    const transformedRequests = findRequests.map((request) => ({
+      ...request,
+      payments: request.PaymentSchedule,
+      files: request.PaymentRequestsFiles.map((file) => file.fileUid),
+    }));
+
+    return transformedRequests;
   }
 }
