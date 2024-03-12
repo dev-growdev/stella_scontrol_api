@@ -60,6 +60,8 @@ export class PaymentRequestsGeneralService {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+            totalValue: paymentRequestGeneralDTO.totalValue,
+            accountingAccount: paymentRequestGeneralDTO.accountingAccount,
           },
           select: {
             uid: true,
