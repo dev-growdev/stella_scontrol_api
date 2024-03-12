@@ -45,8 +45,9 @@ model PaymentRequestsGeneral {
   description     String?
   requiredReceipt Boolean @default(false) @map("send_receipt")
 
-  user           User   @relation(fields: [userCreatedUid], references: [uid])
-  userCreatedUid String @map("user_created_uid")
+  user           User             @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String           @map("user_created_uid")
+  Apportionments Apportionments[]
 
   createdAt            DateTime               @default(now()) @map("created_at")
   updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
@@ -177,4 +178,20 @@ model CardHolders {
 enum CardType {
   credit
   corporate
+}
+
+model Apportionments {
+  uid String @id @default(uuid())
+
+  paymentRequestsGeneralUid String
+  costCenter                String  @map("cost_center")
+  accountingAccount         String  @map("accounting_account")
+  value                     Decimal
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  PaymentRequestGeneralUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+
+  @@map("apportionments")
 }
