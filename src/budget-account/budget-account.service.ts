@@ -16,7 +16,6 @@ export class BudgetAccountService {
 
   async getCostCenters(): Promise<CostCenterCesar[]> {
     try {
-      console.log('entrou aqui');
       const costCenters = await this.cesarRepository.getCostCenters();
 
       return costCenters;
