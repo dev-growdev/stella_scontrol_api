@@ -24,9 +24,11 @@ datasource db {
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  supplier        String
-  description     String?
-  requiredReceipt Boolean @default(false) @map("send_receipt")
+  supplier          String
+  description       String?
+  requiredReceipt   Boolean @default(false) @map("send_receipt")
+  totalValue        Float   @map("total_value")
+  accountingAccount String  @map("accounting_account") @db.VarChar(255)
 
   createdAt            DateTime               @default(now()) @map("created_at")
   updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
