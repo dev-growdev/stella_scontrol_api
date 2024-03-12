@@ -12,7 +12,7 @@ export class ProductDTO {
   categoryId: string;
 
   @IsString({ message: 'Código deve ser do tipo string' })
-  @IsNotEmpty({ message: 'Código é obrigatório' })
+  @IsOptional({ message: 'Código é opcional' })
   code: string;
 
   @IsString({ message: 'Nome deve ser do tipo string' })
@@ -22,6 +22,10 @@ export class ProductDTO {
   @IsBoolean({ message: 'Habilitado deve ser do tipo boolean' })
   @IsNotEmpty({ message: 'Habilitado é obrigatório' })
   enable: boolean;
+
+  @IsString({ message: 'Descrição deve ser do tipo string' })
+  @IsOptional({ message: 'Descrição é opcional' })
+  description?: string;
 
   @IsString({ message: 'Unidade de medida deve ser do tipo string' })
   @IsOptional({ message: 'Unidade de medida é opcional' })

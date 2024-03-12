@@ -89,6 +89,7 @@ model Products {
   code        String  @db.VarChar(50)
   name        String  @db.VarChar(50)
   enable      Boolean @default(true)
+  description String?
   measurement String? @db.VarChar(50)
   quantity    Int?
 
