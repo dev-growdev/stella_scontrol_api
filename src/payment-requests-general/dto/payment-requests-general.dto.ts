@@ -42,6 +42,13 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
+
+  @IsNotEmpty({ message: 'O comprovante é obrigatório' })
+  totalValue: number;
+
+  @IsNotEmpty({ message: 'Conta contábil é obrigatória' })
+  @IsString({ message: 'Conta contábil deve ser uma string' })
+  accountingAccount: string;
 }
 
 export class PaymentRequestCreatedType {
