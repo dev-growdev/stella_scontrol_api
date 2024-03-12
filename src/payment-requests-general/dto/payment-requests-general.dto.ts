@@ -1,3 +1,4 @@
+import { Decimal } from '@prisma/client/runtime/library';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -21,6 +22,19 @@ export class PaymentRequestGeneralDTO {
   @IsString({ message: 'O documento deve ser uma string' })
   document: string;
 }
+export class ApportionmentsDto {
+  @IsNotEmpty({ message: 'É necessário adicionar um centro de custo.' })
+  @IsString()
+  costCenter: string;
+
+  @IsNotEmpty({ message: 'É necessário adicionar uma conta contábil.' })
+  @IsString()
+  accountingAccount: string;
+
+  @IsNotEmpty({ message: 'É necessário adicionar um valor.' })
+  @IsString()
+  value: string;
+}
 
 export class ValidatePaymentRequestGeneralDTO {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
@@ -43,6 +57,11 @@ export class ValidatePaymentRequestGeneralDTO {
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
 
+  @IsArray({ message: 'Rateio deve ser um array.' })
+  @ValidateNested({ each: true })
+  @Type(() => ApportionmentsDto)
+  apportionments: ApportionmentsDto[];
+
   @IsString()
   userCreatedUid: string;
 }
@@ -64,4 +83,12 @@ export class FilesCreatedType {
   uid: string;
   name: string;
   key: string;
+}
+
+export class ApportionmentsCreatedType {
+  uid: string;
+  accountingAccount: string;
+  costCenter: string;
+  paymentRequestsGeneralUid: string;
+  value: Decimal;
 }

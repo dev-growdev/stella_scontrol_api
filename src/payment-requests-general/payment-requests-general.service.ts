@@ -1,9 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  ApportionmentsCreatedType,
   FilesCreatedType,
   PaymentRequestCreatedType,
   PaymentScheduleCreatedType,
@@ -28,6 +30,7 @@ export class PaymentRequestsGeneralService {
     let createdPaymentRequest: PaymentRequestCreatedType;
     let paymentSchedules: PaymentScheduleCreatedType[];
     let filesDB: FilesCreatedType[];
+    let apportionmentsCreated: ApportionmentsCreatedType[];
 
     const dirPath = path.join(__dirname, '..', '..', '..', 'files');
 
@@ -95,13 +98,33 @@ export class PaymentRequestsGeneralService {
             prisma.paymentSchedule.create({
               data: {
                 dueDate: payment.dueDate,
-                value: +payment.value,
+                value: Number(payment.value),
                 paymentRequestsGeneralUid: createdPaymentRequest.uid,
               },
               select: {
                 uid: true,
                 value: true,
                 dueDate: true,
+              },
+            }),
+          ),
+        );
+
+        apportionmentsCreated = await Promise.all(
+          paymentRequestGeneralDTO.apportionments.map(async (apportionment) =>
+            prisma.apportionments.create({
+              data: {
+                paymentRequestsGeneralUid: createdPaymentRequest.uid,
+                costCenter: apportionment.costCenter,
+                accountingAccount: apportionment.accountingAccount,
+                value: new Prisma.Decimal(Number(apportionment.value)),
+              },
+              select: {
+                uid: true,
+                accountingAccount: true,
+                costCenter: true,
+                paymentRequestsGeneralUid: true,
+                value: true,
               },
             }),
           ),
@@ -118,6 +141,7 @@ export class PaymentRequestsGeneralService {
         ...createdPaymentRequest,
         payments: paymentSchedules,
         files: filesDB,
+        apportionments: apportionmentsCreated,
       },
     };
   }
@@ -162,6 +186,15 @@ export class PaymentRequestsGeneralService {
             fileUid: true,
           },
         },
+        Apportionments: {
+          select: {
+            uid: true,
+            accountingAccount: true,
+            costCenter: true,
+            paymentRequestsGeneralUid: true,
+            value: true,
+          },
+        },
       },
     });
 
@@ -175,6 +208,7 @@ export class PaymentRequestsGeneralService {
       ...request,
       payments: request.PaymentSchedule,
       files: request.PaymentRequestsFiles.map((file) => file.fileUid),
+      apportionments: request.Apportionments,
     }));
 
     return transformedRequests;
