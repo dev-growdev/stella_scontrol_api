@@ -183,7 +183,7 @@ enum CardType {
 model Apportionments {
   uid String @id @default(uuid())
 
-  paymentRequestsGeneralUid String
+  paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
   costCenter                String  @map("cost_center")
   accountingAccount         String  @map("accounting_account")
   value                     Decimal
