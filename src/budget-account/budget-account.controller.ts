@@ -1,11 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { BudgetAccountService } from './budget-account.service';
 import {
   AccountingAccounts,
   CostCenterCesar,
-} from 'src/integrations/dto/cesar.dto.ts';
+} from '../integrations/dto/cesar.dto.ts';
+import { BudgetAccountService } from './budget-account.service';
 
-@Controller()
+@Controller('budget-account')
 export class BudgetAccountController {
   constructor(private readonly budgetAccountService: BudgetAccountService) {}
 
@@ -23,7 +23,7 @@ export class BudgetAccountController {
     );
   }
 
-  @Get('budget-account/balance/:year/:costCenter/:accountingAccount/:month')
+  @Get('balance/:year/:costCenter/:accountingAccount/:month')
   checkAccountBalance(
     @Param('year') year: string,
     @Param('costCenter') costCenter: string,
