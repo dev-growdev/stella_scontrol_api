@@ -86,7 +86,7 @@ model Products {
   categoryId String
   category   Categories @relation(fields: [categoryId], references: [uid])
 
-  code        String  @db.VarChar(50)
+  code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)
   enable      Boolean @default(true)
   description String?

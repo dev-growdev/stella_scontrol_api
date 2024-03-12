@@ -11,10 +11,6 @@ export class ProductDTO {
   @IsNotEmpty({ message: 'ID da categoria é obrigatório' })
   categoryId: string;
 
-  @IsString({ message: 'Código deve ser do tipo string' })
-  @IsOptional({ message: 'Código é opcional' })
-  code: string;
-
   @IsString({ message: 'Nome deve ser do tipo string' })
   @IsNotEmpty({ message: 'Nome é obrigatório' })
   name: string;

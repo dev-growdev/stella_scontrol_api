@@ -30,12 +30,9 @@ export class ProductsService {
       throw new BadRequestException('Categoria não encontrada.');
     }
 
-    const generatedCode = Math.floor(Math.random() * 100000).toString();
-
     const createdProduct = await this.prisma.products.create({
       data: {
         categoryId: findCategory.uid,
-        code: generatedCode,
         name: productDTO.name,
         enable: productDTO.enable,
         description: productDTO.description,
@@ -120,7 +117,6 @@ export class ProductsService {
 
       const updatedData: Partial<ProductDTO> = {
         categoryId: findCategory.uid,
-        code: productDTO.code,
         name: productDTO.name,
         description: productDTO.description,
         measurement: productDTO.measurement,
