@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CesarRepository } from '../integrations/cesar.repository';
 import {
   AccountingAccounts,
   CostCenterCesar,
 } from 'src/integrations/dto/cesar.dto.ts';
+import { CesarRepository } from '../integrations/cesar.repository';
 
 @Injectable()
 export class BudgetAccountService {
@@ -16,6 +16,7 @@ export class BudgetAccountService {
 
   async getCostCenters(): Promise<CostCenterCesar[]> {
     try {
+      console.log('entrou aqui');
       const costCenters = await this.cesarRepository.getCostCenters();
 
       return costCenters;
