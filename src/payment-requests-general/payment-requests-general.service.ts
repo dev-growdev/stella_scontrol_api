@@ -68,6 +68,8 @@ export class PaymentRequestsGeneralService {
             description: true,
             supplier: true,
             requiredReceipt: true,
+            totalValue: true,
+            accountingAccount: true,
           },
         });
 
