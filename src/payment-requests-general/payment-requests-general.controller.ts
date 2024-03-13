@@ -12,13 +12,13 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
-@Controller()
+@Controller('payment-request-general')
 export class PaymentRequestsGeneralController {
   constructor(
     private readonly paymentRequestsGeneralService: PaymentRequestsGeneralService,
   ) {}
 
-  @Post('payment-request-general')
+  @Post()
   @UseInterceptors(FilesInterceptor('file'))
   create(
     @Body()
