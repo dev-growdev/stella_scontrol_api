@@ -33,9 +33,9 @@ export class ProductsService {
     const createdProduct = await this.prisma.products.create({
       data: {
         categoryId: findCategory.uid,
-        code: productDTO.code,
         name: productDTO.name,
         enable: productDTO.enable,
+        description: productDTO.description,
         measurement: productDTO.measurement,
         quantity: productDTO.quantity,
       },
@@ -44,6 +44,7 @@ export class ProductsService {
         code: true,
         name: true,
         enable: true,
+        description: true,
         measurement: true,
         quantity: true,
         category: {
@@ -67,6 +68,7 @@ export class ProductsService {
           code: true,
           name: true,
           enable: true,
+          description: true,
           measurement: true,
           quantity: true,
           category: {
@@ -115,8 +117,8 @@ export class ProductsService {
 
       const updatedData: Partial<ProductDTO> = {
         categoryId: findCategory.uid,
-        code: productDTO.code,
         name: productDTO.name,
+        description: productDTO.description,
         measurement: productDTO.measurement,
         quantity: productDTO.quantity,
       };
@@ -129,6 +131,7 @@ export class ProductsService {
           code: true,
           name: true,
           enable: true,
+          description: true,
           measurement: true,
           quantity: true,
           category: {
@@ -167,6 +170,7 @@ export class ProductsService {
           code: true,
           name: true,
           enable: true,
+          description: true,
           measurement: true,
           quantity: true,
           category: {

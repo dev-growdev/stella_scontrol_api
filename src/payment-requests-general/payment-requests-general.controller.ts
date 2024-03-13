@@ -34,4 +34,9 @@ export class PaymentRequestsGeneralController {
   listOneFile(@Param('imgpath') image, @Res() res) {
     return res.sendFile(image, { root: process.env.ROOT_PATH_FILES });
   }
+
+  @Get('/:userUid')
+  listPaymentsRequestsByUser(@Param('userUid') userUid: string) {
+    return this.paymentRequestsGeneralService.listByUser(userUid);
+  }
 }

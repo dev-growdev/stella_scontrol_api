@@ -21,6 +21,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  uid String @id @default(uuid())
+
+  idUserAd String @unique @map("id_user_ad")
+  name     String
+  email    String @unique
+
+  enable Boolean @default(true)
+
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("user")
+}
+
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
@@ -29,6 +46,10 @@ model PaymentRequestsGeneral {
   requiredReceipt   Boolean @default(false) @map("send_receipt")
   totalValue        Float   @map("total_value")
   accountingAccount String  @map("accounting_account") @db.VarChar(255)
+
+  user           User             @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String           @map("user_created_uid")
+  Apportionments Apportionments[]
 
   createdAt            DateTime               @default(now()) @map("created_at")
   updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
@@ -53,21 +74,6 @@ model PaymentSchedule {
   @@map("payments_schedule")
 }
 
-model User {
-  uid String @id @default(uuid())
-
-  idUserAd String @unique @map("id_user_ad")
-  name     String
-  email    String @unique
-
-  enable Boolean @default(true)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@map("user")
-}
-
 model Categories {
   uid String @id @default(uuid())
 
@@ -88,9 +94,10 @@ model Products {
   categoryId String
   category   Categories @relation(fields: [categoryId], references: [uid])
 
-  code        String  @db.VarChar(50)
+  code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)
   enable      Boolean @default(true)
+  description String?
   measurement String? @db.VarChar(50)
   quantity    Int?
 
@@ -174,4 +181,20 @@ model CardHolders {
 enum CardType {
   credit
   corporate
+}
+
+model Apportionments {
+  uid String @id @default(uuid())
+
+  paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
+  costCenter                String  @map("cost_center")
+  accountingAccount         String  @map("accounting_account")
+  value                     Decimal
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  PaymentRequestGeneralUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+
+  @@map("apportionments")
 }
