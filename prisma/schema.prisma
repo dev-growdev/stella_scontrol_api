@@ -47,6 +47,8 @@ model PaymentRequestsGeneral {
 
   user           User             @relation(fields: [userCreatedUid], references: [uid])
   userCreatedUid String           @map("user_created_uid")
+  CardHolder     CardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid String?          @map("card_holders_uid")
   Apportionments Apportionments[]
 
   createdAt            DateTime               @default(now()) @map("created_at")
@@ -170,8 +172,9 @@ model CardHolders {
   type   CardType
   enable Boolean  @default(true)
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @default(now()) @updatedAt @map("updated_at")
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
 
   @@map("card_holders")
 }
