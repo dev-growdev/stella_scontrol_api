@@ -4,8 +4,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { ProductDTO } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProductDTO } from './dto';
 
 @Injectable()
 export class ProductsService {
@@ -96,14 +96,17 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado.');
     }
 
-    const findProduct = await this.prisma.products.findFirst({
+    const isThereAlreadyThisProductName = await this.prisma.products.findFirst({
       where: {
         name: productDTO.name,
       },
     });
 
-    if (findProduct) {
-      throw new BadRequestException('Esse produto já existe.');
+    if (isThereAlreadyThisProductName) {
+      if (isThereAlreadyThisProductName.uid !== product.uid) {
+        console.log(isThereAlreadyThisProductName, product.uid);
+        throw new BadRequestException('Esse produto já existe.');
+      }
     }
 
     try {
