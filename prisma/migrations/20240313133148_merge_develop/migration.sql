@@ -12,11 +12,5 @@ ALTER TABLE "apportionments" DROP CONSTRAINT "apportionments_paymentRequestsGene
 ALTER TABLE "apportionments" DROP COLUMN "paymentRequestsGeneralUid",
 ADD COLUMN     "payment_requests_general_uid" TEXT NOT NULL;
 
--- AlterTable
-ALTER TABLE "payment_requests_general" ADD COLUMN     "cardHoldersUid" TEXT;
-
--- AddForeignKey
-ALTER TABLE "payment_requests_general" ADD CONSTRAINT "payment_requests_general_cardHoldersUid_fkey" FOREIGN KEY ("cardHoldersUid") REFERENCES "card_holders"("uid") ON DELETE SET NULL ON UPDATE CASCADE;
-
 -- AddForeignKey
 ALTER TABLE "apportionments" ADD CONSTRAINT "apportionments_payment_requests_general_uid_fkey" FOREIGN KEY ("payment_requests_general_uid") REFERENCES "payment_requests_general"("uid") ON DELETE RESTRICT ON UPDATE CASCADE;

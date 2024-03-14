@@ -41,9 +41,11 @@ model User {
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  supplier        String
-  description     String?
-  requiredReceipt Boolean @default(false) @map("send_receipt")
+  supplier          String
+  description       String?
+  requiredReceipt   Boolean @default(false) @map("send_receipt")
+  totalValue        Float   @map("total_value")
+  accountingAccount String? @map("accounting_account") @db.VarChar(255)
 
   user           User             @relation(fields: [userCreatedUid], references: [uid])
   userCreatedUid String           @map("user_created_uid")

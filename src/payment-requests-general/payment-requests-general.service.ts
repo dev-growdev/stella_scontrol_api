@@ -57,6 +57,8 @@ export class PaymentRequestsGeneralService {
           data: {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
+            totalValue: parseFloat(paymentRequestGeneralDTO.totalValue),
+            accountingAccount: paymentRequestGeneralDTO.accountingAccount,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
             cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
@@ -65,6 +67,8 @@ export class PaymentRequestsGeneralService {
             uid: true,
             description: true,
             supplier: true,
+            totalValue: true,
+            accountingAccount: true,
             requiredReceipt: true,
             createdAt: true,
             user: {
@@ -132,7 +136,9 @@ export class PaymentRequestsGeneralService {
                 paymentRequestsGeneralUid: createdPaymentRequest.uid,
                 costCenter: apportionment.costCenter,
                 accountingAccount: apportionment.accountingAccount,
-                value: new Prisma.Decimal(Number(apportionment.value)),
+                value: new Prisma.Decimal(
+                  Number(apportionment.value.replace(',', '.')),
+                ),
               },
               select: {
                 uid: true,

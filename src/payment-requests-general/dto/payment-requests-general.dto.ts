@@ -65,6 +65,13 @@ export class ValidatePaymentRequestGeneralDTO {
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
 
+  @IsNotEmpty({ message: 'O comprovante é obrigatório' })
+  totalValue: string;
+
+  @IsOptional()
+  @IsString({ message: 'Conta contábil deve ser uma string' })
+  accountingAccount?: string;
+
   @IsArray({ message: 'Rateio deve ser um array.' })
   @ValidateNested({ each: true })
   @Type(() => ApportionmentsDto)
