@@ -40,23 +40,18 @@ export class PaymentRequestsGeneralService {
 
     try {
       await this.prisma.$transaction(async (prisma) => {
-        const uploadedFiles = await Promise.all(
-          files.map(async (file) => {
-            const createdFile = await this.filesService.createFileOnDB(file);
-
-            const fileStream = fs.createWriteStream(
-              `${dirPath}/${createdFile.key}`,
+        if (paymentRequestGeneralDTO.cardHolder) {
+          const existsHolder = await prisma.cardHolders.findUnique({
+            where: {
+              uid: paymentRequestGeneralDTO.cardHolder.uid,
+            },
+          });
+          if (!existsHolder) {
+            throw new BadRequestException(
+              'Não foi possível encontrar um portador.',
             );
-
-            fileStream.write(file.buffer);
-
-            fileStream.end();
-
-            return createdFile;
-          }),
-        );
-
-        filesDB = uploadedFiles;
+          }
+        }
 
         createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
           data: {
@@ -64,6 +59,7 @@ export class PaymentRequestsGeneralService {
             supplier: paymentRequestGeneralDTO.supplier,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
+            cardHoldersUid: paymentRequestGeneralDTO.cardHolder.uid,
           },
           select: {
             uid: true,
@@ -81,6 +77,24 @@ export class PaymentRequestsGeneralService {
             },
           },
         });
+
+        const uploadedFiles = await Promise.all(
+          files.map(async (file) => {
+            const createdFile = await this.filesService.createFileOnDB(file);
+
+            const fileStream = fs.createWriteStream(
+              `${dirPath}/${createdFile.key}`,
+            );
+
+            fileStream.write(file.buffer);
+
+            fileStream.end();
+
+            return createdFile;
+          }),
+        );
+
+        filesDB = uploadedFiles;
 
         await Promise.all(
           filesDB.map((file) =>
