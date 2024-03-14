@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -36,6 +37,13 @@ export class ApportionmentsDto {
   value: string;
 }
 
+export class CardHolderType {
+  @IsString()
+  name: string;
+  @IsString()
+  uid: string;
+}
+
 export class ValidatePaymentRequestGeneralDTO {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
@@ -58,11 +66,12 @@ export class ValidatePaymentRequestGeneralDTO {
   uploadedFiles: any[];
 
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
-  totalValue: number;
+  totalValue: string;
 
-  @IsNotEmpty({ message: 'Conta contábil é obrigatória' })
+  @IsOptional()
   @IsString({ message: 'Conta contábil deve ser uma string' })
-  accountingAccount: string;
+  accountingAccount?: string;
+
   @IsArray({ message: 'Rateio deve ser um array.' })
   @ValidateNested({ each: true })
   @Type(() => ApportionmentsDto)
@@ -70,6 +79,9 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsString()
   userCreatedUid: string;
+
+  @IsOptional()
+  cardHolder?: CardHolderType;
 }
 
 export class PaymentRequestCreatedType {
