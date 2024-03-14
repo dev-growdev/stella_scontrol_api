@@ -1,10 +1,10 @@
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { truncatePrisma } from 'test/setup/truncate-database';
 
 describe('SupplierController', () => {
-  let app;
-  const path = 'supplier';
+  let app: INestApplication;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

@@ -6,7 +6,6 @@ import { ConfigService } from '@nestjs/config';
 import { truncatePrisma } from 'test/setup/truncate-database';
 import { IntegrationsModule } from 'src/integrations/integration.module';
 
-// SUT => System Under Test
 describe('SupplierService -', () => {
   let sut: SupplierService;
   let prisma: PrismaService;
@@ -21,10 +20,6 @@ describe('SupplierService -', () => {
     prisma = module.get<PrismaService>(PrismaService);
   });
 
-  // afterEach(async ()=> {
-  //   await prisma.tempSuppliersData.deleteMany({});
-  // })
-
   afterAll(async () => {
     await truncatePrisma();
   });
@@ -36,7 +31,6 @@ describe('SupplierService -', () => {
 
   describe('FindSupplierByCPForCNPJ -', () => {
     it('should find supplier by CNPJ in siger', async () => {
-      // dado (given) -- modela os dados entrada (inputs, configs inicias)
       const cnpj = '1234567891011';
       const supplierSigerMock = {
         name: 'EMPRESA LTDA',
@@ -47,10 +41,8 @@ describe('SupplierService -', () => {
         .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(supplierSigerMock);
 
-      // quando (when) - execução da ação
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
 
-      // entao (then) - validação do esperado
       expect(supplier).toEqual({
         cpfOrCpnj: '1234567891011',
         name: 'EMPRESA LTDA',
@@ -59,7 +51,6 @@ describe('SupplierService -', () => {
     });
 
     it('should find supplier by CNPJ in database', async () => {
-      // dado (given) -- modela os dados entrada (inputs, configs inicias)
       const cnpj = '1234567891011';
 
       const supplierDB = await prisma.tempSuppliersData.create({
@@ -74,10 +65,8 @@ describe('SupplierService -', () => {
         .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(undefined);
 
-      // quando (when) - execução da ação
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
 
-      // entao (then) - validação do esperado
       expect(supplier).toEqual({
         uid: supplierDB.uid,
         cpfOrCpnj: '1234567891011',
@@ -89,7 +78,6 @@ describe('SupplierService -', () => {
     });
 
     it('should return undefined if not found in siger, database and receita', async () => {
-      // dado (given) -- modela os dados entrada (inputs, configs inicias)
       const cnpj = '1234567891011';
 
       jest
@@ -100,15 +88,12 @@ describe('SupplierService -', () => {
         .spyOn(sut['receitawsRepository'], 'findSupplierByCNPJ')
         .mockResolvedValue(undefined);
 
-      // quando (when) - execução da ação
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
 
-      // entao (then) - validação do esperado
       expect(supplier).toBeUndefined();
     });
 
     it('should return supplier from receita if not found in siger and database', async () => {
-      // dado (given) -- modela os dados entrada (inputs, configs inicias)
       const cnpj = '1234567891011';
       const supplierMock = {
         cnpj,
@@ -123,10 +108,8 @@ describe('SupplierService -', () => {
         .spyOn(sut['receitawsRepository'], 'findSupplierByCNPJ')
         .mockResolvedValue(supplierMock);
 
-      // quando (when) - execução da ação
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
 
-      // entao (then) - validação do esperado
       const supplierDB = await prisma.tempSuppliersData.findFirst({
         where: { cnpj },
       });
