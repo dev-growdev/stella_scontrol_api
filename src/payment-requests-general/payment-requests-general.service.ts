@@ -59,7 +59,7 @@ export class PaymentRequestsGeneralService {
             supplier: paymentRequestGeneralDTO.supplier,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
-            cardHoldersUid: paymentRequestGeneralDTO.cardHolder.uid,
+            cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
           },
           select: {
             uid: true,
@@ -75,6 +75,7 @@ export class PaymentRequestsGeneralService {
                 email: true,
               },
             },
+            CardHolder: true,
           },
         });
 
@@ -188,6 +189,7 @@ export class PaymentRequestsGeneralService {
             email: true,
           },
         },
+        CardHolder: true,
         PaymentSchedule: {
           select: {
             uid: true,
