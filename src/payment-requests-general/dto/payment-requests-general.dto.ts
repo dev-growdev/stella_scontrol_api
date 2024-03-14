@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -36,6 +37,13 @@ export class ApportionmentsDto {
   value: string;
 }
 
+export class CardHolderType {
+  @IsString()
+  name: string;
+  @IsString()
+  uid: string;
+}
+
 export class ValidatePaymentRequestGeneralDTO {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
@@ -64,6 +72,9 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsString()
   userCreatedUid: string;
+
+  @IsOptional()
+  cardHolder?: CardHolderType;
 }
 
 export class PaymentRequestCreatedType {

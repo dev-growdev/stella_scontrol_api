@@ -40,6 +40,45 @@ export class PaymentRequestsGeneralService {
 
     try {
       await this.prisma.$transaction(async (prisma) => {
+        if (paymentRequestGeneralDTO.cardHolder) {
+          const existsHolder = await prisma.cardHolders.findUnique({
+            where: {
+              uid: paymentRequestGeneralDTO.cardHolder.uid,
+            },
+          });
+          if (!existsHolder) {
+            throw new BadRequestException(
+              'Não foi possível encontrar um portador.',
+            );
+          }
+        }
+
+        createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
+          data: {
+            description: paymentRequestGeneralDTO.description,
+            supplier: paymentRequestGeneralDTO.supplier,
+            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+            userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
+            cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
+          },
+          select: {
+            uid: true,
+            description: true,
+            supplier: true,
+            requiredReceipt: true,
+            createdAt: true,
+            user: {
+              select: {
+                uid: true,
+                name: true,
+                enable: true,
+                email: true,
+              },
+            },
+            CardHolder: true,
+          },
+        });
+
         const uploadedFiles = await Promise.all(
           files.map(async (file) => {
             const createdFile = await this.filesService.createFileOnDB(file);
@@ -57,30 +96,6 @@ export class PaymentRequestsGeneralService {
         );
 
         filesDB = uploadedFiles;
-
-        createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
-          data: {
-            description: paymentRequestGeneralDTO.description,
-            supplier: paymentRequestGeneralDTO.supplier,
-            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
-            userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
-          },
-          select: {
-            uid: true,
-            description: true,
-            supplier: true,
-            requiredReceipt: true,
-            createdAt: true,
-            user: {
-              select: {
-                uid: true,
-                name: true,
-                enable: true,
-                email: true,
-              },
-            },
-          },
-        });
 
         await Promise.all(
           filesDB.map((file) =>
@@ -174,6 +189,7 @@ export class PaymentRequestsGeneralService {
             email: true,
           },
         },
+        CardHolder: true,
         PaymentSchedule: {
           select: {
             uid: true,
