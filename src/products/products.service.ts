@@ -104,7 +104,6 @@ export class ProductsService {
 
     if (isThereAlreadyThisProductName) {
       if (isThereAlreadyThisProductName.uid !== product.uid) {
-        console.log(isThereAlreadyThisProductName, product.uid);
         throw new BadRequestException('Esse produto já existe.');
       }
     }
