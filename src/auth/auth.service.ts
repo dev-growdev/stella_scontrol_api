@@ -67,7 +67,7 @@ export class AuthService {
     }
 
     const user: any = {
-      uuid: foundUser.uid,
+      uid: foundUser.uid,
       idUserAd: foundUser.idUserAd,
       data: {
         displayName: foundUser.name,

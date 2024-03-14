@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-export const knexConfig: Knex.Config = {
+export const knexConfigSieger: Knex.Config = {
   client: 'mysql',
   connection: {
     // host: process.env.DB_HOST_SIEGER,
@@ -11,5 +11,15 @@ export const knexConfig: Knex.Config = {
     user: 'growdev',
     password: 'growdev@stella',
     database: '02970s001',
+  },
+};
+
+export const knexConfigCesar: Knex.Config = {
+  client: 'mysql',
+  connection: {
+    host: 'archi02.stelladesign.local',
+    user: 'growdev',
+    password: '7k03zO$2',
+    database: 'cc_contab',
   },
 };

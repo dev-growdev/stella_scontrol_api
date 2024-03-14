@@ -21,6 +21,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  uid String @id @default(uuid())
+
+  idUserAd String @unique @map("id_user_ad")
+  name     String
+  email    String @unique
+
+  enable Boolean @default(true)
+
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("user")
+}
+
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
@@ -28,9 +45,16 @@ model PaymentRequestsGeneral {
   description     String?
   requiredReceipt Boolean @default(false) @map("send_receipt")
 
-  createdAt       DateTime          @default(now()) @map("created_at")
-  updatedAt       DateTime          @default(now()) @updatedAt @map("updated_at")
-  PaymentSchedule PaymentSchedule[]
+  user           User             @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String           @map("user_created_uid")
+  CardHolder     CardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid String?          @map("card_holders_uid")
+  Apportionments Apportionments[]
+
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
+  PaymentSchedule      PaymentSchedule[]
+  PaymentRequestsFiles PaymentRequestsFiles[]
 
   @@map("payment_requests_general")
 }
@@ -48,21 +72,6 @@ model PaymentSchedule {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("payments_schedule")
-}
-
-model User {
-  uid String @id @default(uuid())
-
-  idUserAd String @unique @map("id_user_ad")
-  name     String
-  email    String @unique
-
-  enable Boolean @default(true)
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@map("user")
 }
 
 model Categories {
@@ -85,9 +94,10 @@ model Products {
   categoryId String
   category   Categories @relation(fields: [categoryId], references: [uid])
 
-  code        String  @db.VarChar(50)
+  code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)
   enable      Boolean @default(true)
+  description String?
   measurement String? @db.VarChar(50)
   quantity    Int?
 
@@ -108,4 +118,84 @@ model TempSuppliersData {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("temp_suppliers_data")
+}
+
+model Files {
+  uid String @id @default(uuid())
+
+  name String @db.Text
+  key  String @db.Text
+
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
+  PaymentRequestsFiles PaymentRequestsFiles[]
+
+  @@map("files")
+}
+
+model PaymentRequestsFiles {
+  uid String @id @default(uuid())
+
+  filesUid                  String @map("file_uid")
+  paymentRequestsGeneralUid String @map("payment_request_uid")
+
+  fileUid           Files                  @relation(fields: [filesUid], references: [uid])
+  paymentRequestUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("payment_requests_files")
+}
+
+model PaymentsForm {
+  uid String @id @default(uuid())
+
+  name   String  @db.VarChar(50)
+  enable Boolean @default(true)
+
+  cardHolders CardHolders[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("payments_form")
+}
+
+model CardHolders {
+  uid String @id @default(uuid())
+
+  paymentFormId String?       @map("payment_form_id")
+  paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
+
+  name   String   @db.VarChar(50)
+  type   CardType
+  enable Boolean  @default(true)
+
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @default(now()) @updatedAt @map("updated_at")
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
+
+  @@map("card_holders")
+}
+
+enum CardType {
+  credit
+  corporate
+}
+
+model Apportionments {
+  uid String @id @default(uuid())
+
+  paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
+  costCenter                String  @map("cost_center")
+  accountingAccount         String  @map("accounting_account")
+  value                     Decimal
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  PaymentRequestGeneralUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+
+  @@map("apportionments")
 }
