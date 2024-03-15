@@ -22,6 +22,7 @@ export class PaymentsFormService {
       const findHolders = await this.prisma.cardHolders.findMany({
         select: {
           name: true,
+          code: true,
           uid: true,
           enable: true,
           type: true,
@@ -78,6 +79,7 @@ export class PaymentsFormService {
       },
       select: {
         uid: true,
+        code: true,
         name: true,
         enable: true,
         type: true,
