@@ -13,6 +13,7 @@ export class CardHoldersService {
         },
         select: {
           uid: true,
+          code: true,
           name: true,
         },
       });
