@@ -44,7 +44,7 @@ model PaymentRequestsGeneral {
   supplier          String
   description       String?
   requiredReceipt   Boolean @default(false) @map("send_receipt")
-  totalValue        Float   @map("total_value")
+  totalValue        Decimal @map("total_value")
   accountingAccount String? @map("accounting_account") @db.VarChar(255)
 
   user           User             @relation(fields: [userCreatedUid], references: [uid])
@@ -170,6 +170,7 @@ model CardHolders {
   paymentFormId String?       @map("payment_form_id")
   paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
 
+  code   Int
   name   String   @db.VarChar(50)
   type   CardType
   enable Boolean  @default(true)
