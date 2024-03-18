@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Res,
   UploadedFiles,
   UseInterceptors,
@@ -38,5 +39,16 @@ export class PaymentRequestsGeneralController {
   @Get('/:userUid')
   listPaymentsRequestsByUser(@Param('userUid') userUid: string) {
     return this.paymentRequestsGeneralService.listByUser(userUid);
+  }
+
+  @Put(':userUid/:uid')
+  updatePaymentsRequestsByUser(
+    @Param('userUid') userUid: string,
+    @Param('uid') uid: string,
+  ) {
+    return this.paymentRequestsGeneralService.updatePaymentsRequestsByUser(
+      userUid,
+      uid,
+    );
   }
 }

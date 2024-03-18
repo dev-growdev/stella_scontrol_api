@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -185,6 +190,8 @@ export class PaymentRequestsGeneralService {
         uid: true,
         description: true,
         supplier: true,
+        totalValue: true,
+        accountingAccount: true,
         requiredReceipt: true,
         createdAt: true,
         user: {
@@ -234,5 +241,38 @@ export class PaymentRequestsGeneralService {
     }));
 
     return transformedRequests;
+  }
+
+  async updatePaymentsRequestsByUser(
+    userUid: string,
+    uid: string,
+    updateData: any,
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { uid: userUid } });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    const paymentRequestGeneral =
+      await this.prisma.paymentRequestsGeneral.findUnique({
+        where: { uid },
+      });
+
+    if (!paymentRequestGeneral) {
+      throw new NotFoundException('Solicitação não encontrada.');
+    }
+
+    try {
+      const updatedPaymentRequest =
+        await this.prisma.paymentRequestsGeneral.update({
+          where: { uid },
+          data: updateData,
+        });
+
+      return updatedPaymentRequest;
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }
