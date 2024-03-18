@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
@@ -57,7 +56,7 @@ export class PaymentRequestsGeneralService {
           data: {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
-            totalValue: parseFloat(paymentRequestGeneralDTO.totalValue),
+            totalValue: Number(paymentRequestGeneralDTO.totalValue),
             accountingAccount: paymentRequestGeneralDTO.accountingAccount,
             requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
@@ -136,9 +135,7 @@ export class PaymentRequestsGeneralService {
                 paymentRequestsGeneralUid: createdPaymentRequest.uid,
                 costCenter: apportionment.costCenter,
                 accountingAccount: apportionment.accountingAccount,
-                value: new Prisma.Decimal(
-                  Number(apportionment.value.replace(',', '.')),
-                ),
+                value: Number(apportionment.value),
               },
               select: {
                 uid: true,
@@ -185,6 +182,7 @@ export class PaymentRequestsGeneralService {
         uid: true,
         description: true,
         supplier: true,
+        totalValue: true,
         requiredReceipt: true,
         createdAt: true,
         user: {
