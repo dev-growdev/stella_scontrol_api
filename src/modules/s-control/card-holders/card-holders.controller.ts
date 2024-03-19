@@ -1,12 +1,17 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { CardHoldersService } from './card-holders.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+import { CardHoldersService } from './card-holders.service';
+import { CardHolderParams } from './dtos/card-holders-input.dto';
+
+@ApiTags('Titulares de cartão')
+@ApiBearerAuth()
 @Controller('card-holders')
 export class CardHoldersController {
   constructor(private readonly cardHoldersService: CardHoldersService) {}
 
   @Get(':type')
-  findAll(@Param('type') type: 'credit' | 'corporate') {
-    return this.cardHoldersService.findCardHolders(type);
+  findAll(@Param() params: CardHolderParams) {
+    return this.cardHoldersService.findCardHolders(params.type);
   }
 }

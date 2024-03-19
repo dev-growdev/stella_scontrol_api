@@ -6,8 +6,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '@/shared/modules/prisma/prisma.service';
 
 const mockIdUserAd = 'mockUserIdAd';
 const mockDisableUser = {
@@ -42,7 +42,7 @@ describe('UserController', () => {
     it('should call userService.disableUser with the provided id_user_ad and return the disable user', async () => {
       jest.spyOn(service, 'disableUser').mockResolvedValue(mockDisableUser);
 
-      const result = await controller.disable(mockIdUserAd);
+      const result = await controller.disable({ id_user_ad: mockIdUserAd });
 
       expect(service.disableUser).toHaveBeenCalledWith(mockIdUserAd);
       expect(result).toEqual(mockDisableUser);
@@ -54,7 +54,7 @@ describe('UserController', () => {
       });
 
       try {
-        await controller.disable('');
+        await controller.disable({ id_user_ad: '' });
       } catch (error) {
         expect(error.message).toBe('ID do usuário não fornecido');
       }
@@ -66,7 +66,7 @@ describe('UserController', () => {
       });
 
       try {
-        await controller.disable(mockIdUserAd);
+        await controller.disable({ id_user_ad: mockIdUserAd });
       } catch (error) {
         expect(error.message).toBe('Usuário não encontrado!');
       }
@@ -78,7 +78,7 @@ describe('UserController', () => {
       });
 
       try {
-        await controller.disable(mockIdUserAd);
+        await controller.disable({ id_user_ad: mockIdUserAd });
       } catch (error) {
         expect(error.message).toBe('Some error');
       }

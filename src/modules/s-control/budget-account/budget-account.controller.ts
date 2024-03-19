@@ -1,6 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { BudgetAccountService } from './budget-account.service';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Contas Orçamentárias')
+@ApiBearerAuth()
 @Controller('budget-account')
 export class BudgetAccountController {
   constructor(private readonly budgetAccountService: BudgetAccountService) {}

@@ -1,5 +1,8 @@
+import 'dotenv/config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,9 +14,18 @@ async function bootstrap() {
 
   app.enableCors();
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', { exclude: ['/'] });
 
-  await app.listen(8080);
+  const config = new DocumentBuilder()
+    .setTitle('Stella API')
+    .setDescription('Stella API Documentation')
+    .setVersion('0.0.1')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  await app.listen(process.env.PORT || 8080);
 }
 
 bootstrap();
