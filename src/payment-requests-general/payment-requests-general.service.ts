@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
@@ -245,46 +240,64 @@ export class PaymentRequestsGeneralService {
     requestUid: string,
     updateData: any,
   ) {
-    const user = await this.prisma.user.findUnique({
-      where: { uid: userUid },
-    });
-
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado.');
-    }
-
-    const paymentRequestGeneral =
-      await this.prisma.paymentRequestsGeneral.findUnique({
-        where: { uid: requestUid },
-      });
-
-    if (!paymentRequestGeneral) {
-      throw new NotFoundException('Solicitação não encontrada.');
-    }
-
-    let uploadedFiles;
-    let paymentSchedule;
-    let updatedApportionments;
-
+    let user;
+    let request;
+    console.log(updateData);
     try {
-      const updatedPaymentRequest =
-        await this.prisma.paymentRequestsGeneral.update({
-          where: { uid: requestUid },
+      await this.prisma.$transaction(async (prisma) => {
+        user = await prisma.user.findUnique({
+          where: {
+            uid: userUid,
+          },
+        });
+
+        request = await prisma.paymentRequestsGeneral.findUnique({
+          where: {
+            uid: requestUid,
+          },
+        });
+
+        request = await prisma.paymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
           data: {
             description: updateData.description,
             supplier: updateData.supplier,
             requiredReceipt: updateData.requiredReceipt,
             totalValue: updateData.totalValue,
-            CardHolder: updateData.cardHolder,
             accountingAccount: updateData.accountingAccount,
+            PaymentSchedule: {
+              update: updateData.paymentSchedules.map((scheduled) => ({
+                where: {
+                  uid: scheduled.uid,
+                },
+                data: {
+                  value: scheduled.value,
+                  dueDate: scheduled.dueDate,
+                },
+              })),
+            },
+            // Apportionments: {
+            //   update: updateData.apportionments.map((apportionment) => ({
+            //     where: {
+            //       uid: apportionment.uid,
+            //     },
+            //     data: {
+            //       costCenter: apportionment.costCenter,
+            //       accountingAccount: apportionment.accountingAccount,
+            //       value: apportionment.value,
+            //     },
+            //   })),
+            // },
           },
           select: {
             uid: true,
             description: true,
             supplier: true,
             totalValue: true,
-            requiredReceipt: true,
             accountingAccount: true,
+            requiredReceipt: true,
             createdAt: true,
             user: {
               select: {
@@ -294,72 +307,149 @@ export class PaymentRequestsGeneralService {
                 email: true,
               },
             },
-            CardHolder: true,
-          },
-        });
-
-      if (updateData.files) {
-        uploadedFiles = await Promise.all(
-          updateData.files.map(async (fileData) => {
-            const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
-            return this.prisma.files.update({
-              where: { uid: fileData.uid },
-              data: dataWithoutTimestamps,
-              select: {
-                uid: true,
-                name: true,
-                key: true,
-              },
-            });
-          }),
-        );
-      }
-
-      if (updateData.paymentSchedules) {
-        paymentSchedule = await Promise.all(
-          updateData.paymentSchedules.map(async (scheduleData) => {
-            const { uid, ...data } = scheduleData;
-            return this.prisma.paymentSchedule.update({
-              where: { uid },
-              data,
+            PaymentSchedule: {
               select: {
                 uid: true,
                 value: true,
                 dueDate: true,
               },
-            });
-          }),
-        );
-      }
+            },
+          },
+        });
 
-      if (updateData.apportionments) {
-        updatedApportionments = await Promise.all(
-          updateData.apportionments.map(async (apportionmentData) => {
-            const { uid, ...data } = apportionmentData;
-            return this.prisma.apportionments.update({
-              where: { uid },
-              data,
-              select: {
-                uid: true,
-                costCenter: true,
-                accountingAccount: true,
-                value: true,
-              },
-            });
-          }),
+        const totalValueFromPaymentsSchedule = request.PaymentSchedule.reduce(
+          (total, payment) => {
+            return total + payment.value;
+          },
+          0,
         );
-      }
 
-      return {
-        request: {
-          ...updatedPaymentRequest,
-          payments: paymentSchedule,
-          files: uploadedFiles,
-          apportionments: updatedApportionments,
-        },
-      };
+        const totalValueFromApportionments = request.Apportionments.reduce(
+          (total, apportionment) => {
+            return total + apportionment.value;
+          },
+          0,
+        );
+
+        if (
+          (totalValueFromPaymentsSchedule || totalValueFromApportionments) !==
+          parseFloat(request.totalValue)
+        ) {
+          throw new BadRequestException(
+            'O valor total do agendamento de pagamento não confere com o valor total da solicitação.',
+          );
+        }
+      });
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(error);
     }
+
+    // const user = await this.prisma.user.findUnique({
+    //   where: { uid: userUid },
+    // });
+    // if (!user) {
+    //   throw new NotFoundException('Usuário não encontrado.');
+    // }
+    // const paymentRequestGeneral =
+    //   await this.prisma.paymentRequestsGeneral.findUnique({
+    //     where: { uid: requestUid },
+    //   });
+    // if (!paymentRequestGeneral) {
+    //   throw new NotFoundException('Solicitação não encontrada.');
+    // }
+    // let uploadedFiles;
+    // let paymentSchedule;
+    // let updatedApportionments;
+    // try {
+    //   const updatedPaymentRequest =
+    //     await this.prisma.paymentRequestsGeneral.update({
+    //       where: { uid: requestUid },
+    //       data: {
+    //         description: updateData.description,
+    //         supplier: updateData.supplier,
+    //         requiredReceipt: updateData.requiredReceipt,
+    //         totalValue: updateData.totalValue,
+    //         CardHolder: updateData.cardHolder,
+    //         accountingAccount: updateData.accountingAccount,
+    //       },
+    //       select: {
+    //         uid: true,
+    //         description: true,
+    //         supplier: true,
+    //         totalValue: true,
+    //         requiredReceipt: true,
+    //         accountingAccount: true,
+    //         createdAt: true,
+    //         user: {
+    //           select: {
+    //             uid: true,
+    //             name: true,
+    //             enable: true,
+    //             email: true,
+    //           },
+    //         },
+    //         CardHolder: true,
+    //       },
+    //     });
+    //   if (updateData.files) {
+    //     uploadedFiles = await Promise.all(
+    //       updateData.files.map(async (fileData) => {
+    //         const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
+    //         return this.prisma.files.update({
+    //           where: { uid: fileData.uid },
+    //           data: dataWithoutTimestamps,
+    //           select: {
+    //             uid: true,
+    //             name: true,
+    //             key: true,
+    //           },
+    //         });
+    //       }),
+    //     );
+    //   }
+    //   if (updateData.paymentSchedules) {
+    //     paymentSchedule = await Promise.all(
+    //       updateData.paymentSchedules.map(async (scheduleData) => {
+    //         const { uid, ...data } = scheduleData;
+    //         return this.prisma.paymentSchedule.update({
+    //           where: { uid },
+    //           data,
+    //           select: {
+    //             uid: true,
+    //             value: true,
+    //             dueDate: true,
+    //           },
+    //         });
+    //       }),
+    //     );
+    //   }
+    //   if (updateData.apportionments) {
+    //     updatedApportionments = await Promise.all(
+    //       updateData.apportionments.map(async (apportionmentData) => {
+    //         const { uid, ...data } = apportionmentData;
+    //         return this.prisma.apportionments.update({
+    //           where: { uid },
+    //           data,
+    //           select: {
+    //             uid: true,
+    //             costCenter: true,
+    //             accountingAccount: true,
+    //             value: true,
+    //           },
+    //         });
+    //       }),
+    //     );
+    //   }
+    // return {
+    //   request: {
+    //     ...updatedPaymentRequest,
+    //     payments: paymentSchedule,
+    //     files: uploadedFiles,
+    //     apportionments: updatedApportionments,
+    //   },
+    // };
+    // } catch (error) {
+    //   throw new InternalServerErrorException(error.message);
+    // }
   }
 }

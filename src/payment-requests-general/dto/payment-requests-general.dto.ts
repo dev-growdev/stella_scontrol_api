@@ -111,3 +111,12 @@ export class ApportionmentsCreatedType {
   paymentRequestsGeneralUid: string;
   value: Decimal;
 }
+
+export class UpdateRequestGeneral {
+  description?: string;
+  supplier?: string;
+  requiredReceipt?: boolean;
+  totalValue?: number;
+  accountingAccount?: string;
+  CardHolder?: string | null;
+}
