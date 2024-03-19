@@ -1,3 +1,4 @@
+import { CesarFacade } from '@/modules/@facades/s-integration/cesar.facade';
 import {
   BadRequestException,
   Injectable,
@@ -5,16 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { CesarService } from '@/modules/s-integration/cesar/cesar.service';
-
 @Injectable()
 export class BudgetAccountService {
   // TODO: Implementar Façade
-  constructor(private cesarService: CesarService) {}
+  constructor(private cesarFacade: CesarFacade) {}
 
   async getCostCenters() {
     try {
-      const costCenters = await this.cesarService.getCostCenters();
+      const costCenters = await this.cesarFacade.getCostCenters();
 
       return costCenters;
     } catch (error) {
@@ -25,7 +24,7 @@ export class BudgetAccountService {
   async getAccountingAccountByCostCenter(costCenterId: number) {
     try {
       const accountingAccount =
-        await this.cesarService.getAccountingAccountsByCostCenter(costCenterId);
+        await this.cesarFacade.getAccountingAccountsByCostCenter(costCenterId);
 
       if (accountingAccount.length === 0) {
         throw new NotFoundException(
@@ -50,7 +49,7 @@ export class BudgetAccountService {
   ): Promise<{ totalBudget: number }> {
     try {
       const retrievedAccountingAccount =
-        await this.cesarService.checkAccountBalanceForOperation(
+        await this.cesarFacade.checkAccountBalanceForOperation(
           year,
           costCenter,
           accountingAccount,
