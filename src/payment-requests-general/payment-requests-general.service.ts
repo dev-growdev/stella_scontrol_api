@@ -262,11 +262,9 @@ export class PaymentRequestsGeneralService {
       throw new NotFoundException('Solicitação não encontrada.');
     }
 
-    if (paymentRequestGeneral.userCreatedUid !== userUid) {
-      throw new BadRequestException(
-        'Usuário não tem permissão para atualizar esta solicitação.',
-      );
-    }
+    let uploadedFiles;
+    let paymentSchedule;
+    let updatedApportionments;
 
     try {
       const updatedPaymentRequest =
@@ -300,51 +298,57 @@ export class PaymentRequestsGeneralService {
           },
         });
 
-      const uploadedFiles = await Promise.all(
-        updateData.files.map(async (fileData) => {
-          const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
-          return this.prisma.files.update({
-            where: { uid: fileData.uid },
-            data: dataWithoutTimestamps,
-            select: {
-              uid: true,
-              name: true,
-              key: true,
-            },
-          });
-        }),
-      );
+      if (updateData.files) {
+        uploadedFiles = await Promise.all(
+          updateData.files.map(async (fileData) => {
+            const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
+            return this.prisma.files.update({
+              where: { uid: fileData.uid },
+              data: dataWithoutTimestamps,
+              select: {
+                uid: true,
+                name: true,
+                key: true,
+              },
+            });
+          }),
+        );
+      }
 
-      const paymentSchedule = await Promise.all(
-        updateData.paymentSchedules.map(async (scheduleData) => {
-          const { uid, ...data } = scheduleData;
-          return this.prisma.paymentSchedule.update({
-            where: { uid },
-            data,
-            select: {
-              uid: true,
-              value: true,
-              dueDate: true,
-            },
-          });
-        }),
-      );
+      if (updateData.paymentSchedules) {
+        paymentSchedule = await Promise.all(
+          updateData.paymentSchedules.map(async (scheduleData) => {
+            const { uid, ...data } = scheduleData;
+            return this.prisma.paymentSchedule.update({
+              where: { uid },
+              data,
+              select: {
+                uid: true,
+                value: true,
+                dueDate: true,
+              },
+            });
+          }),
+        );
+      }
 
-      const updatedApportionments = await Promise.all(
-        updateData.apportionments.map(async (apportionmentData) => {
-          const { uid, ...data } = apportionmentData;
-          return this.prisma.apportionments.update({
-            where: { uid },
-            data,
-            select: {
-              uid: true,
-              costCenter: true,
-              accountingAccount: true,
-              value: true,
-            },
-          });
-        }),
-      );
+      if (updateData.apportionments) {
+        updatedApportionments = await Promise.all(
+          updateData.apportionments.map(async (apportionmentData) => {
+            const { uid, ...data } = apportionmentData;
+            return this.prisma.apportionments.update({
+              where: { uid },
+              data,
+              select: {
+                uid: true,
+                costCenter: true,
+                accountingAccount: true,
+                value: true,
+              },
+            });
+          }),
+        );
+      }
 
       return {
         request: {
