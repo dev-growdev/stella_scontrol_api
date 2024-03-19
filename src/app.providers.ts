@@ -9,10 +9,10 @@ export const commonProviders: Provider[] = [
     provide: APP_FILTER,
     useClass: CustomExceptionFilter,
   },
-  // {
-  //   provide: APP_INTERCEPTOR,
-  //   useClass: CustomResponseInterceptor,
-  // },
+  {
+    provide: APP_INTERCEPTOR,
+    useClass: CustomResponseInterceptor,
+  },
   {
     provide: APP_PIPE,
     useClass: ClassValidatorPipe,

@@ -1,9 +1,4 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-} from 'class-validator';
-import { User } from 'src/shared/models';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 /**
  * ! Para usar o class-validator o DTO precisa ser declarado como classe e não como interface ou type.
@@ -19,8 +14,18 @@ export class AuthDTO {
   email: string;
 
   @IsString({ message: 'ID deve ser do tipo string' })
-  idUserAd?: string
+  idUserAd?: string;
 }
+
+export interface User {
+  uid: string;
+  name: string;
+  email: string;
+  enable: boolean;
+  phone: string;
+  document?: string;
+}
+
 export interface AuthUser {
   user: User;
   token: string;
