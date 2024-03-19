@@ -23,6 +23,7 @@ export class PaymentRequestGeneralDTO {
   @IsString({ message: 'O documento deve ser uma string' })
   document: string;
 }
+
 export class ApportionmentsDto {
   @IsNotEmpty({ message: 'É necessário adicionar um centro de custo.' })
   @IsString()

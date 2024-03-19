@@ -189,6 +189,7 @@ export class PaymentRequestsGeneralService {
         supplier: true,
         totalValue: true,
         requiredReceipt: true,
+        accountingAccount: true,
         createdAt: true,
         user: {
           select: {
@@ -241,10 +242,12 @@ export class PaymentRequestsGeneralService {
 
   async updatePaymentsRequestsByUser(
     userUid: string,
-    uid: string,
+    requestUid: string,
     updateData: any,
   ) {
-    const user = await this.prisma.user.findUnique({ where: { uid: userUid } });
+    const user = await this.prisma.user.findUnique({
+      where: { uid: userUid },
+    });
 
     if (!user) {
       throw new NotFoundException('Usuário não encontrado.');
@@ -252,21 +255,105 @@ export class PaymentRequestsGeneralService {
 
     const paymentRequestGeneral =
       await this.prisma.paymentRequestsGeneral.findUnique({
-        where: { uid },
+        where: { uid: requestUid },
       });
 
     if (!paymentRequestGeneral) {
       throw new NotFoundException('Solicitação não encontrada.');
     }
 
+    if (paymentRequestGeneral.userCreatedUid !== userUid) {
+      throw new BadRequestException(
+        'Usuário não tem permissão para atualizar esta solicitação.',
+      );
+    }
+
     try {
       const updatedPaymentRequest =
         await this.prisma.paymentRequestsGeneral.update({
-          where: { uid },
-          data: updateData,
+          where: { uid: requestUid },
+          data: {
+            description: updateData.description,
+            supplier: updateData.supplier,
+            requiredReceipt: updateData.requiredReceipt,
+            totalValue: updateData.totalValue,
+            CardHolder: updateData.cardHolder,
+            accountingAccount: updateData.accountingAccount,
+          },
+          select: {
+            uid: true,
+            description: true,
+            supplier: true,
+            totalValue: true,
+            requiredReceipt: true,
+            accountingAccount: true,
+            createdAt: true,
+            user: {
+              select: {
+                uid: true,
+                name: true,
+                enable: true,
+                email: true,
+              },
+            },
+            CardHolder: true,
+          },
         });
 
-      return updatedPaymentRequest;
+      const uploadedFiles = await Promise.all(
+        updateData.files.map(async (fileData) => {
+          const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
+          return this.prisma.files.update({
+            where: { uid: fileData.uid },
+            data: dataWithoutTimestamps,
+            select: {
+              uid: true,
+              name: true,
+              key: true,
+            },
+          });
+        }),
+      );
+
+      const paymentSchedule = await Promise.all(
+        updateData.paymentSchedules.map(async (scheduleData) => {
+          const { uid, ...data } = scheduleData;
+          return this.prisma.paymentSchedule.update({
+            where: { uid },
+            data,
+            select: {
+              uid: true,
+              value: true,
+              dueDate: true,
+            },
+          });
+        }),
+      );
+
+      const updatedApportionments = await Promise.all(
+        updateData.apportionments.map(async (apportionmentData) => {
+          const { uid, ...data } = apportionmentData;
+          return this.prisma.apportionments.update({
+            where: { uid },
+            data,
+            select: {
+              uid: true,
+              costCenter: true,
+              accountingAccount: true,
+              value: true,
+            },
+          });
+        }),
+      );
+
+      return {
+        request: {
+          ...updatedPaymentRequest,
+          payments: paymentSchedule,
+          files: uploadedFiles,
+          apportionments: updatedApportionments,
+        },
+      };
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

@@ -41,14 +41,17 @@ export class PaymentRequestsGeneralController {
     return this.paymentRequestsGeneralService.listByUser(userUid);
   }
 
-  @Put(':userUid/:uid')
+  @Put('/:userUid/:uid')
   updatePaymentsRequestsByUser(
     @Param('userUid') userUid: string,
     @Param('uid') uid: string,
+    @Body()
+    updateData: any,
   ) {
     return this.paymentRequestsGeneralService.updatePaymentsRequestsByUser(
       userUid,
       uid,
+      updateData,
     );
   }
 }
