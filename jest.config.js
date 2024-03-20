@@ -7,6 +7,9 @@ module.exports = {
   },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
+  moduleNameMapper: {
+    '@shared/(.*)': '<rootDir>/src/shared/$1',
+  },
   testEnvironment: 'node',
   setupFilesAfterEnv: [
     '<rootDir>/test/setup/truncate-database.ts',
