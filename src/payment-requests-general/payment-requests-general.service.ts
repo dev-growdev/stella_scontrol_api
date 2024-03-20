@@ -4,12 +4,11 @@ import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
-  ApportionmentsCreatedType,
   FilesCreatedType,
   PaymentRequestCreatedType,
-  PaymentScheduleCreatedType,
   ValidatePaymentRequestGeneralDTO,
 } from './dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
@@ -27,9 +26,7 @@ export class PaymentRequestsGeneralService {
     }
 
     let createdPaymentRequest: PaymentRequestCreatedType;
-    let paymentSchedules: PaymentScheduleCreatedType[];
     let filesDB: FilesCreatedType[];
-    let apportionmentsCreated: ApportionmentsCreatedType[];
 
     const dirPath = path.join(__dirname, '..', '..', '..', 'files');
 
@@ -39,28 +36,30 @@ export class PaymentRequestsGeneralService {
 
     try {
       await this.prisma.$transaction(async (prisma) => {
-        if (paymentRequestGeneralDTO.cardHolder) {
-          const existsHolder = await prisma.cardHolders.findUnique({
-            where: {
-              uid: paymentRequestGeneralDTO.cardHolder.uid,
-            },
-          });
-          if (!existsHolder) {
-            throw new BadRequestException(
-              'Não foi possível encontrar um portador.',
-            );
-          }
-        }
-
         createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
           data: {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
+            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             totalValue: Number(paymentRequestGeneralDTO.totalValue),
             accountingAccount: paymentRequestGeneralDTO.accountingAccount,
-            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
             cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
+            PaymentSchedule: {
+              create: paymentRequestGeneralDTO.payments.map((payment) => ({
+                value: Number(payment.value),
+                dueDate: payment.dueDate,
+              })),
+            },
+            Apportionments: {
+              create: paymentRequestGeneralDTO.apportionments.map(
+                (apportionment) => ({
+                  costCenter: apportionment.costCenter,
+                  accountingAccount: apportionment.accountingAccount,
+                  value: Number(apportionment.value),
+                }),
+              ),
+            },
           },
           select: {
             uid: true,
@@ -78,7 +77,14 @@ export class PaymentRequestsGeneralService {
                 email: true,
               },
             },
-            CardHolder: true,
+            PaymentSchedule: {
+              select: {
+                uid: true,
+                value: true,
+                dueDate: true,
+              },
+            },
+            Apportionments: true,
           },
         });
 
@@ -110,58 +116,14 @@ export class PaymentRequestsGeneralService {
             }),
           ),
         );
-
-        paymentSchedules = await Promise.all(
-          paymentRequestGeneralDTO.payments.map(async (payment) =>
-            prisma.paymentSchedule.create({
-              data: {
-                dueDate: payment.dueDate,
-                value: Number(payment.value),
-                paymentRequestsGeneralUid: createdPaymentRequest.uid,
-              },
-              select: {
-                uid: true,
-                value: true,
-                dueDate: true,
-              },
-            }),
-          ),
-        );
-
-        apportionmentsCreated = await Promise.all(
-          paymentRequestGeneralDTO.apportionments.map(async (apportionment) =>
-            prisma.apportionments.create({
-              data: {
-                paymentRequestsGeneralUid: createdPaymentRequest.uid,
-                costCenter: apportionment.costCenter,
-                accountingAccount: apportionment.accountingAccount,
-                value: Number(apportionment.value),
-              },
-              select: {
-                uid: true,
-                accountingAccount: true,
-                costCenter: true,
-                paymentRequestsGeneralUid: true,
-                value: true,
-              },
-            }),
-          ),
-        );
       });
+
+      return createdPaymentRequest;
     } catch (error) {
       throw new BadRequestException(
         'Algo deu errado, confira os campos e tente novamente.',
       );
     }
-
-    return {
-      request: {
-        ...createdPaymentRequest,
-        payments: paymentSchedules,
-        files: filesDB,
-        apportionments: apportionmentsCreated,
-      },
-    };
   }
 
   async listByUser(userUid: string) {
@@ -240,12 +202,11 @@ export class PaymentRequestsGeneralService {
     requestUid: string,
     updateData: any,
   ) {
-    let user;
     let request;
-    console.log(updateData);
+
     try {
       await this.prisma.$transaction(async (prisma) => {
-        user = await prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
           where: {
             uid: userUid,
           },
@@ -278,18 +239,18 @@ export class PaymentRequestsGeneralService {
                 },
               })),
             },
-            // Apportionments: {
-            //   update: updateData.apportionments.map((apportionment) => ({
-            //     where: {
-            //       uid: apportionment.uid,
-            //     },
-            //     data: {
-            //       costCenter: apportionment.costCenter,
-            //       accountingAccount: apportionment.accountingAccount,
-            //       value: apportionment.value,
-            //     },
-            //   })),
-            // },
+            Apportionments: {
+              update: updateData.apportionments.map((apportionment) => ({
+                where: {
+                  uid: apportionment.uid,
+                },
+                data: {
+                  costCenter: apportionment.costCenter,
+                  accountingAccount: apportionment.accountingAccount,
+                  value: new Prisma.Decimal(apportionment.value),
+                },
+              })),
+            },
           },
           select: {
             uid: true,
@@ -314,6 +275,7 @@ export class PaymentRequestsGeneralService {
                 dueDate: true,
               },
             },
+            Apportionments: true,
           },
         });
 
@@ -340,116 +302,10 @@ export class PaymentRequestsGeneralService {
           );
         }
       });
+
+      return request;
     } catch (error) {
       throw new BadRequestException(error);
     }
-
-    // const user = await this.prisma.user.findUnique({
-    //   where: { uid: userUid },
-    // });
-    // if (!user) {
-    //   throw new NotFoundException('Usuário não encontrado.');
-    // }
-    // const paymentRequestGeneral =
-    //   await this.prisma.paymentRequestsGeneral.findUnique({
-    //     where: { uid: requestUid },
-    //   });
-    // if (!paymentRequestGeneral) {
-    //   throw new NotFoundException('Solicitação não encontrada.');
-    // }
-    // let uploadedFiles;
-    // let paymentSchedule;
-    // let updatedApportionments;
-    // try {
-    //   const updatedPaymentRequest =
-    //     await this.prisma.paymentRequestsGeneral.update({
-    //       where: { uid: requestUid },
-    //       data: {
-    //         description: updateData.description,
-    //         supplier: updateData.supplier,
-    //         requiredReceipt: updateData.requiredReceipt,
-    //         totalValue: updateData.totalValue,
-    //         CardHolder: updateData.cardHolder,
-    //         accountingAccount: updateData.accountingAccount,
-    //       },
-    //       select: {
-    //         uid: true,
-    //         description: true,
-    //         supplier: true,
-    //         totalValue: true,
-    //         requiredReceipt: true,
-    //         accountingAccount: true,
-    //         createdAt: true,
-    //         user: {
-    //           select: {
-    //             uid: true,
-    //             name: true,
-    //             enable: true,
-    //             email: true,
-    //           },
-    //         },
-    //         CardHolder: true,
-    //       },
-    //     });
-    //   if (updateData.files) {
-    //     uploadedFiles = await Promise.all(
-    //       updateData.files.map(async (fileData) => {
-    //         const { createdAt, updatedAt, ...dataWithoutTimestamps } = fileData;
-    //         return this.prisma.files.update({
-    //           where: { uid: fileData.uid },
-    //           data: dataWithoutTimestamps,
-    //           select: {
-    //             uid: true,
-    //             name: true,
-    //             key: true,
-    //           },
-    //         });
-    //       }),
-    //     );
-    //   }
-    //   if (updateData.paymentSchedules) {
-    //     paymentSchedule = await Promise.all(
-    //       updateData.paymentSchedules.map(async (scheduleData) => {
-    //         const { uid, ...data } = scheduleData;
-    //         return this.prisma.paymentSchedule.update({
-    //           where: { uid },
-    //           data,
-    //           select: {
-    //             uid: true,
-    //             value: true,
-    //             dueDate: true,
-    //           },
-    //         });
-    //       }),
-    //     );
-    //   }
-    //   if (updateData.apportionments) {
-    //     updatedApportionments = await Promise.all(
-    //       updateData.apportionments.map(async (apportionmentData) => {
-    //         const { uid, ...data } = apportionmentData;
-    //         return this.prisma.apportionments.update({
-    //           where: { uid },
-    //           data,
-    //           select: {
-    //             uid: true,
-    //             costCenter: true,
-    //             accountingAccount: true,
-    //             value: true,
-    //           },
-    //         });
-    //       }),
-    //     );
-    //   }
-    // return {
-    //   request: {
-    //     ...updatedPaymentRequest,
-    //     payments: paymentSchedule,
-    //     files: uploadedFiles,
-    //     apportionments: updatedApportionments,
-    //   },
-    // };
-    // } catch (error) {
-    //   throw new InternalServerErrorException(error.message);
-    // }
   }
 }
