@@ -1,28 +1,27 @@
 version: "3.8"
 
 services:
-  # nest-api:
-  #   container_name: scontrol-api
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - .:/home/node/app
-  #   working_dir: /home/node/app
-  #   ports:
-  #     - 8080:8080
-  #   networks:
-  #     - scontrol
-  #   tty: true
-  #   depends_on:
-  #     - pg-db-dev
-  #     - pg-db-test
-  #     - redis
+  nest-api:
+    container_name: scontrol-api
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+    ports:
+      - 8080:8080
+    networks:
+      - scontrol
+    tty: true
+    depends_on:
+      - pg-db-dev
+      - pg-db-test
+      # - redis
 
   pg-db-dev:
     image: postgres:14
     container_name: scontrol-db-dev
-    restart: always
     environment:
       POSTGRES_PASSWORD: growdev2023
       POSTGRES_USER: growdev
@@ -37,7 +36,6 @@ services:
 
   pg-db-test:
     image: postgres:14
-    restart: always
     container_name: scontrol-db-test
     deploy:
       resources:
@@ -52,14 +50,14 @@ services:
     networks:
       - scontrol
 
-  redis:
-    image: redis
-    container_name: scontrol-redis
-    command: redis-server --requirepass growdev2023
-    ports:
-      - 6379:6379
-    networks:
-      - scontrol
+  # redis:
+  #   image: redis
+  #   container_name: scontrol-redis
+  #   command: redis-server --requirepass growdev2023
+  #   ports:
+  #     - 6379:6379
+  #   networks:
+  #     - scontrol
 
 networks:
   scontrol:
