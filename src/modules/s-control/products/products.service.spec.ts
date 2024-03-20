@@ -1,20 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsService } from './products.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { ProductDTO } from './dto';
+import { CreateProductDto } from './dto/products-input.dto';
 import {
   BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaService } from '@/shared/modules/prisma/prisma.service';
 
 const uid = '2a4cdbad-aab0-470a-ae48-e4693d62ce9e';
 
-const productDTO: ProductDTO = {
+const productDto: CreateProductDto = {
   name: 'Caneta Esferográfica',
   enable: true,
   categoryId: '4e292f89-ef81-41f4-8be8-da44c0012f8b',
-  code: 'P12345',
   measurement: 'unidades',
   quantity: 100,
 };
@@ -57,17 +56,17 @@ describe('ProductsService', () => {
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
       });
 
-      prismaServiceMock.products.create.mockResolvedValueOnce(productDTO);
+      prismaServiceMock.products.create.mockResolvedValueOnce(productDto);
 
-      const result = await service.create(productDTO);
+      const result = await service.create(productDto);
 
-      expect(result).toEqual(productDTO);
+      expect(result).toEqual(productDto);
     });
 
     it('should throw BadRequestException if product already exists', async () => {
-      prismaServiceMock.products.findFirst.mockResolvedValueOnce(productDTO);
+      prismaServiceMock.products.findFirst.mockResolvedValueOnce(productDto);
 
-      await expect(service.create(productDTO)).rejects.toThrow(
+      await expect(service.create(productDto)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -77,7 +76,7 @@ describe('ProductsService', () => {
 
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.create(productDTO)).rejects.toThrow(
+      await expect(service.create(productDto)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -89,7 +88,7 @@ describe('ProductsService', () => {
         {
           uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
           categoryId: '4e292f89-ef81-41f4-8be8-da44c0012f8b',
-          code: 'P12345',
+          code: 12345,
           name: 'Caneta Esferográfica',
           enable: true,
           measurement: 'unidades',
@@ -115,11 +114,11 @@ describe('ProductsService', () => {
     it('should throw InternalServerErrorException if category is not found', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, productDTO)).rejects.toThrow(
+      await expect(service.update(uid, productDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -129,7 +128,7 @@ describe('ProductsService', () => {
     it('should update a product', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
@@ -137,18 +136,18 @@ describe('ProductsService', () => {
 
       prismaServiceMock.products.update.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
 
-      const result = await service.update(uid, productDTO);
+      const result = await service.update(uid, productDto);
 
-      expect(result).toEqual({ uid, ...productDTO });
+      expect(result).toEqual({ uid, ...productDto });
     });
 
     it('should throw NotFoundException if product is not found', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, productDTO)).rejects.toThrow(
+      await expect(service.update(uid, productDto)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -156,11 +155,11 @@ describe('ProductsService', () => {
     it('should throw InternalServerErrorException if category is not found', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, productDTO)).rejects.toThrow(
+      await expect(service.update(uid, productDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -168,7 +167,7 @@ describe('ProductsService', () => {
     it('should throw InternalServerErrorException on error', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
@@ -178,7 +177,7 @@ describe('ProductsService', () => {
         new Error('Mocked error'),
       );
 
-      await expect(service.update(uid, productDTO)).rejects.toThrow(
+      await expect(service.update(uid, productDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -188,18 +187,18 @@ describe('ProductsService', () => {
     it('should disable a product', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
 
       prismaServiceMock.products.update.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
         enable: false,
       });
 
       const result = await service.disable(uid, false);
 
-      expect(result).toEqual({ uid, ...productDTO, enable: false });
+      expect(result).toEqual({ uid, ...productDto, enable: false });
     });
 
     it('should throw NotFoundException if product is not found', async () => {
@@ -213,7 +212,7 @@ describe('ProductsService', () => {
     it('should throw InternalServerErrorException on error', async () => {
       prismaServiceMock.products.findUnique.mockResolvedValueOnce({
         uid,
-        ...productDTO,
+        ...productDto,
       });
 
       prismaServiceMock.products.update.mockRejectedValueOnce(

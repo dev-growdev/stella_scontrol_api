@@ -1,193 +1,134 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import Prisma from '@prisma/client';
 import { PrismaService } from '@shared/modules/prisma/prisma.service';
-import { ProductDTO } from './dto';
+import {
+  CreateProductDto,
+  DisableProductDto,
+  UpdateProductDto,
+} from './dto/products-input.dto';
+import { ProductDto } from './dto/products-output.dto';
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(productDTO: ProductDTO) {
-    const existingProduct = await this.prisma.products.findFirst({
+  async create(createProductDto: CreateProductDto) {
+    const productsAlreadyExists = await this.prisma.products.findFirst({
       where: {
-        name: productDTO.name,
+        name: createProductDto.name,
       },
     });
 
-    if (existingProduct) {
+    if (productsAlreadyExists) {
       throw new BadRequestException('Esse produto já existe.');
     }
 
+    const categoryExists = await this.prisma.categories.findUnique({
+      where: { uid: createProductDto.categoryId },
+    });
+
+    if (!categoryExists) {
+      throw new BadRequestException('Categoria não encontrada.');
+    }
+
+    const createdProduct = await this.prisma.products.create({
+      data: {
+        categoryId: categoryExists.uid,
+        name: createProductDto.name,
+        enable: createProductDto.enable,
+        description: createProductDto.description,
+        measurement: createProductDto.measurement,
+        quantity: createProductDto.quantity,
+      },
+    });
+
+    return this.mapToDto(createdProduct);
+  }
+
+  async findAll() {
+    const products = await this.prisma.products.findMany({});
+
+    return products.map(this.mapToDto);
+  }
+
+  async update(uid: string, updateProductDto: UpdateProductDto) {
+    const productsSameNameOrUid = await this.prisma.products.findMany({
+      where: { OR: [{ name: updateProductDto.name }, { uid: uid }] },
+    });
+
+    if (productsSameNameOrUid.length === 0) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    for (const product of productsSameNameOrUid) {
+      if (product.uid !== uid) {
+        throw new BadRequestException('Esse produto já existe.');
+      }
+    }
+
     const findCategory = await this.prisma.categories.findUnique({
-      where: { uid: productDTO.categoryId },
+      where: { uid: updateProductDto.categoryId },
     });
 
     if (!findCategory) {
       throw new BadRequestException('Categoria não encontrada.');
     }
 
-    const createdProduct = await this.prisma.products.create({
+    const updatedProduct = await this.prisma.products.update({
+      where: { uid },
+      data: updateProductDto,
+    });
+
+    return this.mapToDto(updatedProduct);
+  }
+
+  async disable(uid: string, enable: DisableProductDto['enable']) {
+    const product = await this.prisma.products.findUnique({
+      where: { uid },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    const disableProduct = await this.prisma.products.update({
+      where: { uid },
       data: {
-        categoryId: findCategory.uid,
-        name: productDTO.name,
-        enable: productDTO.enable,
-        description: productDTO.description,
-        measurement: productDTO.measurement,
-        quantity: productDTO.quantity,
-      },
-      select: {
-        uid: true,
-        code: true,
-        name: true,
-        enable: true,
-        description: true,
-        measurement: true,
-        quantity: true,
-        category: {
-          select: {
-            uid: true,
-            name: true,
-            enable: true,
-          },
-        },
+        enable,
       },
     });
 
-    return createdProduct;
+    return this.mapToDto(disableProduct);
   }
 
-  async findAll() {
-    try {
-      const findAllProducts = await this.prisma.products.findMany({
-        select: {
-          uid: true,
-          code: true,
-          name: true,
-          enable: true,
-          description: true,
-          measurement: true,
-          quantity: true,
-          category: {
-            select: {
-              uid: true,
-              name: true,
-              enable: true,
-            },
-          },
-        },
-      });
+  private mapToDto(entity: IProductWithRelations): ProductDto {
+    let category: ProductDto['category'];
 
-      return findAllProducts;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  async update(uid: string, productDTO: ProductDTO) {
-    const product = await this.prisma.products.findUnique({
-      where: { uid },
-    });
-
-    if (!product) {
-      throw new NotFoundException('Produto não encontrado.');
-    }
-
-    const isThereAlreadyThisProductName = await this.prisma.products.findFirst({
-      where: {
-        name: productDTO.name,
-      },
-    });
-
-    if (isThereAlreadyThisProductName) {
-      if (isThereAlreadyThisProductName.uid !== product.uid) {
-        throw new BadRequestException('Esse produto já existe.');
-      }
-    }
-
-    try {
-      const findCategory = await this.prisma.categories.findUnique({
-        where: { uid: productDTO.categoryId },
-      });
-
-      if (!findCategory) {
-        throw new BadRequestException('Categoria não encontrada.');
-      }
-
-      const updatedData: Partial<ProductDTO> = {
-        categoryId: findCategory.uid,
-        name: productDTO.name,
-        description: productDTO.description,
-        measurement: productDTO.measurement,
-        quantity: productDTO.quantity,
+    if (entity.category) {
+      category = {
+        uid: entity.category.uid,
+        name: entity.category.name,
+        enable: entity.category.enable,
       };
-
-      const updatedProduct = await this.prisma.products.update({
-        where: { uid: product.uid },
-        data: updatedData,
-        select: {
-          uid: true,
-          code: true,
-          name: true,
-          enable: true,
-          description: true,
-          measurement: true,
-          quantity: true,
-          category: {
-            select: {
-              uid: true,
-              name: true,
-              enable: true,
-            },
-          },
-        },
-      });
-
-      return updatedProduct;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
     }
+
+    return {
+      uid: entity.uid,
+      code: entity.code,
+      name: entity.name,
+      enable: entity.enable,
+      description: entity.description,
+      measurement: entity.measurement,
+      quantity: entity.quantity,
+      ...(category && { category }),
+    };
   }
+}
 
-  async disable(uid: string, enable: boolean) {
-    const product = await this.prisma.products.findUnique({
-      where: { uid },
-    });
-
-    if (!product) {
-      throw new NotFoundException('Produto não encontrado.');
-    }
-
-    try {
-      const disableProduct = await this.prisma.products.update({
-        where: { uid },
-        data: {
-          enable,
-        },
-        select: {
-          uid: true,
-          code: true,
-          name: true,
-          enable: true,
-          description: true,
-          measurement: true,
-          quantity: true,
-          category: {
-            select: {
-              uid: true,
-              name: true,
-              enable: true,
-            },
-          },
-        },
-      });
-
-      return disableProduct;
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
-  }
+interface IProductWithRelations extends Prisma.Products {
+  category?: Prisma.Categories;
 }

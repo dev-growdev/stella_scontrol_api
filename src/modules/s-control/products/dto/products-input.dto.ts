@@ -1,3 +1,4 @@
+import { OmitType } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsBoolean,
@@ -6,7 +7,7 @@ import {
   IsOptional,
 } from 'class-validator';
 
-export class ProductDTO {
+export class CreateProductDto {
   @IsString({ message: 'ID da categoria deve ser do tipo string' })
   @IsNotEmpty({ message: 'ID da categoria é obrigatório' })
   categoryId: string;
@@ -30,4 +31,14 @@ export class ProductDTO {
   @IsNumber()
   @IsOptional({ message: 'Unidade de medida é opcional' })
   quantity?: number;
+}
+
+export class UpdateProductDto extends OmitType(CreateProductDto, [
+  'enable',
+] as const) {}
+
+export class DisableProductDto {
+  @IsBoolean({ message: 'Habilitado deve ser do tipo boolean' })
+  @IsNotEmpty({ message: 'Habilitado é obrigatório' })
+  enable: boolean;
 }
