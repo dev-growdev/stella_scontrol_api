@@ -10,7 +10,7 @@ import { CreateCategoryDto } from './dto/categories-input.dto';
 
 const uid = 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11';
 
-const categoryDTO: CreateCategoryDto = {
+const categoryDto: CreateCategoryDto = {
   name: 'Eletrônicos',
   enable: true,
 };
@@ -47,11 +47,11 @@ describe('CategoriesService', () => {
     it('should create a category', async () => {
       prismaServiceMock.categories.findFirst.mockResolvedValueOnce(null);
 
-      prismaServiceMock.categories.create.mockResolvedValueOnce(categoryDTO);
+      prismaServiceMock.categories.create.mockResolvedValueOnce(categoryDto);
 
-      const result = await service.create(categoryDTO);
+      const result = await service.create(categoryDto);
 
-      expect(result).toEqual(categoryDTO);
+      expect(result).toEqual(categoryDto);
     });
 
     it('should throw InternalServerErrorException on error during category creation', async () => {
@@ -59,15 +59,15 @@ describe('CategoriesService', () => {
         new InternalServerErrorException('Mocked error'),
       );
 
-      await expect(service.create(categoryDTO)).rejects.toThrow(
+      await expect(service.create(categoryDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
 
     it('should throw BadRequestException if category already exists', async () => {
-      prismaServiceMock.categories.findFirst.mockResolvedValueOnce(categoryDTO);
+      prismaServiceMock.categories.findFirst.mockResolvedValueOnce(categoryDto);
 
-      await expect(service.create(categoryDTO)).rejects.toThrow(
+      await expect(service.create(categoryDto)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -117,18 +117,18 @@ describe('CategoriesService', () => {
 
       prismaServiceMock.categories.update.mockResolvedValueOnce({
         uid,
-        ...categoryDTO,
+        ...categoryDto,
       });
 
-      const result = await service.update(uid, categoryDTO);
+      const result = await service.update(uid, categoryDto);
 
-      expect(result).toEqual({ uid, ...categoryDTO });
+      expect(result).toEqual({ uid, ...categoryDto });
     });
 
     it('should throw NotFoundException if category is not found', async () => {
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, categoryDTO)).rejects.toThrow(
+      await expect(service.update(uid, categoryDto)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -144,7 +144,7 @@ describe('CategoriesService', () => {
         new Error('Mocked error'),
       );
 
-      await expect(service.update(uid, categoryDTO)).rejects.toThrow(
+      await expect(service.update(uid, categoryDto)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

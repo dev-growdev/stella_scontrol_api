@@ -10,7 +10,7 @@ import { CategoriesController } from './categories.controller';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
-const makeCategoriesDTO = (): CreateCategoryDto => {
+const makeCategoriesDto = (): CreateCategoryDto => {
   return {
     name: 'Eletrônicos',
     enable: true,
@@ -39,7 +39,7 @@ describe('CategoriesController', () => {
 
   describe('Create - POST', () => {
     it('should create a category and return the created data on success', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         return Promise.resolve({
@@ -49,21 +49,21 @@ describe('CategoriesController', () => {
         });
       });
 
-      const result = await controller.create(categoryDTO);
+      const result = await controller.create(categoryDto);
 
       expect(result).toBeDefined();
       expect(result.uid).toEqual('fcca0cf5-4e29-41e1-83ec-ce14fa973b11');
     });
 
     it('should handle duplicate category and return BadRequestException on failure', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         throw new BadRequestException('Essa categoria já existe.');
       });
 
       try {
-        await controller.create(categoryDTO);
+        await controller.create(categoryDto);
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
         expect(error.message).toEqual('Essa categoria já existe.');
@@ -71,14 +71,14 @@ describe('CategoriesController', () => {
     });
 
     it('should handle errors and return InternalServerErrorException on failure', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         throw new InternalServerErrorException('Test error');
       });
 
       try {
-        await controller.create(categoryDTO);
+        await controller.create(categoryDto);
       } catch (error) {
         expect(error).toBeInstanceOf(InternalServerErrorException);
         expect(error.message).toEqual('Test error');
@@ -127,7 +127,7 @@ describe('CategoriesController', () => {
 
   describe('Update - PUT', () => {
     it('should update a category and return the updated data on success', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {
         return Promise.resolve({
@@ -139,7 +139,7 @@ describe('CategoriesController', () => {
 
       const result = await controller.update(
         { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
-        categoryDTO,
+        categoryDto,
       );
 
       expect(result).toBeDefined();
@@ -148,14 +148,14 @@ describe('CategoriesController', () => {
     });
 
     it('should handle not found category and return NotFoundException on failure', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {
         throw new NotFoundException('Categoria não encontrada.');
       });
 
       try {
-        await controller.update({ uid: 'nonexistent-uid' }, categoryDTO);
+        await controller.update({ uid: 'nonexistent-uid' }, categoryDto);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toEqual('Categoria não encontrada.');
@@ -163,7 +163,7 @@ describe('CategoriesController', () => {
     });
 
     it('should handle errors and return InternalServerErrorException on failure', async () => {
-      const categoryDTO = makeCategoriesDTO();
+      const categoryDto = makeCategoriesDto();
 
       jest.spyOn(service, 'update').mockImplementation(async () => {
         throw new InternalServerErrorException('Test error');
@@ -172,7 +172,7 @@ describe('CategoriesController', () => {
       try {
         await controller.update(
           { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
-          categoryDTO,
+          categoryDto,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(InternalServerErrorException);
@@ -183,7 +183,7 @@ describe('CategoriesController', () => {
 
   describe('Disable - PUT', () => {
     it('should disable a category and return the updated data on success', async () => {
-      const categoryDTO = { name: 'Eletrônicos', enable: false };
+      const categoryDto = { name: 'Eletrônicos', enable: false };
 
       jest.spyOn(service, 'disable').mockImplementation(async () => {
         return Promise.resolve({
@@ -195,7 +195,7 @@ describe('CategoriesController', () => {
 
       const result = await controller.dissable(
         { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
-        categoryDTO,
+        categoryDto,
       );
 
       expect(result).toBeDefined();
@@ -204,14 +204,14 @@ describe('CategoriesController', () => {
     });
 
     it('should handle not found category and return NotFoundException on failure', async () => {
-      const categoryDTO = { name: 'Eletrônicos', enable: false };
+      const categoryDto = { name: 'Eletrônicos', enable: false };
 
       jest.spyOn(service, 'disable').mockImplementation(async () => {
         throw new NotFoundException('Categoria não encontrada.');
       });
 
       try {
-        await controller.dissable({ uid: 'nonexistent-uid' }, categoryDTO);
+        await controller.dissable({ uid: 'nonexistent-uid' }, categoryDto);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toEqual('Categoria não encontrada.');
@@ -219,7 +219,7 @@ describe('CategoriesController', () => {
     });
 
     it('should handle errors and return InternalServerErrorException on failure', async () => {
-      const categoryDTO = { name: 'Eletrônicos', enable: false };
+      const categoryDto = { name: 'Eletrônicos', enable: false };
 
       jest.spyOn(service, 'disable').mockImplementation(async () => {
         throw new InternalServerErrorException('Test error');
@@ -228,7 +228,7 @@ describe('CategoriesController', () => {
       try {
         await controller.dissable(
           { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
-          categoryDTO,
+          categoryDto,
         );
       } catch (error) {
         expect(error).toBeInstanceOf(InternalServerErrorException);
