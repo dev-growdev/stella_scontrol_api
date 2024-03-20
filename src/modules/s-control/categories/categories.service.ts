@@ -4,14 +4,20 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CategoriesDTO } from './dto';
-import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+  UpdateEnableCategoryDto,
+} from './dto/categories-input.dto';
+import { PrismaService } from '@shared/modules/prisma/prisma.service';
+import Prisma from '@prisma/client';
+import { CategoryDto } from './dto/categories-output.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(categoryDto: CategoriesDTO) {
+  async create(categoryDto: CreateCategoryDto): Promise<CategoryDto> {
     const findCategory = await this.prisma.categories.findFirst({
       where: {
         name: categoryDto.name,
@@ -26,72 +32,74 @@ export class CategoriesService {
       data: {
         name: categoryDto.name,
       },
-      select: {
-        uid: true,
-        name: true,
-        enable: true,
-      },
     });
 
-    return createdCategory;
+    return this.mapToDto(createdCategory);
   }
 
-  async findAll() {
+  async findAll(): Promise<CategoryDto[]> {
     try {
-      const findAllCategories = await this.prisma.categories.findMany({
-        select: {
-          uid: true,
-          name: true,
-          enable: true,
-        },
-      });
+      const findAllCategories = await this.prisma.categories.findMany({});
 
-      return findAllCategories;
+      return findAllCategories.map(this.mapToDto);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  async update(uid: string, name: string) {
-    const category = await this.prisma.categories.findUnique({
-      where: { uid },
-    });
-
-    if (!category) {
-      throw new NotFoundException('Categoria não encontrada.');
-    }
-
-    const findCategoryByName = await this.prisma.categories.findFirst({
+  async update(uid: string, data: UpdateCategoryDto): Promise<CategoryDto> {
+    const categories = await this.prisma.categories.findMany({
       where: {
-        name,
-        uid: { not: uid },
+        OR: [{ uid }, { name: data.name }],
       },
     });
 
-    if (findCategoryByName) {
-      throw new BadRequestException('Essa categoria já existe.');
+    if (categories.length === 0) {
+      throw new NotFoundException('Categoria não encontrada.');
     }
+
+    for (const category of categories) {
+      if (category.uid !== uid) {
+        throw new BadRequestException('Essa categoria já existe.');
+      }
+    }
+    // const category = await this.prisma.categories.findUnique({
+    //   where: { uid },
+    // });
+
+    // if (!category) {
+    //   throw new NotFoundException('Categoria não encontrada.');
+    // }
+
+    // const findCategoryByName = await this.prisma.categories.findFirst({
+    //   where: {
+    //     name,
+    //     uid: { not: uid },
+    //   },
+    // });
+
+    // if (findCategoryByName) {
+    //   throw new BadRequestException('Essa categoria já existe.');
+    // }
 
     try {
       const updatedCategory = await this.prisma.categories.update({
         where: { uid },
         data: {
-          name,
-        },
-        select: {
-          uid: true,
-          name: true,
-          enable: true,
+          name: data.name,
         },
       });
 
-      return updatedCategory;
+      return this.mapToDto(updatedCategory);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
-  async disable(uid: string, enable: boolean) {
+  async disable(
+    uid: string,
+    data: UpdateEnableCategoryDto,
+  ): Promise<CategoryDto> {
     const category = await this.prisma.categories.findUnique({
       where: { uid },
     });
@@ -104,18 +112,21 @@ export class CategoriesService {
       const updatedCategory = await this.prisma.categories.update({
         where: { uid },
         data: {
-          enable,
-        },
-        select: {
-          uid: true,
-          name: true,
-          enable: true,
+          enable: data.enable,
         },
       });
 
-      return updatedCategory;
+      return this.mapToDto(updatedCategory);
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  private mapToDto(entity: Prisma.Categories): CategoryDto {
+    return {
+      uid: entity.uid,
+      name: entity.name,
+      enable: entity.enable,
+    };
   }
 }

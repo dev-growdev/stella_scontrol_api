@@ -1,13 +1,21 @@
 import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
-import { CategoriesDTO } from './dto';
+import {
+  CreateCategoryDto,
+  ParamDto,
+  UpdateCategoryDto,
+  UpdateEnableCategoryDto,
+} from './dto/categories-input.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('Categorias')
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  create(@Body() categoryDto: CategoriesDTO) {
+  create(@Body() categoryDto: CreateCategoryDto) {
     return this.categoriesService.create(categoryDto);
   }
 
@@ -17,12 +25,15 @@ export class CategoriesController {
   }
 
   @Put(':uid')
-  update(@Param('uid') uid: string, @Body() categoryDto: CategoriesDTO) {
-    return this.categoriesService.update(uid, categoryDto.name);
+  update(@Param() params: ParamDto, @Body() categoryDto: UpdateCategoryDto) {
+    return this.categoriesService.update(params.uid, categoryDto);
   }
 
   @Put(':uid/disable')
-  dissable(@Param('uid') uid: string, @Body() categoryDto: CategoriesDTO) {
-    return this.categoriesService.disable(uid, categoryDto.enable);
+  dissable(
+    @Param() params: ParamDto,
+    @Body() categoryDto: UpdateEnableCategoryDto,
+  ) {
+    return this.categoriesService.disable(params.uid, categoryDto);
   }
 }

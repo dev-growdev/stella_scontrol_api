@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CategoriesService } from './categories.service';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
-import { CategoriesDTO } from './dto';
 import {
   BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { CreateCategoryDto } from './dto/categories-input.dto';
 
 const uid = 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11';
 
-const categoryDTO: CategoriesDTO = {
+const categoryDTO: CreateCategoryDto = {
   name: 'Eletrônicos',
   enable: true,
 };
@@ -120,7 +120,7 @@ describe('CategoriesService', () => {
         ...categoryDTO,
       });
 
-      const result = await service.update(uid, categoryDTO.name);
+      const result = await service.update(uid, categoryDTO);
 
       expect(result).toEqual({ uid, ...categoryDTO });
     });
@@ -128,7 +128,7 @@ describe('CategoriesService', () => {
     it('should throw NotFoundException if category is not found', async () => {
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.update(uid, categoryDTO.name)).rejects.toThrow(
+      await expect(service.update(uid, categoryDTO)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -144,7 +144,7 @@ describe('CategoriesService', () => {
         new Error('Mocked error'),
       );
 
-      await expect(service.update(uid, categoryDTO.name)).rejects.toThrow(
+      await expect(service.update(uid, categoryDTO)).rejects.toThrow(
         InternalServerErrorException,
       );
     });
@@ -164,7 +164,7 @@ describe('CategoriesService', () => {
         updatedCategory,
       );
 
-      const result = await service.disable(uid, false);
+      const result = await service.disable(uid, { enable: false });
 
       expect(result).toEqual(updatedCategory);
     });
@@ -172,7 +172,7 @@ describe('CategoriesService', () => {
     it('should throw NotFoundException if category is not found', async () => {
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.disable(uid, false)).rejects.toThrow(
+      await expect(service.disable(uid, { enable: false })).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -188,7 +188,7 @@ describe('CategoriesService', () => {
         new Error('Mocked error'),
       );
 
-      await expect(service.disable(uid, false)).rejects.toThrow(
+      await expect(service.disable(uid, { enable: false })).rejects.toThrow(
         InternalServerErrorException,
       );
     });

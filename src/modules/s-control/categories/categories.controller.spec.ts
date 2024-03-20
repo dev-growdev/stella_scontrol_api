@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoriesDTO } from './dto';
+import { CreateCategoryDto } from './dto/categories-input.dto';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -10,7 +10,7 @@ import { CategoriesController } from './categories.controller';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
-const makeCategoriesDTO = (): CategoriesDTO => {
+const makeCategoriesDTO = (): CreateCategoryDto => {
   return {
     name: 'Eletrônicos',
     enable: true,
@@ -138,7 +138,7 @@ describe('CategoriesController', () => {
       });
 
       const result = await controller.update(
-        'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+        { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
         categoryDTO,
       );
 
@@ -155,7 +155,7 @@ describe('CategoriesController', () => {
       });
 
       try {
-        await controller.update('nonexistent-uid', categoryDTO);
+        await controller.update({ uid: 'nonexistent-uid' }, categoryDTO);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toEqual('Categoria não encontrada.');
@@ -171,7 +171,7 @@ describe('CategoriesController', () => {
 
       try {
         await controller.update(
-          'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+          { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
           categoryDTO,
         );
       } catch (error) {
@@ -194,7 +194,7 @@ describe('CategoriesController', () => {
       });
 
       const result = await controller.dissable(
-        'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+        { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
         categoryDTO,
       );
 
@@ -211,7 +211,7 @@ describe('CategoriesController', () => {
       });
 
       try {
-        await controller.dissable('nonexistent-uid', categoryDTO);
+        await controller.dissable({ uid: 'nonexistent-uid' }, categoryDTO);
       } catch (error) {
         expect(error).toBeInstanceOf(NotFoundException);
         expect(error.message).toEqual('Categoria não encontrada.');
@@ -227,7 +227,7 @@ describe('CategoriesController', () => {
 
       try {
         await controller.dissable(
-          'fcca0cf5-4e29-41e1-83ec-ce14fa973b11',
+          { uid: 'fcca0cf5-4e29-41e1-83ec-ce14fa973b11' },
           categoryDTO,
         );
       } catch (error) {
