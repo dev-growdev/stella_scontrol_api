@@ -9,6 +9,7 @@ import { PrismaService } from 'src/shared/modules/prisma/prisma.service';
 export class PaymentsFormService {
   constructor(private prisma: PrismaService) {}
 
+  // TODO: Entender o que é retornado e criar Dto
   async findAllPaymentsForm() {
     try {
       const findAllPaymentsForm = await this.prisma.paymentsForm.findMany({
