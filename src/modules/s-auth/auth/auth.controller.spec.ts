@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AuthDTO } from './dtos';
+import { AuthDto } from './dtos';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -27,7 +27,7 @@ const expectedResult = {
   },
 };
 
-const loginDto: AuthDTO = {
+const loginDto: AuthDto = {
   name: 'Growdev - S.Control',
   email: 'growdev_scontrol@stella.com.br',
   idUserAd: 'algumiduserad',

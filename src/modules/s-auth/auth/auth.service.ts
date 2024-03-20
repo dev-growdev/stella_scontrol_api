@@ -5,13 +5,16 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@shared/modules/prisma/prisma.service';
-import { AuthDTO } from './dtos/auth-input.dto';
+import { AuthDto } from './dtos/auth-input.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+  ) {}
 
-  async signin(dto: AuthDTO) {
+  async signin(dto: AuthDto) {
     try {
       const existingUser = await this.prisma.user.findUnique({
         where: {

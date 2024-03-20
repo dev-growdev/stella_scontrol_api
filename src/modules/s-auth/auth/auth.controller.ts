@@ -4,7 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/shared/guards';
 import { User } from '@/shared/decorators/user.decorator';
 import { AuthService } from './auth.service';
-import { AuthDTO } from './dtos/auth-input.dto';
+import { AuthDto } from './dtos/auth-input.dto';
 
 @ApiTags('Autenticação')
 @Controller()
@@ -12,7 +12,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  signin(@Body() loginDto: AuthDTO) {
+  signin(@Body() loginDto: AuthDto) {
     return this.authService.signin(loginDto);
   }
 

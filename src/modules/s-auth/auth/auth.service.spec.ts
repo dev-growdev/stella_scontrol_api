@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InternalServerErrorException } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { AuthDTO } from './dtos/auth-input.dto';
+import { AuthDto } from './dtos/auth-input.dto';
 import { PrismaService } from '@/shared/modules/prisma/prisma.service';
 
 const mockPrismaService = {
@@ -17,7 +17,7 @@ const mockJwtService = {
   signAsync: jest.fn(),
 };
 
-const authDto: AuthDTO = {
+const authDto: AuthDto = {
   name: 'Error User',
   email: 'erroruser@example.com',
   idUserAd: 'errorUserIdAd',
