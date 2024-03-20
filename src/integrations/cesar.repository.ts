@@ -48,4 +48,18 @@ export class CesarRepository {
 
     return { totalBudget: result?.total ?? 0 };
   }
+
+  async updateTotalBudget(
+    year: string,
+    costCenter: string,
+    accountingAccount: string,
+    month: string,
+    totalBudget: number,
+  ): Promise<void> {
+    await this.knex('orcamento')
+      .where('ano_orcamento', year)
+      .where('centro_custo', costCenter)
+      .where('conta_contabil', accountingAccount)
+      .update({ [month]: totalBudget });
+  }
 }

@@ -20,6 +20,7 @@ export const knexConfigCesar: Knex.Config = {
     host: 'archi02.stelladesign.local',
     user: 'growdev',
     password: '7k03zO$2',
-    database: 'cc_contab',
+    database: 'cc_contab_desenv',
+    // database: 'cc_contab',
   },
 };
