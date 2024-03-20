@@ -67,7 +67,7 @@ model PaymentSchedule {
   paymentRequestUid         PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
   paymentRequestsGeneralUid String
 
-  value   Float    @map("total_request_value")
+  value   Decimal  @map("total_request_value") @db.Decimal(10, 2)
   dueDate DateTime @map("due_date")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -193,7 +193,7 @@ model Apportionments {
   paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
   costCenter                String  @map("cost_center")
   accountingAccount         String  @map("accounting_account")
-  value                     Decimal
+  value                     Decimal @db.Decimal(10, 2)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
