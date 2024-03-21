@@ -18,17 +18,17 @@ export class PaymentRequestsGeneralController {
     private readonly paymentRequestsGeneralService: PaymentRequestsGeneralService,
   ) {}
 
-  // @Post()
-  // @UseInterceptors(FilesInterceptor('file'))
-  // create(
-  //   @Body()
-  //   paymentRequestGeneral: PaymentRequestGeneralDTO,
-  //   @UploadedFiles()
-  //   files: Express.Multer.File[],
-  // ) {
-  //   const form = JSON.parse(paymentRequestGeneral.document);
-  //   return this.paymentRequestsGeneralService.create(form, files);
-  // }
+  @Post()
+  @UseInterceptors(FilesInterceptor('file'))
+  create(
+    @Body()
+    paymentRequestGeneral: PaymentRequestGeneralDTO,
+    @UploadedFiles()
+    files: Express.Multer.File[],
+  ) {
+    const form = JSON.parse(paymentRequestGeneral.document);
+    return this.paymentRequestsGeneralService.create(form, files);
+  }
 
   @Get('file/:imgpath')
   listOneFile(@Param('imgpath') image, @Res() res) {
