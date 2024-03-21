@@ -1,24 +1,10 @@
+import 'dotenv/config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { CustomExceptionFilter } from './shared/exceptions';
-import { CustomResponseInterceptor } from './shared/response';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-/**
- * bootstrap():
- * Ponto de entrada da aplicação
- *
- * NestFactory.create():
- * Cria uma instância da aplicação
- *
- * setGlobalPrefix():
- * Aplicação utilizará um prefixo global
- *
- * `Exemplo`: localhost:8080/api
- *
- * listen():
- * Número da porta onde a aplicação irá roda
- */
+import { AppModule } from './app.module';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -26,15 +12,20 @@ async function bootstrap() {
 
   logger.log('App started at http://localhost:8080/api');
 
-  app.useGlobalFilters(new CustomExceptionFilter());
+  app.enableCors();
 
-  app.enableCors()
+  app.setGlobalPrefix('api', { exclude: ['/'] });
 
-  app.useGlobalInterceptors(new CustomResponseInterceptor());
+  const config = new DocumentBuilder()
+    .setTitle('Stella API')
+    .setDescription('Stella API Documentation')
+    .setVersion('0.0.1')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
-  app.setGlobalPrefix('api');
-
-  await app.listen(8080);
+  await app.listen(process.env.PORT || 8080);
 }
 
 bootstrap();

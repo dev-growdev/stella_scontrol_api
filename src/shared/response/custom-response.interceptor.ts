@@ -7,7 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-interface CustomResponseDTO {
+interface CustomResponseDto {
   success: boolean;
   code: number;
   data: any;
@@ -21,7 +21,7 @@ export class CustomResponseInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data) => {
-        const response: CustomResponseDTO = {
+        const response: CustomResponseDto = {
           success: true,
           code: res.statusCode,
           data,

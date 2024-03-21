@@ -1,0 +1,48 @@
+name: RunTestsWithDocker
+on: [pull_request]
+
+jobs:
+  test:
+    env:
+      BCRYPT_SALT: 8
+      JWT_EXPIREIN: 2h
+      JWT_SECRET: gdashdgash
+      DATABASE_URL: postgres://growdev:growdev@localhost/growdev-test-ci-cd
+
+
+    runs-on: ubuntu-latest
+      # Service containers to run with `container-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: growdev
+          POSTGRES_PASSWORD: growdev
+          POSTGRES_DB: growdev-test-ci-cd
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.yarnpkg.com/
+      - run: yarn --frozen-lockfile
+      # run the migration in the test database
+      - run: yarn prisma migrate deploy
+      - run: yarn prisma generate
+      - run: yarn test
+
+      # Set conclusion based on tests result
+      - name: Set workflow conclusion
+        run: echo "##[set-output name=conclusion;]${{ job.status }}"
