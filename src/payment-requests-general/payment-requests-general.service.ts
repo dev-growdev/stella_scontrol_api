@@ -164,15 +164,22 @@ export class PaymentRequestsGeneralService {
     };
   }
 
-  async listByUser(userUid: string) {
+  private async findUser(userUid: string) {
     const findUser = await this.prisma.user.findUnique({
       where: {
         uid: userUid,
       },
     });
+
     if (!findUser) {
       throw new BadRequestException('Não foi possível encontrar um usuário.');
     }
+
+    return findUser;
+  }
+
+  async listByUser(userUid: string) {
+    const findUser = await this.findUser(userUid);
 
     const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
       where: {
@@ -235,15 +242,7 @@ export class PaymentRequestsGeneralService {
   }
 
   async listPaymentRequest(userUid: string, uid: string) {
-    const findUser = await this.prisma.user.findUnique({
-      where: {
-        uid: userUid,
-      },
-    });
-
-    if (!findUser) {
-      throw new BadRequestException('Não foi possível encontrar um usuário.');
-    }
+    const findUser = await this.findUser(userUid);
 
     const findRequestGeneral =
       await this.prisma.paymentRequestsGeneral.findUnique({
