@@ -16,14 +16,14 @@ export class AuthService {
 
   async signin(dto: AuthDto) {
     try {
-      const existingUser = await this.prisma.user.findUnique({
+      const existingUser = await this.prisma.saUser.findUnique({
         where: {
           email: dto.email,
         },
       });
 
       if (!existingUser) {
-        const createdUser = await this.prisma.user.create({
+        const createdUser = await this.prisma.saUser.create({
           data: {
             idUserAd: dto.idUserAd,
             email: dto.email,
@@ -61,7 +61,7 @@ export class AuthService {
   }
 
   async getUserByUid(userId: string) {
-    const foundUser = await this.prisma.user.findUnique({
+    const foundUser = await this.prisma.saUser.findUnique({
       where: { uid: userId },
     });
 

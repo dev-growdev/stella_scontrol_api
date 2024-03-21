@@ -7,7 +7,7 @@ export class FilesService {
   constructor(private prisma: PrismaService) {}
 
   async listFilesByKey(keys: string[]) {
-    const files = await this.prisma.files.findMany({
+    const files = await this.prisma.scFiles.findMany({
       where: {
         key: {
           in: keys,
@@ -29,7 +29,7 @@ export class FilesService {
 
   async createFileOnDB(file: Express.Multer.File) {
     const randomKey = `${randomUUID()}-${file.originalname}`;
-    return await this.prisma.files.create({
+    return await this.prisma.scFiles.create({
       data: {
         key: randomKey,
         name: file.originalname,

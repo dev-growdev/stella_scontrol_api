@@ -18,7 +18,7 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(categoryDto: CreateCategoryDto): Promise<CategoryDto> {
-    const findCategory = await this.prisma.categories.findFirst({
+    const findCategory = await this.prisma.scCategories.findFirst({
       where: {
         name: categoryDto.name,
       },
@@ -28,7 +28,7 @@ export class CategoriesService {
       throw new BadRequestException('Essa categoria já existe.');
     }
 
-    const createdCategory = await this.prisma.categories.create({
+    const createdCategory = await this.prisma.scCategories.create({
       data: {
         name: categoryDto.name,
       },
@@ -39,7 +39,7 @@ export class CategoriesService {
 
   async findAll(): Promise<CategoryDto[]> {
     try {
-      const findAllCategories = await this.prisma.categories.findMany({});
+      const findAllCategories = await this.prisma.scCategories.findMany({});
 
       return findAllCategories.map(this.mapToDto);
     } catch (error) {
@@ -48,7 +48,7 @@ export class CategoriesService {
   }
 
   async update(uid: string, data: UpdateCategoryDto): Promise<CategoryDto> {
-    const categories = await this.prisma.categories.findMany({
+    const categories = await this.prisma.scCategories.findMany({
       where: {
         OR: [{ uid }, { name: data.name, uid: { not: uid } }],
       },
@@ -63,7 +63,7 @@ export class CategoriesService {
         throw new BadRequestException('Essa categoria já existe.');
       }
     }
-    // const category = await this.prisma.categories.findUnique({
+    // const category = await this.prisma.scCategories.findUnique({
     //   where: { uid },
     // });
 
@@ -71,7 +71,7 @@ export class CategoriesService {
     //   throw new NotFoundException('Categoria não encontrada.');
     // }
 
-    // const findCategoryByName = await this.prisma.categories.findFirst({
+    // const findCategoryByName = await this.prisma.scCategories.findFirst({
     //   where: {
     //     name,
     //     uid: { not: uid },
@@ -82,7 +82,7 @@ export class CategoriesService {
     //   throw new BadRequestException('Essa categoria já existe.');
     // }
 
-    const updatedCategory = await this.prisma.categories.update({
+    const updatedCategory = await this.prisma.scCategories.update({
       where: { uid },
       data: {
         name: data.name,
@@ -96,7 +96,7 @@ export class CategoriesService {
     uid: string,
     data: UpdateEnableCategoryDto,
   ): Promise<CategoryDto> {
-    const category = await this.prisma.categories.findUnique({
+    const category = await this.prisma.scCategories.findUnique({
       where: { uid },
     });
 
@@ -104,7 +104,7 @@ export class CategoriesService {
       throw new NotFoundException('Categoria não encontrada.');
     }
 
-    const updatedCategory = await this.prisma.categories.update({
+    const updatedCategory = await this.prisma.scCategories.update({
       where: { uid },
       data: {
         enable: data.enable,
@@ -114,7 +114,7 @@ export class CategoriesService {
     return this.mapToDto(updatedCategory);
   }
 
-  private mapToDto(entity: Prisma.Categories): CategoryDto {
+  private mapToDto(entity: Prisma.ScCategories): CategoryDto {
     return {
       uid: entity.uid,
       name: entity.name,

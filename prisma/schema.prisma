@@ -1,27 +1,16 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// binaryTargets: 
-// Specify the OS on which the Prisma Client will run to ensure compatibility of the query engine. 
-
-// value => Build OS
-
-// linux-musl-openssl-3.0.x => Linux Alpine v3.17 x86_x64 (Docker Container uses Alpine)
-// darwin => macOS Intel x86 | darwin-arm64 => macOS ARM64
-// windows => Windows
-// debian-openssl-1.1.x => Ubuntu v18 - v20| Mint v19 - v20
-
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  provider        = "prisma-client-js"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["s_control", "s_auth", "s_quality"]
 }
 
-model User {
+model SaUser {
   uid String @id @default(uuid())
 
   idUserAd String @unique @map("id_user_ad")
@@ -30,15 +19,16 @@ model User {
 
   enable Boolean @default(true)
 
-  PaymentRequestsGeneral PaymentRequestsGeneral[]
+  paymentRequestsGeneral ScPaymentRequestsGeneral[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("user")
+  @@map("sa_user")
+  @@schema("s_auth")
 }
 
-model PaymentRequestsGeneral {
+model ScPaymentRequestsGeneral {
   uid String @id @default(uuid())
 
   supplier          String
@@ -47,24 +37,25 @@ model PaymentRequestsGeneral {
   totalValue        Decimal @map("total_value")
   accountingAccount String? @map("accounting_account") @db.VarChar(255)
 
-  user           User             @relation(fields: [userCreatedUid], references: [uid])
-  userCreatedUid String           @map("user_created_uid")
-  CardHolder     CardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
-  cardHoldersUid String?          @map("card_holders_uid")
-  Apportionments Apportionments[]
+  user           SaUser             @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String             @map("user_created_uid")
+  cardHolder     ScCardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid String?            @map("card_holders_uid")
+  apportionments ScApportionments[]
 
-  createdAt            DateTime               @default(now()) @map("created_at")
-  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
-  PaymentSchedule      PaymentSchedule[]
-  PaymentRequestsFiles PaymentRequestsFiles[]
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @default(now()) @updatedAt @map("updated_at")
+  paymentSchedule      ScPaymentSchedule[]
+  paymentRequestsFiles ScPaymentRequestsFiles[]
 
-  @@map("payment_requests_general")
+  @@map("sc_payment_requests_general")
+  @@schema("s_control")
 }
 
-model PaymentSchedule {
+model ScPaymentSchedule {
   uid String @id @default(uuid())
 
-  paymentRequestUid         PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  paymentRequestUid         ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
   paymentRequestsGeneralUid String
 
   value   Float    @map("total_request_value")
@@ -73,10 +64,11 @@ model PaymentSchedule {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("payments_schedule")
+  @@map("sc_payments_schedule")
+  @@schema("s_control")
 }
 
-model Categories {
+model ScCategories {
   uid String @id @default(uuid())
 
   name   String  @db.VarChar(50)
@@ -85,16 +77,17 @@ model Categories {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  products Products[]
+  products ScProducts[]
 
-  @@map("categories")
+  @@map("sc_categories")
+  @@schema("s_control")
 }
 
-model Products {
+model ScProducts {
   uid String @id @default(uuid())
 
   categoryId String
-  category   Categories @relation(fields: [categoryId], references: [uid])
+  category   ScCategories @relation(fields: [categoryId], references: [uid])
 
   code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)
@@ -106,10 +99,11 @@ model Products {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("products")
+  @@map("sc_products")
+  @@schema("s_control")
 }
 
-model TempSuppliersData {
+model ScTempSuppliersData {
   uid String @id @default(uuid())
 
   name   String @db.VarChar(50)
@@ -119,75 +113,82 @@ model TempSuppliersData {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("temp_suppliers_data")
+  @@map("sc_temp_suppliers_data")
+  @@schema("s_control")
 }
 
-model Files {
+model ScFiles {
   uid String @id @default(uuid())
 
   name String @db.Text
   key  String @db.Text
 
-  createdAt            DateTime               @default(now()) @map("created_at")
-  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
-  PaymentRequestsFiles PaymentRequestsFiles[]
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @default(now()) @updatedAt @map("updated_at")
+  paymentRequestsFiles ScPaymentRequestsFiles[]
 
-  @@map("files")
+  @@map("sc_files")
+  @@schema("s_control")
 }
 
-model PaymentRequestsFiles {
+model ScPaymentRequestsFiles {
   uid String @id @default(uuid())
 
   filesUid                  String @map("file_uid")
   paymentRequestsGeneralUid String @map("payment_request_uid")
 
-  fileUid           Files                  @relation(fields: [filesUid], references: [uid])
-  paymentRequestUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  fileUid           ScFiles                  @relation(fields: [filesUid], references: [uid])
+  paymentRequestUid ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("payment_requests_files")
+  @@map("sc_payment_requests_files")
+  @@schema("s_control")
 }
 
-model PaymentsForm {
+model ScPaymentsForm {
   uid String @id @default(uuid())
 
   name   String  @db.VarChar(50)
   enable Boolean @default(true)
 
-  cardHolders CardHolders[]
+  cardHolders ScCardHolders[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  @@map("payments_form")
+  @@map("sc_payments_form")
+  @@schema("s_control")
 }
 
-model CardHolders {
+model ScCardHolders {
   uid String @id @default(uuid())
 
-  paymentFormId String?       @map("payment_form_id")
-  paymentForm   PaymentsForm? @relation(fields: [paymentFormId], references: [uid])
+  paymentFormId String?         @map("payment_form_id")
+  paymentForm   ScPaymentsForm? @relation(fields: [paymentFormId], references: [uid])
 
   code   Int
-  name   String   @db.VarChar(50)
-  type   CardType
-  enable Boolean  @default(true)
+  name   String     @db.VarChar(50)
+  type   ScCardType
+  enable Boolean    @default(true)
 
-  createdAt              DateTime                 @default(now()) @map("created_at")
-  updatedAt              DateTime                 @default(now()) @updatedAt @map("updated_at")
-  PaymentRequestsGeneral PaymentRequestsGeneral[]
+  createdAt              DateTime                   @default(now()) @map("created_at")
+  updatedAt              DateTime                   @default(now()) @updatedAt @map("updated_at")
+  paymentRequestsGeneral ScPaymentRequestsGeneral[]
 
-  @@map("card_holders")
+  @@map("sc_card_holders")
+  @@schema("s_control")
 }
 
-enum CardType {
+enum ScCardType {
   credit
   corporate
+
+  @@schema("s_control")
 }
 
-model Apportionments {
+model ScApportionments {
   uid String @id @default(uuid())
 
   paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
@@ -198,7 +199,8 @@ model Apportionments {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  PaymentRequestGeneralUid PaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  paymentRequestGeneralUid ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
 
-  @@map("apportionments")
+  @@map("sc_apportionments")
+  @@schema("s_control")
 }

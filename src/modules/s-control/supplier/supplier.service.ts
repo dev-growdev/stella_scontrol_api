@@ -27,7 +27,7 @@ export class SupplierService {
         };
       }
 
-      const existingSupplier = await this.prisma.tempSuppliersData.findUnique({
+      const existingSupplier = await this.prisma.scTempSuppliersData.findUnique({
         where: { cnpj: cpfOrCnpj },
         select: {
           uid: true,
@@ -53,7 +53,7 @@ export class SupplierService {
 
       const formatCnpj = cpfOrCnpj.replace(/\D/g, '');
 
-      const createdSupplier = await this.prisma.tempSuppliersData.create({
+      const createdSupplier = await this.prisma.scTempSuppliersData.create({
         data: {
           name: supplierReceita.name,
           cnpj: formatCnpj,

@@ -12,7 +12,7 @@ export class CardHoldersService {
     type: CardHolderParams['type'],
   ): Promise<CardHolderDto[]> {
     try {
-      const cardHolders = await this.prisma.cardHolders.findMany({
+      const cardHolders = await this.prisma.scCardHolders.findMany({
         where: {
           type,
         },
@@ -24,7 +24,7 @@ export class CardHoldersService {
     }
   }
 
-  private mapToDto(cardHolders: Prisma.CardHolders): CardHolderDto {
+  private mapToDto(cardHolders: Prisma.ScCardHolders): CardHolderDto {
     return {
       uid: cardHolders.uid,
       code: cardHolders.code,

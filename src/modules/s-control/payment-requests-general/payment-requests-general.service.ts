@@ -38,7 +38,7 @@ export class PaymentRequestsGeneralService {
     }
 
     if (paymentRequestGeneralDto.cardHolder) {
-      const existsHolder = await this.prisma.cardHolders.findUnique({
+      const existsHolder = await this.prisma.scCardHolders.findUnique({
         where: {
           uid: paymentRequestGeneralDto.cardHolder.uid,
         },
@@ -51,7 +51,7 @@ export class PaymentRequestsGeneralService {
     }
 
     await this.prisma.$transaction(async (prisma) => {
-      createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
+      createdPaymentRequest = await prisma.scPaymentRequestsGeneral.create({
         data: {
           description: paymentRequestGeneralDto.description,
           supplier: paymentRequestGeneralDto.supplier,
@@ -77,7 +77,7 @@ export class PaymentRequestsGeneralService {
               email: true,
             },
           },
-          CardHolder: true,
+          cardHolder: true,
         },
       });
 
@@ -101,7 +101,7 @@ export class PaymentRequestsGeneralService {
 
       await Promise.all(
         filesDB.map((file) =>
-          prisma.paymentRequestsFiles.create({
+          prisma.scPaymentRequestsFiles.create({
             data: {
               filesUid: file.uid,
               paymentRequestsGeneralUid: createdPaymentRequest.uid,
@@ -112,7 +112,7 @@ export class PaymentRequestsGeneralService {
 
       paymentSchedules = await Promise.all(
         paymentRequestGeneralDto.payments.map(async (payment) =>
-          prisma.paymentSchedule.create({
+          prisma.scPaymentSchedule.create({
             data: {
               dueDate: payment.dueDate,
               value: Number(payment.value),
@@ -129,7 +129,7 @@ export class PaymentRequestsGeneralService {
 
       apportionmentsCreated = await Promise.all(
         paymentRequestGeneralDto.apportionments.map(async (apportionment) =>
-          prisma.apportionments.create({
+          prisma.scApportionments.create({
             data: {
               paymentRequestsGeneralUid: createdPaymentRequest.uid,
               costCenter: apportionment.costCenter,
@@ -159,7 +159,7 @@ export class PaymentRequestsGeneralService {
   }
 
   async listByUser(userUid: string) {
-    const findUser = await this.prisma.user.findUnique({
+    const findUser = await this.prisma.saUser.findUnique({
       where: {
         uid: userUid,
       },
@@ -168,7 +168,7 @@ export class PaymentRequestsGeneralService {
       throw new BadRequestException('Não foi possível encontrar um usuário.');
     }
 
-    const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
+    const findRequests = await this.prisma.scPaymentRequestsGeneral.findMany({
       where: {
         userCreatedUid: findUser.uid,
       },
@@ -187,20 +187,20 @@ export class PaymentRequestsGeneralService {
             email: true,
           },
         },
-        CardHolder: true,
-        PaymentSchedule: {
+        cardHolder: true,
+        paymentSchedule: {
           select: {
             uid: true,
             value: true,
             dueDate: true,
           },
         },
-        PaymentRequestsFiles: {
+        paymentRequestsFiles: {
           select: {
             fileUid: true,
           },
         },
-        Apportionments: {
+        apportionments: {
           select: {
             uid: true,
             accountingAccount: true,
@@ -220,9 +220,9 @@ export class PaymentRequestsGeneralService {
 
     const transformedRequests = findRequests.map((request) => ({
       ...request,
-      payments: request.PaymentSchedule,
-      files: request.PaymentRequestsFiles.map((file) => file.fileUid),
-      apportionments: request.Apportionments,
+      payments: request.paymentSchedule,
+      files: request.paymentRequestsFiles.map((file) => file.fileUid),
+      apportionments: request.apportionments,
     }));
 
     return transformedRequests;
@@ -232,7 +232,7 @@ export class PaymentRequestsGeneralService {
     const findUser = await this.findUser(userUid);
 
     const findRequestGeneral =
-      await this.prisma.paymentRequestsGeneral.findUnique({
+      await this.prisma.scPaymentRequestsGeneral.findUnique({
         where: {
           uid: uid,
         },
@@ -245,7 +245,7 @@ export class PaymentRequestsGeneralService {
     }
 
     try {
-      const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
+      const findRequests = await this.prisma.scPaymentRequestsGeneral.findMany({
         where: {
           userCreatedUid: findUser.uid,
         },
@@ -264,20 +264,20 @@ export class PaymentRequestsGeneralService {
               email: true,
             },
           },
-          CardHolder: true,
-          PaymentSchedule: {
+          cardHolder: true,
+          paymentSchedule: {
             select: {
               uid: true,
               value: true,
               dueDate: true,
             },
           },
-          PaymentRequestsFiles: {
+          paymentRequestsFiles: {
             select: {
               fileUid: true,
             },
           },
-          Apportionments: {
+          apportionments: {
             select: {
               uid: true,
               accountingAccount: true,
@@ -302,7 +302,7 @@ export class PaymentRequestsGeneralService {
   }
 
   private async findUser(userUid: string) {
-    const findUser = await this.prisma.user.findUnique({
+    const findUser = await this.prisma.saUser.findUnique({
       where: {
         uid: userUid,
       },

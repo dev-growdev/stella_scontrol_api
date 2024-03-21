@@ -8,12 +8,16 @@ import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import { CreateProductDto, UpdateProductDto } from './dto/products-input.dto';
 import { ProductDto } from './dto/products-output.dto';
 
+interface IProductWithRelations extends Prisma.ScProducts {
+  category?: Prisma.ScCategories;
+}
+
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
-    const productsAlreadyExists = await this.prisma.products.findFirst({
+    const productsAlreadyExists = await this.prisma.scProducts.findFirst({
       where: {
         name: createProductDto.name,
       },
@@ -23,7 +27,7 @@ export class ProductsService {
       throw new BadRequestException('Esse produto já existe.');
     }
 
-    const categoryExists = await this.prisma.categories.findUnique({
+    const categoryExists = await this.prisma.scCategories.findUnique({
       where: { uid: createProductDto.categoryId },
     });
 
@@ -31,7 +35,7 @@ export class ProductsService {
       throw new BadRequestException('Categoria não encontrada.');
     }
 
-    const createdProduct = await this.prisma.products.create({
+    const createdProduct = await this.prisma.scProducts.create({
       data: {
         categoryId: categoryExists.uid,
         name: createProductDto.name,
@@ -46,13 +50,13 @@ export class ProductsService {
   }
 
   async findAll() {
-    const products = await this.prisma.products.findMany({});
+    const products = await this.prisma.scProducts.findMany({});
 
     return products.map(this.mapToDto);
   }
 
   async update(uid: string, updateProductDto: UpdateProductDto) {
-    const productsSameNameOrUid = await this.prisma.products.findMany({
+    const productsSameNameOrUid = await this.prisma.scProducts.findMany({
       where: { OR: [{ name: updateProductDto.name }, { uid: uid }] },
     });
 
@@ -66,7 +70,7 @@ export class ProductsService {
       }
     }
 
-    const findCategory = await this.prisma.categories.findUnique({
+    const findCategory = await this.prisma.scCategories.findUnique({
       where: { uid: updateProductDto.categoryId },
     });
 
@@ -74,7 +78,7 @@ export class ProductsService {
       throw new BadRequestException('Categoria não encontrada.');
     }
 
-    const updatedProduct = await this.prisma.products.update({
+    const updatedProduct = await this.prisma.scProducts.update({
       where: { uid },
       data: updateProductDto,
     });
@@ -83,7 +87,7 @@ export class ProductsService {
   }
 
   async disable(uid: string, enable: boolean) {
-    const product = await this.prisma.products.findUnique({
+    const product = await this.prisma.scProducts.findUnique({
       where: { uid },
     });
 
@@ -91,7 +95,7 @@ export class ProductsService {
       throw new NotFoundException('Produto não encontrado.');
     }
 
-    const disableProduct = await this.prisma.products.update({
+    const disableProduct = await this.prisma.scProducts.update({
       where: { uid },
       data: {
         enable,
@@ -123,8 +127,4 @@ export class ProductsService {
       ...(category && { category }),
     };
   }
-}
-
-interface IProductWithRelations extends Prisma.Products {
-  category?: Prisma.Categories;
 }

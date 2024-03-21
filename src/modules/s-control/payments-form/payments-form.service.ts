@@ -12,7 +12,7 @@ export class PaymentsFormService {
   // TODO: Entender o que é retornado e criar Dto
   async findAllPaymentsForm() {
     try {
-      const findAllPaymentsForm = await this.prisma.paymentsForm.findMany({
+      const findAllPaymentsForm = await this.prisma.scPaymentsForm.findMany({
         select: {
           uid: true,
           name: true,
@@ -20,7 +20,7 @@ export class PaymentsFormService {
         },
       });
 
-      const findHolders = await this.prisma.cardHolders.findMany({
+      const findHolders = await this.prisma.scCardHolders.findMany({
         select: {
           name: true,
           code: true,
@@ -43,12 +43,12 @@ export class PaymentsFormService {
   }
 
   async disablePaymentsForm(uid: string) {
-    const holder = await this.prisma.cardHolders.findUnique({
+    const holder = await this.prisma.scCardHolders.findUnique({
       where: { uid },
     });
 
     if (!holder) {
-      const findPaymentForm = await this.prisma.paymentsForm.findUnique({
+      const findPaymentForm = await this.prisma.scPaymentsForm.findUnique({
         where: { uid },
       });
 
@@ -58,7 +58,7 @@ export class PaymentsFormService {
         );
       }
 
-      const updatePaymentForm = await this.prisma.paymentsForm.update({
+      const updatePaymentForm = await this.prisma.scPaymentsForm.update({
         where: { uid },
         data: {
           enable: !findPaymentForm.enable,
@@ -73,7 +73,7 @@ export class PaymentsFormService {
       return updatePaymentForm;
     }
 
-    const disableHolder = await this.prisma.cardHolders.update({
+    const disableHolder = await this.prisma.scCardHolders.update({
       where: { uid },
       data: {
         enable: !holder.enable,
