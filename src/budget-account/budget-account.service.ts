@@ -75,4 +75,33 @@ export class BudgetAccountService {
       throw new InternalServerErrorException(error.message);
     }
   }
+
+  async updateTotalBudget(
+    year: string,
+    costCenter: string,
+    accountingAccount: string,
+    month: string,
+    requestValue: { totalBudget: number },
+  ) {
+    try {
+      const currentBudget = await this.checkAccountBalance(
+        year,
+        costCenter,
+        accountingAccount,
+        month,
+      );
+
+      const newTotal = currentBudget.totalBudget - requestValue.totalBudget;
+
+      await this.cesarRepository.updateTotalBudget(
+        year,
+        costCenter,
+        accountingAccount,
+        month,
+        newTotal,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }
