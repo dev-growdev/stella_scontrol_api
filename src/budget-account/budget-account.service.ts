@@ -81,7 +81,7 @@ export class BudgetAccountService {
     costCenter: string,
     accountingAccount: string,
     month: string,
-    requestValue: { totalBudget: number },
+    request: { totalValue: number; canceled: boolean },
   ) {
     try {
       const currentBudget = await this.checkAccountBalance(
@@ -91,7 +91,13 @@ export class BudgetAccountService {
         month,
       );
 
-      const newTotal = currentBudget.totalBudget - requestValue.totalBudget;
+      let newTotal = currentBudget.totalBudget;
+
+      if (request.canceled) {
+        newTotal += request.totalValue;
+      } else {
+        newTotal -= request.totalValue;
+      }
 
       await this.cesarRepository.updateTotalBudget(
         year,

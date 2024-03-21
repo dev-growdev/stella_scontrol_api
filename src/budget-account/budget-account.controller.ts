@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
 import {
   AccountingAccounts,
   CostCenterCesar,
@@ -35,6 +35,23 @@ export class BudgetAccountController {
       costCenter,
       accountingAccount,
       month,
+    );
+  }
+
+  @Patch('update-total-budget/:year/:costCenter/:accountingAccount/:month')
+  updateTotalBudget(
+    @Param('year') year: string,
+    @Param('costCenter') costCenter: string,
+    @Param('accountingAccount') accountingAccount: string,
+    @Param('month') month: string,
+    @Body() request: { totalValue: number; canceled: boolean },
+  ) {
+    return this.budgetAccountService.updateTotalBudget(
+      year,
+      costCenter,
+      accountingAccount,
+      month,
+      request,
     );
   }
 }

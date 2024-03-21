@@ -4,5 +4,6 @@ PATCH  {{HOST}}/budget-account/update-total-budget/2024/3.1.1.4.09.3 DESPESA CON
 Content-Type: application/json
 
 {
-    "totalBudget": 10
+    "totalValue": 10,
+    "canceled": true
 }
