@@ -1,4 +1,4 @@
 @HOST = http://localhost:8080/api
 
-GET  {{HOST}}/budget-account/balance/2023/3.1.1.2.08.1 CUSTO MERCADORIAS IMPORTADAS/3.1.2.1.01.3.00850-8 RESULTADO VARIACOES CAMBIAIS/marco HTTP/1.1
+GET  {{HOST}}/budget-account/balance/2024/3.1.1.4.09.3 DESPESA CONTROLADORIA/1.2.2.2.01.1.00262-3 INSTALAÇÕES/marco HTTP/1.1
 Content-Type: application/json
