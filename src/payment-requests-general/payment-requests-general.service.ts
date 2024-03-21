@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
@@ -8,7 +9,6 @@ import {
   PaymentRequestCreatedType,
   ValidatePaymentRequestGeneralDTO,
 } from './dto';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
@@ -40,11 +40,21 @@ export class PaymentRequestsGeneralService {
           data: {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
-            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
+            sendReceipt: paymentRequestGeneralDTO.sendReceipt,
             totalValue: Number(paymentRequestGeneralDTO.totalValue),
             accountingAccount: paymentRequestGeneralDTO.accountingAccount,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
             cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
+            unregisteredProducts: paymentRequestGeneralDTO.products
+              .filter((product) => !product.uid)
+              .map((product) => product.name),
+            Products: {
+              connect: paymentRequestGeneralDTO.products
+                .filter((product) => product.uid)
+                .map((product) => ({
+                  uid: product.uid,
+                })),
+            },
             PaymentSchedule: {
               create: paymentRequestGeneralDTO.payments.map((payment) => ({
                 value: Number(payment.value),
@@ -67,7 +77,7 @@ export class PaymentRequestsGeneralService {
             supplier: true,
             totalValue: true,
             accountingAccount: true,
-            requiredReceipt: true,
+            sendReceipt: true,
             createdAt: true,
             user: {
               select: {
@@ -85,6 +95,8 @@ export class PaymentRequestsGeneralService {
               },
             },
             Apportionments: true,
+            Products: true,
+            unregisteredProducts: true,
           },
         });
 
@@ -145,7 +157,7 @@ export class PaymentRequestsGeneralService {
         description: true,
         supplier: true,
         totalValue: true,
-        requiredReceipt: true,
+        sendReceipt: true,
         accountingAccount: true,
         createdAt: true,
         user: {
@@ -178,6 +190,8 @@ export class PaymentRequestsGeneralService {
             value: true,
           },
         },
+        Products: true,
+        unregisteredProducts: true,
       },
     });
 
@@ -225,7 +239,7 @@ export class PaymentRequestsGeneralService {
           data: {
             description: updateData.description,
             supplier: updateData.supplier,
-            requiredReceipt: updateData.requiredReceipt,
+            sendReceipt: updateData.sendReceipt,
             totalValue: updateData.totalValue,
             accountingAccount: updateData.accountingAccount,
             PaymentSchedule: {
@@ -258,7 +272,7 @@ export class PaymentRequestsGeneralService {
             supplier: true,
             totalValue: true,
             accountingAccount: true,
-            requiredReceipt: true,
+            sendReceipt: true,
             createdAt: true,
             user: {
               select: {

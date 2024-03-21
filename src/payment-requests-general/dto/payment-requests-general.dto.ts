@@ -18,6 +18,16 @@ export class PaymentDto {
   dueDate: Date;
 }
 
+export class Products {
+  @IsOptional()
+  @IsString()
+  uid?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}
+
 export class PaymentRequestGeneralDTO {
   @IsNotEmpty({ message: 'O documento é obrigatório' })
   @IsString({ message: 'O documento deve ser uma string' })
@@ -56,7 +66,7 @@ export class ValidatePaymentRequestGeneralDTO {
 
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
   @IsBoolean({ message: 'O comprovante deve ser um booleano' })
-  requiredReceipt: boolean;
+  sendReceipt: boolean;
 
   @IsArray({ message: 'payments deve ser um array' })
   @ValidateNested({ each: true })
@@ -72,6 +82,9 @@ export class ValidatePaymentRequestGeneralDTO {
   @IsOptional()
   @IsString({ message: 'Conta contábil deve ser uma string' })
   accountingAccount?: string;
+
+  @IsArray()
+  products: Products[];
 
   @IsArray({ message: 'Rateio deve ser um array.' })
   @ValidateNested({ each: true })
@@ -89,7 +102,7 @@ export class PaymentRequestCreatedType {
   uid: string;
   description: string;
   supplier: string;
-  requiredReceipt: boolean;
+  sendReceipt: boolean;
 }
 
 export class PaymentScheduleCreatedType {
