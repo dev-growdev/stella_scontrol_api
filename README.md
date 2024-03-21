@@ -39,7 +39,7 @@ Use the `.env-example` as reference to create your configuration file `.env`.
 How to install and start your project
 
 ```bash
-yarn install && yarn start:dev
+npm install && npm run start:dev
 ``````
 
 ---
