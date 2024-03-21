@@ -9,6 +9,8 @@ module.exports = {
   coverageDirectory: '../coverage',
   moduleNameMapper: {
     '@shared/(.*)': '<rootDir>/src/shared/$1',
+    '@/(.*)': '<rootDir>/src/$1',
+    '@modules/(.*)': '<rootDir>/src/modules/$1',
   },
   testEnvironment: 'node',
   setupFilesAfterEnv: [
