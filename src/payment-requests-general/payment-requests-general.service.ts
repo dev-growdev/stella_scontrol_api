@@ -164,15 +164,22 @@ export class PaymentRequestsGeneralService {
     };
   }
 
-  async listByUser(userUid: string) {
+  private async findUser(userUid: string) {
     const findUser = await this.prisma.user.findUnique({
       where: {
         uid: userUid,
       },
     });
+
     if (!findUser) {
       throw new BadRequestException('Não foi possível encontrar um usuário.');
     }
+
+    return findUser;
+  }
+
+  async listByUser(userUid: string) {
+    const findUser = await this.findUser(userUid);
 
     const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
       where: {
@@ -232,5 +239,78 @@ export class PaymentRequestsGeneralService {
     }));
 
     return transformedRequests;
+  }
+
+  async listPaymentRequest(userUid: string, uid: string) {
+    const findUser = await this.findUser(userUid);
+
+    const findRequestGeneral =
+      await this.prisma.paymentRequestsGeneral.findUnique({
+        where: {
+          uid: uid,
+        },
+      });
+
+    if (!findRequestGeneral) {
+      throw new BadRequestException(
+        'Não foi possível encontrar a solicitação de pagamento.',
+      );
+    }
+
+    try {
+      const findRequests = await this.prisma.paymentRequestsGeneral.findMany({
+        where: {
+          userCreatedUid: findUser.uid,
+        },
+        select: {
+          uid: true,
+          description: true,
+          supplier: true,
+          totalValue: true,
+          requiredReceipt: true,
+          createdAt: true,
+          user: {
+            select: {
+              uid: true,
+              name: true,
+              enable: true,
+              email: true,
+            },
+          },
+          CardHolder: true,
+          PaymentSchedule: {
+            select: {
+              uid: true,
+              value: true,
+              dueDate: true,
+            },
+          },
+          PaymentRequestsFiles: {
+            select: {
+              fileUid: true,
+            },
+          },
+          Apportionments: {
+            select: {
+              uid: true,
+              accountingAccount: true,
+              costCenter: true,
+              paymentRequestsGeneralUid: true,
+              value: true,
+            },
+          },
+        },
+      });
+
+      if (!findRequests.length) {
+        throw new BadRequestException(
+          'Você não tem nenhuma solicitação geral de pagamento.',
+        );
+      }
+
+      return findRequests;
+    } catch (error) {
+      throw new Error('Ocorreu um erro ao processar a solicitação.');
+    }
   }
 }

@@ -1,0 +1,6 @@
+@HOST = http://localhost:8080/api
+
+GET {{HOST}}/payment-request-general/9fef5be8-e163-45d2-b46a-901a25f679d6/9dffa867-73c4-440c-8210-047cad4ba206 HTTP/1.1
+Content-Type: application/json
+
+
