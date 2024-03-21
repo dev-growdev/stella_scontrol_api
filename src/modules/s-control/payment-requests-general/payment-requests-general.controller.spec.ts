@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PaymentRequestGeneralDTO } from './dto';
 import { InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 import { PaymentRequestsGeneralController } from './payment-requests-general.controller';
+import { CreatePaymentRequestGeneralDto } from './dto/payment-requests-general-input.dto';
 
-const makePaymentRequestGeneralDTO = (): PaymentRequestGeneralDTO => {
+const makePaymentRequestGeneralDto = (): CreatePaymentRequestGeneralDto => {
   return {
     description: 'Solicito pagamento para um equipamento novo.',
     supplier: '1234567891011',
@@ -40,7 +40,7 @@ describe('PaymentRequestsGeneralController', () => {
 
   describe('Create - POST', () => {
     it('should create a payment request general and return the created data on success', async () => {
-      const paymentRequestGeneralDTO = makePaymentRequestGeneralDTO();
+      const paymentRequestGeneralDto = makePaymentRequestGeneralDto();
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         return Promise.resolve({
@@ -55,21 +55,21 @@ describe('PaymentRequestsGeneralController', () => {
         });
       });
 
-      const result = await controller.create(paymentRequestGeneralDTO);
+      const result = await controller.create(paymentRequestGeneralDto);
 
       expect(result).toBeDefined();
       expect(result.uid).toEqual('1');
     });
 
     it('should handle errors and return InternalServerErrorException on failure', async () => {
-      const paymentRequestGeneralDTO = makePaymentRequestGeneralDTO();
+      const paymentRequestGeneralDto = makePaymentRequestGeneralDto();
 
       jest.spyOn(service, 'create').mockImplementation(async () => {
         throw new InternalServerErrorException('Test error');
       });
 
       try {
-        await controller.create(paymentRequestGeneralDTO);
+        await controller.create(paymentRequestGeneralDto);
       } catch (error) {
         expect(error).toBeInstanceOf(InternalServerErrorException);
         expect(error.message).toEqual('Test error');

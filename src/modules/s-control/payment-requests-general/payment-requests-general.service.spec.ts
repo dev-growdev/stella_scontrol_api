@@ -2,10 +2,10 @@ import { BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
-import { ValidatePaymentRequestGeneralDTO } from './dto';
+import { ValidatePaymentRequestGeneralDto } from './dto/payment-requests-general-input.dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
-const makePaymentRequestGeneralDTO = (): ValidatePaymentRequestGeneralDTO => {
+const makePaymentRequestGeneralDto = (): ValidatePaymentRequestGeneralDto => {
   return {
     supplier: '1234567891011',
     description: 'Solicito pagamento para um equipamento novo.',
@@ -36,7 +36,7 @@ describe('PaymentRequestsGeneralService', () => {
 
   describe('Create - POST', () => {
     it('should create a payment request general and return the created data on success', async () => {
-      const paymentRequestGeneralDTO = makePaymentRequestGeneralDTO();
+      const paymentRequestGeneralDto = makePaymentRequestGeneralDto();
 
       jest.spyOn(prisma, '$transaction').mockImplementation(async () => {
         const createdPaymentRequestGeneral = {
@@ -53,7 +53,7 @@ describe('PaymentRequestsGeneralService', () => {
       });
 
       const createdPaymentRequestGeneral = await sut.create(
-        paymentRequestGeneralDTO,
+        paymentRequestGeneralDto,
         [],
       );
 
@@ -62,7 +62,7 @@ describe('PaymentRequestsGeneralService', () => {
     });
 
     it('should throw BadRequestException if there is no file', async () => {
-      const paymentRequestGeneralDTO = {
+      const paymentRequestGeneralDto = {
         supplier: '1234567891011',
         description: 'Solicito pagamento para um equipamento novo.',
         requiredReceipt: true,
@@ -77,7 +77,7 @@ describe('PaymentRequestsGeneralService', () => {
       });
 
       try {
-        await sut.create(paymentRequestGeneralDTO, []);
+        await sut.create(paymentRequestGeneralDto, []);
       } catch (error) {
         console.log(error);
         expect(error).toBeInstanceOf(BadRequestException);

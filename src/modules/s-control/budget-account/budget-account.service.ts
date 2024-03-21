@@ -8,7 +8,6 @@ import {
 
 @Injectable()
 export class BudgetAccountService {
-  // TODO: Implementar Façade
   constructor(private cesarFacade: CesarFacade) {}
 
   async getCostCenters() {
@@ -47,25 +46,18 @@ export class BudgetAccountService {
     accountingAccount: string,
     month: string,
   ): Promise<{ totalBudget: number }> {
-    try {
-      const retrievedAccountingAccount =
-        await this.cesarFacade.checkAccountBalanceForOperation(
-          year,
-          costCenter,
-          accountingAccount,
-          month,
-        );
+    const retrievedAccountingAccount =
+      await this.cesarFacade.checkAccountBalanceForOperation(
+        year,
+        costCenter,
+        accountingAccount,
+        month,
+      );
 
-      if (retrievedAccountingAccount.totalBudget === 0) {
-        throw new BadRequestException('Saldo insuficiente');
-      }
-
-      return retrievedAccountingAccount;
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(error.message);
+    if (retrievedAccountingAccount.totalBudget === 0) {
+      throw new BadRequestException('Saldo insuficiente');
     }
+
+    return retrievedAccountingAccount;
   }
 }

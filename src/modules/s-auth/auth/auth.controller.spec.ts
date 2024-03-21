@@ -1,10 +1,10 @@
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dtos';
-import { PrismaService } from '../prisma/prisma.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { AuthDto } from './dtos/auth-input.dto';
+import { PrismaService } from '@shared/modules/prisma/prisma.service';
 
 const mockUser = {
   uid: 'mockUserId',

@@ -9,8 +9,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
+import { CreatePaymentRequestGeneralDto } from './dto/payment-requests-general-input.dto';
 
 @Controller('payment-request-general')
 export class PaymentRequestsGeneralController {
@@ -22,7 +22,7 @@ export class PaymentRequestsGeneralController {
   @UseInterceptors(FilesInterceptor('file'))
   create(
     @Body()
-    paymentRequestGeneral: PaymentRequestGeneralDTO,
+    paymentRequestGeneral: CreatePaymentRequestGeneralDto,
     @UploadedFiles()
     files: Express.Multer.File[],
   ) {

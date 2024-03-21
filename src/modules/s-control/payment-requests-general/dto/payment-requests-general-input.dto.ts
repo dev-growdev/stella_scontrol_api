@@ -18,11 +18,12 @@ export class PaymentDto {
   dueDate: Date;
 }
 
-export class PaymentRequestGeneralDTO {
+export class CreatePaymentRequestGeneralDto {
   @IsNotEmpty({ message: 'O documento é obrigatório' })
   @IsString({ message: 'O documento deve ser uma string' })
   document: string;
 }
+
 export class ApportionmentsDto {
   @IsNotEmpty({ message: 'É necessário adicionar um centro de custo.' })
   @IsString()
@@ -44,7 +45,7 @@ export class CardHolderType {
   uid: string;
 }
 
-export class ValidatePaymentRequestGeneralDTO {
+export class ValidatePaymentRequestGeneralDto {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
   supplier: string;

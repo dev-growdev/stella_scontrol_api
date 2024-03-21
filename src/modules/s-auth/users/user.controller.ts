@@ -1,7 +1,6 @@
 import { Controller, Param, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { DisableUserDto } from './dto/user-input.dto';
 
 @ApiTags('Usuários')
 @ApiBearerAuth()
@@ -10,7 +9,7 @@ export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Put(':id_user_ad/disable')
-  disable(@Param() userDto: DisableUserDto) {
-    return this.usersService.disableUser(userDto.id_user_ad);
+  disable(@Param('id_user_ad') idUserAd: string) {
+    return this.usersService.disableUser(idUserAd);
   }
 }

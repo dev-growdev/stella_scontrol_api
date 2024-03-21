@@ -2,14 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
-import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
+import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import {
   ApportionmentsCreatedType,
   FilesCreatedType,
   PaymentRequestCreatedType,
   PaymentScheduleCreatedType,
-  ValidatePaymentRequestGeneralDTO,
-} from './dto';
+  ValidatePaymentRequestGeneralDto,
+} from './dto/payment-requests-general-input.dto';
 
 @Injectable()
 export class PaymentRequestsGeneralService {
@@ -19,7 +19,7 @@ export class PaymentRequestsGeneralService {
   ) {}
 
   async create(
-    paymentRequestGeneralDTO: ValidatePaymentRequestGeneralDTO,
+    paymentRequestGeneralDto: ValidatePaymentRequestGeneralDto,
     files: Express.Multer.File[],
   ) {
     if (files.length === 0) {
@@ -37,122 +37,116 @@ export class PaymentRequestsGeneralService {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    try {
-      await this.prisma.$transaction(async (prisma) => {
-        if (paymentRequestGeneralDTO.cardHolder) {
-          const existsHolder = await prisma.cardHolders.findUnique({
-            where: {
-              uid: paymentRequestGeneralDTO.cardHolder.uid,
-            },
-          });
-          if (!existsHolder) {
-            throw new BadRequestException(
-              'Não foi possível encontrar um portador.',
-            );
-          }
-        }
-
-        createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
-          data: {
-            description: paymentRequestGeneralDTO.description,
-            supplier: paymentRequestGeneralDTO.supplier,
-            totalValue: Number(paymentRequestGeneralDTO.totalValue),
-            accountingAccount: paymentRequestGeneralDTO.accountingAccount,
-            requiredReceipt: paymentRequestGeneralDTO.requiredReceipt,
-            userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
-            cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
-          },
-          select: {
-            uid: true,
-            description: true,
-            supplier: true,
-            totalValue: true,
-            accountingAccount: true,
-            requiredReceipt: true,
-            createdAt: true,
-            user: {
-              select: {
-                uid: true,
-                name: true,
-                enable: true,
-                email: true,
-              },
-            },
-            CardHolder: true,
-          },
-        });
-
-        const uploadedFiles = await Promise.all(
-          files.map(async (file) => {
-            const createdFile = await this.filesService.createFileOnDB(file);
-
-            const fileStream = fs.createWriteStream(
-              `${dirPath}/${createdFile.key}`,
-            );
-
-            fileStream.write(file.buffer);
-
-            fileStream.end();
-
-            return createdFile;
-          }),
-        );
-
-        filesDB = uploadedFiles;
-
-        await Promise.all(
-          filesDB.map((file) =>
-            prisma.paymentRequestsFiles.create({
-              data: {
-                filesUid: file.uid,
-                paymentRequestsGeneralUid: createdPaymentRequest.uid,
-              },
-            }),
-          ),
-        );
-
-        paymentSchedules = await Promise.all(
-          paymentRequestGeneralDTO.payments.map(async (payment) =>
-            prisma.paymentSchedule.create({
-              data: {
-                dueDate: payment.dueDate,
-                value: Number(payment.value),
-                paymentRequestsGeneralUid: createdPaymentRequest.uid,
-              },
-              select: {
-                uid: true,
-                value: true,
-                dueDate: true,
-              },
-            }),
-          ),
-        );
-
-        apportionmentsCreated = await Promise.all(
-          paymentRequestGeneralDTO.apportionments.map(async (apportionment) =>
-            prisma.apportionments.create({
-              data: {
-                paymentRequestsGeneralUid: createdPaymentRequest.uid,
-                costCenter: apportionment.costCenter,
-                accountingAccount: apportionment.accountingAccount,
-                value: Number(apportionment.value),
-              },
-              select: {
-                uid: true,
-                accountingAccount: true,
-                costCenter: true,
-                paymentRequestsGeneralUid: true,
-                value: true,
-              },
-            }),
-          ),
-        );
+    if (paymentRequestGeneralDto.cardHolder) {
+      const existsHolder = await this.prisma.cardHolders.findUnique({
+        where: {
+          uid: paymentRequestGeneralDto.cardHolder.uid,
+        },
       });
-    } catch (error) {
-      throw new BadRequestException(
-        'Algo deu errado, confira os campos e tente novamente.',
-      );
+      if (!existsHolder) {
+        throw new BadRequestException(
+          'Não foi possível encontrar um portador.',
+        );
+      }
     }
+
+    await this.prisma.$transaction(async (prisma) => {
+      createdPaymentRequest = await prisma.paymentRequestsGeneral.create({
+        data: {
+          description: paymentRequestGeneralDto.description,
+          supplier: paymentRequestGeneralDto.supplier,
+          totalValue: Number(paymentRequestGeneralDto.totalValue),
+          accountingAccount: paymentRequestGeneralDto.accountingAccount,
+          requiredReceipt: paymentRequestGeneralDto.requiredReceipt,
+          userCreatedUid: paymentRequestGeneralDto.userCreatedUid,
+          cardHoldersUid: paymentRequestGeneralDto.cardHolder?.uid ?? null,
+        },
+        select: {
+          uid: true,
+          description: true,
+          supplier: true,
+          totalValue: true,
+          accountingAccount: true,
+          requiredReceipt: true,
+          createdAt: true,
+          user: {
+            select: {
+              uid: true,
+              name: true,
+              enable: true,
+              email: true,
+            },
+          },
+          CardHolder: true,
+        },
+      });
+
+      const uploadedFiles = await Promise.all(
+        files.map(async (file) => {
+          const createdFile = await this.filesService.createFileOnDB(file);
+
+          const fileStream = fs.createWriteStream(
+            `${dirPath}/${createdFile.key}`,
+          );
+
+          fileStream.write(file.buffer);
+
+          fileStream.end();
+
+          return createdFile;
+        }),
+      );
+
+      filesDB = uploadedFiles;
+
+      await Promise.all(
+        filesDB.map((file) =>
+          prisma.paymentRequestsFiles.create({
+            data: {
+              filesUid: file.uid,
+              paymentRequestsGeneralUid: createdPaymentRequest.uid,
+            },
+          }),
+        ),
+      );
+
+      paymentSchedules = await Promise.all(
+        paymentRequestGeneralDto.payments.map(async (payment) =>
+          prisma.paymentSchedule.create({
+            data: {
+              dueDate: payment.dueDate,
+              value: Number(payment.value),
+              paymentRequestsGeneralUid: createdPaymentRequest.uid,
+            },
+            select: {
+              uid: true,
+              value: true,
+              dueDate: true,
+            },
+          }),
+        ),
+      );
+
+      apportionmentsCreated = await Promise.all(
+        paymentRequestGeneralDto.apportionments.map(async (apportionment) =>
+          prisma.apportionments.create({
+            data: {
+              paymentRequestsGeneralUid: createdPaymentRequest.uid,
+              costCenter: apportionment.costCenter,
+              accountingAccount: apportionment.accountingAccount,
+              value: Number(apportionment.value),
+            },
+            select: {
+              uid: true,
+              accountingAccount: true,
+              costCenter: true,
+              paymentRequestsGeneralUid: true,
+              value: true,
+            },
+          }),
+        ),
+      );
+    });
 
     return {
       request: {

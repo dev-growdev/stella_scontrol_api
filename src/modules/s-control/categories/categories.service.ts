@@ -50,7 +50,7 @@ export class CategoriesService {
   async update(uid: string, data: UpdateCategoryDto): Promise<CategoryDto> {
     const categories = await this.prisma.categories.findMany({
       where: {
-        OR: [{ uid }, { name: data.name }],
+        OR: [{ uid }, { name: data.name, uid: { not: uid } }],
       },
     });
 
@@ -82,18 +82,14 @@ export class CategoriesService {
     //   throw new BadRequestException('Essa categoria já existe.');
     // }
 
-    try {
-      const updatedCategory = await this.prisma.categories.update({
-        where: { uid },
-        data: {
-          name: data.name,
-        },
-      });
+    const updatedCategory = await this.prisma.categories.update({
+      where: { uid },
+      data: {
+        name: data.name,
+      },
+    });
 
-      return this.mapToDto(updatedCategory);
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
+    return this.mapToDto(updatedCategory);
   }
 
   async disable(
@@ -108,18 +104,14 @@ export class CategoriesService {
       throw new NotFoundException('Categoria não encontrada.');
     }
 
-    try {
-      const updatedCategory = await this.prisma.categories.update({
-        where: { uid },
-        data: {
-          enable: data.enable,
-        },
-      });
+    const updatedCategory = await this.prisma.categories.update({
+      where: { uid },
+      data: {
+        enable: data.enable,
+      },
+    });
 
-      return this.mapToDto(updatedCategory);
-    } catch (error) {
-      throw new InternalServerErrorException(error.message);
-    }
+    return this.mapToDto(updatedCategory);
   }
 
   private mapToDto(entity: Prisma.Categories): CategoryDto {
