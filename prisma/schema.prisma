@@ -41,22 +41,25 @@ model User {
 model PaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  supplier          String
-  description       String?
-  requiredReceipt   Boolean @default(false) @map("send_receipt")
-  totalValue        Decimal @map("total_value")
-  accountingAccount String? @map("accounting_account") @db.VarChar(255)
+  supplier             String
+  description          String?
+  requiredReceipt      Boolean  @default(false) @map("send_receipt")
+  totalValue           Decimal  @map("total_value")
+  accountingAccount    String?  @map("accounting_account") @db.VarChar(255)
+  unregisteredProducts String[] @map("unregistered_products")
 
-  user           User             @relation(fields: [userCreatedUid], references: [uid])
-  userCreatedUid String           @map("user_created_uid")
-  CardHolder     CardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
-  cardHoldersUid String?          @map("card_holders_uid")
-  Apportionments Apportionments[]
+  user           User         @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String       @map("user_created_uid")
+  CardHolder     CardHolders? @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid String?      @map("card_holders_uid")
 
-  createdAt            DateTime               @default(now()) @map("created_at")
-  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at")
+  Apportionments       Apportionments[]
+  Products             Products[]
   PaymentSchedule      PaymentSchedule[]
   PaymentRequestsFiles PaymentRequestsFiles[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("payment_requests_general")
 }
@@ -93,8 +96,9 @@ model Categories {
 model Products {
   uid String @id @default(uuid())
 
-  categoryId String
-  category   Categories @relation(fields: [categoryId], references: [uid])
+  categoryId             String
+  category               Categories               @relation(fields: [categoryId], references: [uid])
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
 
   code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)
