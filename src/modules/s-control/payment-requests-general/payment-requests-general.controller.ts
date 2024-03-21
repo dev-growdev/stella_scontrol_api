@@ -39,4 +39,12 @@ export class PaymentRequestsGeneralController {
   listPaymentsRequestsByUser(@Param('userUid') userUid: string) {
     return this.paymentRequestsGeneralService.listByUser(userUid);
   }
+
+  @Get('/:userUid/:uid')
+  listPaymentRequest(
+    @Param('userUid') userUid: string,
+    @Param('uid') uid: string,
+  ) {
+    return this.paymentRequestsGeneralService.listPaymentRequest(userUid, uid);
+  }
 }
