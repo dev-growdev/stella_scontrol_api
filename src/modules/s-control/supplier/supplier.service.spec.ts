@@ -4,7 +4,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../../../shared/modules/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { truncatePrisma } from 'test/setup/truncate-database';
-import { IntegrationsModule } from 'src/integrations/integration.module';
+import { FacadesModule } from '@/modules/@facades/facades.module';
 
 describe('SupplierService -', () => {
   let sut: SupplierService;
@@ -12,8 +12,8 @@ describe('SupplierService -', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [FacadesModule],
       providers: [SupplierService, PrismaService, ConfigService],
-      imports: [IntegrationsModule],
     }).compile();
 
     sut = module.get<SupplierService>(SupplierService);
@@ -38,7 +38,7 @@ describe('SupplierService -', () => {
       };
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(supplierSigerMock);
 
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
@@ -62,7 +62,7 @@ describe('SupplierService -', () => {
       });
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(undefined);
 
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
@@ -81,11 +81,11 @@ describe('SupplierService -', () => {
       const cnpj = '1234567891011';
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(undefined);
 
       jest
-        .spyOn(sut['receitawsRepository'], 'findSupplierByCNPJ')
+        .spyOn(sut['receitawsFacade'], 'findSupplierByCNPJ')
         .mockResolvedValue(undefined);
 
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
@@ -101,11 +101,11 @@ describe('SupplierService -', () => {
       };
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(undefined);
 
       jest
-        .spyOn(sut['receitawsRepository'], 'findSupplierByCNPJ')
+        .spyOn(sut['receitawsFacade'], 'findSupplierByCNPJ')
         .mockResolvedValue(supplierMock);
 
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
@@ -134,7 +134,7 @@ describe('SupplierService -', () => {
       const cpfOrCnpj = '00000000000000';
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockRejectedValue(new InternalServerErrorException('Error message'));
 
       await expect(sut.findSupplierByCPForCNPJ(cpfOrCnpj)).rejects.toThrow(
@@ -146,11 +146,11 @@ describe('SupplierService -', () => {
       const cpfOrCnpj = '00000000000000';
 
       jest
-        .spyOn(sut['siegerRepository'], 'findSupplierByCPForCNPJ')
+        .spyOn(sut['siegerFacade'], 'findSupplierByCPForCNPJ')
         .mockResolvedValue(undefined);
 
       jest
-        .spyOn(sut['receitawsRepository'], 'findSupplierByCNPJ')
+        .spyOn(sut['receitawsFacade'], 'findSupplierByCNPJ')
         .mockRejectedValue(new InternalServerErrorException('Error message'));
 
       await expect(sut.findSupplierByCPForCNPJ(cpfOrCnpj)).rejects.toThrow(

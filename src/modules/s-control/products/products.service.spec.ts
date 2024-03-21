@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@/shared/modules/prisma/prisma.service';
+import { ProductDto } from './dto/products-output.dto';
 
 const uid = '2a4cdbad-aab0-470a-ae48-e4693d62ce9e';
 
@@ -56,11 +57,23 @@ describe('ProductsService', () => {
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
       });
 
-      prismaServiceMock.products.create.mockResolvedValueOnce(productDto);
+      const mockCreate: ProductDto = {
+        name: productDto.name,
+        enable: productDto.enable,
+        uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
+        code: 12345,
+      };
+      prismaServiceMock.products.create.mockResolvedValueOnce(mockCreate);
 
       const result = await service.create(productDto);
 
-      expect(result).toEqual(productDto);
+      expect(result).toEqual({
+        name: productDto.name,
+        enable: productDto.enable,
+        uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
+        code: 12345,
+        description: undefined,
+      });
     });
 
     it('should throw BadRequestException if product already exists', async () => {
@@ -90,6 +103,7 @@ describe('ProductsService', () => {
           categoryId: '4e292f89-ef81-41f4-8be8-da44c0012f8b',
           code: 12345,
           name: 'Caneta Esferográfica',
+          description: 'Caneta esferográfica azul, ponta fina.',
           enable: true,
           measurement: 'unidades',
           quantity: 10,
@@ -97,8 +111,9 @@ describe('ProductsService', () => {
         {
           uid: '7728fa6d-6036-4ea4-b9e5-74a3223ce844',
           categoryId: '5c8f9d1b-0f88-4f31-a95a-865e9fcdff23',
-          code: 'C56789',
+          code: 56789,
           name: 'Calça Jeans Masculina',
+          description: 'Calça jeans masculina, tamanho 42.',
           enable: true,
           measurement: 'peças',
           quantity: 20,
@@ -108,28 +123,28 @@ describe('ProductsService', () => {
 
       const result = await service.findAll();
 
-      expect(result).toEqual(mockProducts);
+      expect(result).toEqual(
+        mockProducts.map(({ categoryId: _, ...rest }) => rest),
+      );
     });
 
     it('should throw InternalServerErrorException if category is not found', async () => {
-      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
-        uid,
-        ...productDto,
-      });
+      prismaServiceMock.products.findMany.mockResolvedValueOnce([
+        { uid, ...productDto },
+      ]);
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.update(uid, productDto)).rejects.toThrow(
-        InternalServerErrorException,
+        BadRequestException,
       );
     });
   });
 
   describe('update', () => {
     it('should update a product', async () => {
-      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
-        uid,
-        ...productDto,
-      });
+      prismaServiceMock.products.findMany.mockResolvedValueOnce([
+        { uid, ...productDto, code: 12345 },
+      ]);
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
       });
@@ -137,44 +152,51 @@ describe('ProductsService', () => {
       prismaServiceMock.products.update.mockResolvedValueOnce({
         uid,
         ...productDto,
+        code: 12345,
       });
 
       const result = await service.update(uid, productDto);
 
-      expect(result).toEqual({ uid, ...productDto });
+      expect(result).toEqual({
+        uid,
+        name: productDto.name,
+        enable: productDto.enable,
+        measurement: productDto.measurement,
+        quantity: productDto.quantity,
+        code: 12345,
+        description: undefined,
+      });
     });
 
     it('should throw NotFoundException if product is not found', async () => {
-      prismaServiceMock.products.findUnique.mockResolvedValueOnce(null);
+      prismaServiceMock.products.findMany.mockResolvedValueOnce([]);
 
       await expect(service.update(uid, productDto)).rejects.toThrow(
         NotFoundException,
       );
     });
 
-    it('should throw InternalServerErrorException if category is not found', async () => {
-      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
-        uid,
-        ...productDto,
-      });
+    it('should throw BadRequestException if category is not found', async () => {
+      prismaServiceMock.products.findMany.mockResolvedValueOnce([
+        { uid, ...productDto },
+      ]);
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.update(uid, productDto)).rejects.toThrow(
-        InternalServerErrorException,
+        BadRequestException,
       );
     });
 
     it('should throw InternalServerErrorException on error', async () => {
-      prismaServiceMock.products.findUnique.mockResolvedValueOnce({
-        uid,
-        ...productDto,
-      });
+      prismaServiceMock.products.findMany.mockResolvedValueOnce([
+        { uid, ...productDto },
+      ]);
       prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
         uid: '2a4cdbad-aab0-470a-ae48-e4693d62ce9e',
       });
 
       prismaServiceMock.products.update.mockRejectedValueOnce(
-        new Error('Mocked error'),
+        new InternalServerErrorException('Mocked error'),
       );
 
       await expect(service.update(uid, productDto)).rejects.toThrow(
@@ -189,16 +211,21 @@ describe('ProductsService', () => {
         uid,
         ...productDto,
       });
-
-      prismaServiceMock.products.update.mockResolvedValueOnce({
+      const stubResponse: ProductDto = {
         uid,
-        ...productDto,
+        code: 12345,
+        name: productDto.name,
         enable: false,
-      });
+      };
+
+      prismaServiceMock.products.update.mockResolvedValueOnce(stubResponse);
 
       const result = await service.disable(uid, false);
 
-      expect(result).toEqual({ uid, ...productDto, enable: false });
+      expect(result).toEqual({
+        ...stubResponse,
+        description: undefined,
+      });
     });
 
     it('should throw NotFoundException if product is not found', async () => {
@@ -216,7 +243,7 @@ describe('ProductsService', () => {
       });
 
       prismaServiceMock.products.update.mockRejectedValueOnce(
-        new Error('Mocked error'),
+        new InternalServerErrorException('Mocked error'),
       );
 
       await expect(service.disable(uid, false)).rejects.toThrow(

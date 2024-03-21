@@ -16,9 +16,8 @@ export class SupplierService {
     cpfOrCnpj: string,
   ): Promise<SupplierDto | undefined> {
     try {
-      const supplierSiger = await this.siegerFacade.findSupplierByCPForCNPJ(
-        cpfOrCnpj,
-      );
+      const supplierSiger =
+        await this.siegerFacade.findSupplierByCPForCNPJ(cpfOrCnpj);
 
       if (supplierSiger) {
         return {
@@ -47,9 +46,8 @@ export class SupplierService {
         };
       }
 
-      const supplierReceita = await this.receitawsFacade.findSupplierByCNPJ(
-        cpfOrCnpj,
-      );
+      const supplierReceita =
+        await this.receitawsFacade.findSupplierByCNPJ(cpfOrCnpj);
 
       if (!supplierReceita) return undefined;
 

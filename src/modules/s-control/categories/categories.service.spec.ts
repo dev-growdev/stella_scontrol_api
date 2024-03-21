@@ -109,11 +109,13 @@ describe('CategoriesService', () => {
 
   describe('update', () => {
     it('should update a category', async () => {
-      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
-        uid,
-        name: 'Eletrônicos',
-        enable: false,
-      });
+      prismaServiceMock.categories.findMany.mockResolvedValueOnce([
+        {
+          uid,
+          name: 'Eletrônicos',
+          enable: false,
+        },
+      ]);
 
       prismaServiceMock.categories.update.mockResolvedValueOnce({
         uid,
@@ -126,7 +128,7 @@ describe('CategoriesService', () => {
     });
 
     it('should throw NotFoundException if category is not found', async () => {
-      prismaServiceMock.categories.findUnique.mockResolvedValueOnce(null);
+      prismaServiceMock.categories.findMany.mockResolvedValueOnce([]);
 
       await expect(service.update(uid, categoryDto)).rejects.toThrow(
         NotFoundException,
@@ -134,11 +136,13 @@ describe('CategoriesService', () => {
     });
 
     it('should throw InternalServerErrorException on error', async () => {
-      prismaServiceMock.categories.findUnique.mockResolvedValueOnce({
-        uid,
-        name: 'Eletrônicos',
-        enable: false,
-      });
+      prismaServiceMock.categories.findMany.mockResolvedValueOnce([
+        {
+          uid,
+          name: 'Eletrônicos',
+          enable: false,
+        },
+      ]);
 
       prismaServiceMock.categories.update.mockRejectedValueOnce(
         new Error('Mocked error'),

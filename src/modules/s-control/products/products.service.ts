@@ -5,11 +5,7 @@ import {
 } from '@nestjs/common';
 import Prisma from '@prisma/client';
 import { PrismaService } from '@shared/modules/prisma/prisma.service';
-import {
-  CreateProductDto,
-  DisableProductDto,
-  UpdateProductDto,
-} from './dto/products-input.dto';
+import { CreateProductDto, UpdateProductDto } from './dto/products-input.dto';
 import { ProductDto } from './dto/products-output.dto';
 
 @Injectable()
@@ -86,7 +82,7 @@ export class ProductsService {
     return this.mapToDto(updatedProduct);
   }
 
-  async disable(uid: string, enable: DisableProductDto['enable']) {
+  async disable(uid: string, enable: boolean) {
     const product = await this.prisma.products.findUnique({
       where: { uid },
     });
