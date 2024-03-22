@@ -31,22 +31,28 @@ model SaUser {
 model ScPaymentRequestsGeneral {
   uid String @id @default(uuid())
 
-  supplier          String
-  description       String?
-  requiredReceipt   Boolean @default(false) @map("send_receipt")
-  totalValue        Decimal @map("total_value")
-  accountingAccount String? @map("accounting_account") @db.VarChar(255)
+  supplier             String
+  description          String?
+  sendReceipt          Boolean  @default(false) @map("send_receipt")
+  totalValue           Decimal  @map("total_value")
+  accountingAccount    String?  @map("accounting_account") @db.VarChar(255)
+  unregisteredProducts String[] @map("unregistered_products")
+  isRateable           Boolean  @default(false) @map("is_rateable")
+  bankTransfer         Json?    @map("bank_transfer") @db.Json
+  pix                  String?
 
-  user           SaUser             @relation(fields: [userCreatedUid], references: [uid])
-  userCreatedUid String             @map("user_created_uid")
-  cardHolder     ScCardHolders?     @relation(fields: [cardHoldersUid], references: [uid])
-  cardHoldersUid String?            @map("card_holders_uid")
-  apportionments ScApportionments[]
+  user           SaUser         @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid String         @map("user_created_uid")
+  cardHolder     ScCardHolders? @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid String?        @map("card_holders_uid")
 
-  createdAt            DateTime                 @default(now()) @map("created_at")
-  updatedAt            DateTime                 @default(now()) @updatedAt @map("updated_at")
+  Apportionments       ScApportionments[]
+  Products             ScProducts[]
   paymentSchedule      ScPaymentSchedule[]
   paymentRequestsFiles ScPaymentRequestsFiles[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("sc_payment_requests_general")
   @@schema("s_control")
@@ -86,8 +92,9 @@ model ScCategories {
 model ScProducts {
   uid String @id @default(uuid())
 
-  categoryId String
-  category   ScCategories @relation(fields: [categoryId], references: [uid])
+  categoryId             String
+  category               ScCategories               @relation(fields: [categoryId], references: [uid])
+  PaymentRequestsGeneral ScPaymentRequestsGeneral[]
 
   code        Int     @default(autoincrement())
   name        String  @db.VarChar(50)

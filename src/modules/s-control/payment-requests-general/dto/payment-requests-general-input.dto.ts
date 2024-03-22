@@ -45,6 +45,27 @@ export class CardHolderType {
   uid: string;
 }
 
+export class BankTransferType {
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  bank: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  accountNumber: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  agency: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  accountType: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  cpfOrCnpj: string;
+}
 export class ValidatePaymentRequestGeneralDto {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
@@ -56,12 +77,23 @@ export class ValidatePaymentRequestGeneralDto {
 
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
   @IsBoolean({ message: 'O comprovante deve ser um booleano' })
-  requiredReceipt: boolean;
+  sendReceipt: boolean;
+
+  @IsNotEmpty()
+  @IsBoolean({ message: 'O rateio deve ser um booleano' })
+  isRateable: boolean;
+
+  @ValidateNested({ each: true })
+  @Type(() => BankTransferType)
+  bankTransfer?: BankTransferType;
 
   @IsArray({ message: 'payments deve ser um array' })
   @ValidateNested({ each: true })
   @Type(() => PaymentDto)
   payments: PaymentDto[];
+
+  @IsArray()
+  unregisteredProducts: string[];
 
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
@@ -72,6 +104,10 @@ export class ValidatePaymentRequestGeneralDto {
   @IsOptional()
   @IsString({ message: 'Conta contábil deve ser uma string' })
   accountingAccount?: string;
+
+  @IsOptional()
+  @IsString({ message: 'Conta contábil deve ser uma string' })
+  pix?: string;
 
   @IsArray({ message: 'Rateio deve ser um array.' })
   @ValidateNested({ each: true })
