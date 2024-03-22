@@ -1,0 +1,31 @@
+FROM node:18-alpine as build
+
+WORKDIR /home/node/app
+
+COPY --chown=node:node . .
+
+RUN npm ci && npm cache clean --force
+
+RUN npm run build
+
+FROM node:18-alpine as runtime
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY --chown=node:node --from=build /home/node/app/dist /app
+
+COPY --chown=node:node --from=build /home/node/app/package.json /app/package.json
+
+COPY --chown=node:node --from=build /home/node/app/package-lock.json /app/package-lock.json
+
+COPY --chown=node:node --from=build /home/node/app/prisma /app/prisma
+
+RUN npm ci --omit=dev && npm cache clean --force
+
+RUN npx prisma generate
+
+USER node
+
+CMD ["node", "src/main.js"]

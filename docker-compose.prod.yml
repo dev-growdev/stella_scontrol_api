@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  nest-api:
+    container_name: scontrol-api
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - 8080:8080
+    networks:
+      - ssystem_hmg
+    depends_on:
+      - database_hmg
+
+  database-hmg:
+    image: postgres:14
+    container_name: database-hmg
+    environment:
+      POSTGRES_PASSWORD: growdev2023
+      POSTGRES_USER: growdev
+      POSTGRES_DB: scontrol
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_hmg:/var/lib/postgresql/data
+    networks:
+      - ssystem_hmg
+
+networks:
+  ssystem_hmg:
+    driver: bridge
+
+volumes:
+  postgres_hmg:
