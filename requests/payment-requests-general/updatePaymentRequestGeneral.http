@@ -1,0 +1,52 @@
+@HOST = http://localhost:8080/api
+
+PUT {{HOST}}/payment-request-general/01cb6368-cc8b-4997-905f-fd854a5df690/7463db88-3a0b-4226-b120-04747c7947fb HTTP/1.1
+Content-Type: application/json
+
+{
+  "description": "mt louco 2",
+  "supplier": "33683111000280",
+  "requiredReceipt": true,
+  "totalValue": 200,
+  "paymentSchedules": [
+    {
+      "uid": "cdc6f9e9-3a23-4303-8e49-48fa5bf76f31",
+      "value": 100,
+      "dueDate": "2024-04-21T03:00:00.000Z"
+    },
+    {
+      "uid": "5091f275-9b0b-47ce-92b5-3738b8948997",
+      "value": 100,
+      "dueDate": "2024-04-21T03:00:00.000Z"
+    }
+  ], 
+  "files": [
+    {
+      "uid": "7149b04c-146f-47bd-90b0-51aea7b34ecd",
+      "name": "Captura de tela 2024-02-19 112510.png",
+      "key": "e7ad057a-6957-48ab-b6fa-8fbc480fbac0-Captura de tela 2024-02-19 112510.png"
+    }
+  ],
+  "apportionments": [
+    {
+      "uid": "61d94aed-ea63-4e0a-acdc-3036410078d7",
+      "costCenter": "3.1.1.2.08.1 CUSTO MERCADORIAS IMPORTADAS",
+      "accountingAccount": "3.1.2.1.01.3.00850-8 RESULTADO VARIACOES CAMBIAIS",
+      "value": 100
+    },
+    {
+      "uid": "0e2a4803-e336-4697-891c-951ac62761fc",
+      "costCenter": "3.1.1.4.01 DESPESA COMERCIAL",
+      "accountingAccount": "3.1.1.4.01.1.08115-9 LANCHES HORA EXTRA",
+      "value": 100
+    },
+    {
+      "uid": "31434182-3949-4517-a68e-328c374f5622",
+      "costCenter": "3.1.1.4.07 DESPESA LABORATÓRIO E QUALIDADE",
+      "accountingAccount": "3.1.1.4.07.1.09115-4 LANCHES HORA EXTRA",
+      "value": 100
+    },
+  ]
+}
+
+

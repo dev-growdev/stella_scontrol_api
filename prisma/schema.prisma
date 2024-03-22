@@ -50,6 +50,8 @@ model ScPaymentRequestsGeneral {
   Products             ScProducts[]
   paymentSchedule      ScPaymentSchedule[]
   paymentRequestsFiles ScPaymentRequestsFiles[]
+  PaymentForm          ScPaymentsForm           @relation(fields: [paymentsFormUid], references: [uid])
+  paymentsFormUid      String                   @map("payments_form_uid")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -64,7 +66,7 @@ model ScPaymentSchedule {
   paymentRequestUid         ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
   paymentRequestsGeneralUid String
 
-  value   Float    @map("total_request_value")
+  value   Decimal  @map("total_request_value") @db.Decimal(10, 2)
   dueDate DateTime @map("due_date")
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -162,8 +164,9 @@ model ScPaymentsForm {
 
   cardHolders ScCardHolders[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt              DateTime                   @default(now()) @map("created_at")
+  updatedAt              DateTime                   @default(now()) @updatedAt @map("updated_at")
+  PaymentRequestsGeneral ScPaymentRequestsGeneral[]
 
   @@map("sc_payments_form")
   @@schema("s_control")
@@ -201,7 +204,7 @@ model ScApportionments {
   paymentRequestsGeneralUid String  @map("payment_requests_general_uid")
   costCenter                String  @map("cost_center")
   accountingAccount         String  @map("accounting_account")
-  value                     Decimal
+  value                     Decimal @db.Decimal(10, 2)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")

@@ -71,9 +71,21 @@ export class ValidatePaymentRequestGeneralDto {
   @IsString({ message: 'O fornecedor deve ser uma string' })
   supplier: string;
 
+  @ValidateNested({ each: true })
+  @Type(() => BankTransferType)
+  bankTransfer?: BankTransferType;
+
+  @IsOptional()
+  @IsString()
+  pix?: string;
+
   @IsNotEmpty({ message: 'A descrição é obrigatória' })
   @IsString({ message: 'A descrição deve ser uma string' })
   description: string;
+
+  @ValidateNested({ each: true })
+  @Type(() => PaymentMethodType)
+  paymentMethod: PaymentMethodType;
 
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
   @IsBoolean({ message: 'O comprovante deve ser um booleano' })
@@ -82,10 +94,6 @@ export class ValidatePaymentRequestGeneralDto {
   @IsNotEmpty()
   @IsBoolean({ message: 'O rateio deve ser um booleano' })
   isRateable: boolean;
-
-  @ValidateNested({ each: true })
-  @Type(() => BankTransferType)
-  bankTransfer?: BankTransferType;
 
   @IsArray({ message: 'payments deve ser um array' })
   @ValidateNested({ each: true })
@@ -109,6 +117,9 @@ export class ValidatePaymentRequestGeneralDto {
   @IsString({ message: 'Conta contábil deve ser uma string' })
   pix?: string;
 
+  @IsArray()
+  products: Products[];
+
   @IsArray({ message: 'Rateio deve ser um array.' })
   @ValidateNested({ each: true })
   @Type(() => ApportionmentsDto)
@@ -125,7 +136,7 @@ export class PaymentRequestCreatedType {
   uid: string;
   description: string;
   supplier: string;
-  requiredReceipt: boolean;
+  sendReceipt: boolean;
 }
 
 export class PaymentScheduleCreatedType {
@@ -146,4 +157,13 @@ export class ApportionmentsCreatedType {
   costCenter: string;
   paymentRequestsGeneralUid: string;
   value: Decimal;
+}
+
+export class UpdateRequestGeneral {
+  description?: string;
+  supplier?: string;
+  requiredReceipt?: boolean;
+  totalValue?: number;
+  accountingAccount?: string;
+  CardHolder?: string | null;
 }
