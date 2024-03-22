@@ -80,6 +80,11 @@ export class PaymentRequestsGeneralService {
             supplier: true,
             totalValue: true,
             sendReceipt: true,
+            unregisteredProducts: true,
+            accountingAccount: true,
+            bankTransfer: true,
+            pix: true,
+            isRateable: true,
             createdAt: true,
             Products: true,
             user: {
@@ -176,6 +181,9 @@ export class PaymentRequestsGeneralService {
         sendReceipt: true,
         unregisteredProducts: true,
         accountingAccount: true,
+        bankTransfer: true,
+        pix: true,
+        isRateable: true,
         createdAt: true,
         Products: true,
         user: {
@@ -255,6 +263,11 @@ export class PaymentRequestsGeneralService {
           supplier: true,
           totalValue: true,
           sendReceipt: true,
+          unregisteredProducts: true,
+          accountingAccount: true,
+          bankTransfer: true,
+          pix: true,
+          isRateable: true,
           createdAt: true,
           Products: true,
           user: {
