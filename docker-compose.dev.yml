@@ -13,7 +13,7 @@ services:
     networks:
       - ssystem_dev
     depends_on:
-      - database_dev
+      - database-dev
 
   database-dev:
     image: postgres:14

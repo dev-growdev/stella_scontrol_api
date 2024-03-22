@@ -13,7 +13,7 @@ services:
     networks:
       - ssystem_hmg
     depends_on:
-      - database_hmg
+      - database-hmg
 
   database-hmg:
     image: postgres:14
