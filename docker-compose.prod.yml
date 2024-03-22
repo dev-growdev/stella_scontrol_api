@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   nest-api:
-    container_name: scontrol-api
+    container_name: scontrol-api-hmg
     image: ssystem-api-hmg
     build:
       context: .
