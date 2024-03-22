@@ -34,7 +34,8 @@ export class PaymentRequestsGeneralController {
 
   @Get('file/:filePath')
   listOneFile(@Param('filePath') filePath, @Res() res) {
-    const file = fs.readFileSync(process.env.ROOT_PATH_FILES + '/' + filePath);
+    const file = fs.readFileSync(process.env.ROOT_PATH_FILE + '/' + filePath);
+
     const base64FileConvert = file.toString('base64');
 
     const extension = filePath.split('.').pop();
@@ -55,17 +56,17 @@ export class PaymentRequestsGeneralController {
     return this.paymentRequestsGeneralService.listByUser(userUid);
   }
 
-  @Put('/:userUid/:uid')
-  updatePaymentsRequestsByUser(
-    @Param('userUid') userUid: string,
-    @Param('uid') uid: string,
-    @Body()
-    updateData: any,
-  ) {
-    return this.paymentRequestsGeneralService.updatePaymentsRequestsByUser(
-      userUid,
-      uid,
-      updateData,
-    );
-  }
+  // @Put('/:userUid/:uid')
+  // updatePaymentsRequestsByUser(
+  //   @Param('userUid') userUid: string,
+  //   @Param('uid') uid: string,
+  //   @Body()
+  //   updateData: any,
+  // ) {
+  //   return this.paymentRequestsGeneralService.updatePaymentsRequestsByUser(
+  //     userUid,
+  //     uid,
+  //     updateData,
+  //   );
+  // }
 }

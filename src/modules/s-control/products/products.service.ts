@@ -44,6 +44,22 @@ export class ProductsService {
         measurement: createProductDto.measurement,
         quantity: createProductDto.quantity,
       },
+      select: {
+        uid: true,
+        code: true,
+        name: true,
+        enable: true,
+        description: true,
+        measurement: true,
+        quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
+      },
     });
 
     return this.mapToDto(createdProduct);

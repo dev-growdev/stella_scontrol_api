@@ -45,6 +45,26 @@ export class CardHolderType {
   uid: string;
 }
 
+export class Products {
+  @IsOptional()
+  @IsString()
+  uid?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}
+
+export class PaymentMethodType {
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  name: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  uid: string;
+}
+
 export class BankTransferType {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
@@ -112,10 +132,6 @@ export class ValidatePaymentRequestGeneralDto {
   @IsOptional()
   @IsString({ message: 'Conta contábil deve ser uma string' })
   accountingAccount?: string;
-
-  @IsOptional()
-  @IsString({ message: 'Conta contábil deve ser uma string' })
-  pix?: string;
 
   @IsArray()
   products: Products[];
