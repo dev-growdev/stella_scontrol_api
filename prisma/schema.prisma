@@ -43,15 +43,20 @@ model PaymentRequestsGeneral {
 
   supplier             String
   description          String?
-  requiredReceipt      Boolean  @default(false) @map("send_receipt")
+  sendReceipt          Boolean  @default(false) @map("send_receipt")
   totalValue           Decimal  @map("total_value")
   accountingAccount    String?  @map("accounting_account") @db.VarChar(255)
   unregisteredProducts String[] @map("unregistered_products")
+  isRateable           Boolean  @default(false) @map("is_rateable")
+  bankTransfer         Json?    @map("bank_transfer") @db.Json
+  pix                  String?
 
-  user           User         @relation(fields: [userCreatedUid], references: [uid])
-  userCreatedUid String       @map("user_created_uid")
-  CardHolder     CardHolders? @relation(fields: [cardHoldersUid], references: [uid])
-  cardHoldersUid String?      @map("card_holders_uid")
+  user            User         @relation(fields: [userCreatedUid], references: [uid])
+  userCreatedUid  String       @map("user_created_uid")
+  CardHolder      CardHolders? @relation(fields: [cardHoldersUid], references: [uid])
+  cardHoldersUid  String?      @map("card_holders_uid")
+  PaymentForm     PaymentsForm @relation(fields: [paymentsFormUid], references: [uid])
+  paymentsFormUid String       @map("payments_form_uid")
 
   Apportionments       Apportionments[]
   Products             Products[]
@@ -162,8 +167,9 @@ model PaymentsForm {
 
   cardHolders CardHolders[]
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @default(now()) @updatedAt @map("updated_at")
+  PaymentRequestsGeneral PaymentRequestsGeneral[]
 
   @@map("payments_form")
 }
