@@ -1,16 +1,26 @@
-FROM node:18-alpine as build
+# Image Base
+FROM node:18-alpine as base
 
 WORKDIR /home/node/app
 
-COPY --chown=node:node . .
+COPY --chown=node:node ./package.json ./package.json
+COPY --chown=node:node ./package-lock.json ./package-lock.json
 
 RUN npm ci && npm cache clean --force
 
+# Image de build
+FROM base as build
+
+COPY --chown=node:node . .
+
+RUN npx prisma generate
+
 RUN npm run build
 
+# Image de production
 FROM node:18-alpine as runtime
 
-ENV NODE_ENV=production
+ENV NODE_ENV production
 
 WORKDIR /app
 
@@ -27,5 +37,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 RUN npx prisma generate
 
 USER node
+
+EXPOSE 8080
 
 CMD ["node", "src/main.js"]

@@ -9,15 +9,15 @@ services:
     ports:
       - 8080:8080
     env_file:
-      - .env.prod # configurar env de produção
+      - .env.dev # configurar env de desenvolvimento
     networks:
-      - ssystem_hmg
+      - ssystem_dev
     depends_on:
-      - database_hmg
+      - database_dev
 
-  database-hmg:
+  database-dev:
     image: postgres:14
-    container_name: database-hmg
+    container_name: database-dev
     environment:
       POSTGRES_PASSWORD: growdev2023
       POSTGRES_USER: growdev
@@ -26,13 +26,13 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgres_hmg:/var/lib/postgresql/data
+      - postgres_dev:/var/lib/postgresql/data
     networks:
-      - ssystem_hmg
+      - ssystem_dev
 
 networks:
-  ssystem_hmg:
+  ssystem_dev:
     driver: bridge
 
 volumes:
-  postgres_hmg:
+  postgres_dev:
