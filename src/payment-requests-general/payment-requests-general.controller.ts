@@ -10,6 +10,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import * as mime from 'mime';
 import { PaymentRequestGeneralDTO } from './dto';
 import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
@@ -31,9 +33,22 @@ export class PaymentRequestsGeneralController {
     return this.paymentRequestsGeneralService.create(form, files);
   }
 
-  @Get('file/:imgpath')
-  listOneFile(@Param('imgpath') image, @Res() res) {
-    return res.sendFile(image, { root: process.env.ROOT_PATH_FILES });
+  @Get('file/:filePath')
+  listOneFile(@Param('filePath') filePath, @Res() res) {
+    const file = fs.readFileSync(process.env.ROOT_PATH_FILES + '/' + filePath);
+    const base64FileConvert = file.toString('base64');
+
+    const extension = filePath.split('.').pop();
+
+    const mimeType = mime.lookup(extension) || 'application/octet-stream';
+
+    const base64File = `data:${mimeType};base64,${base64FileConvert}`;
+
+    const data = {
+      base64: base64File,
+      type: mimeType,
+    };
+    return res.send(data);
   }
 
   @Get('/:userUid')

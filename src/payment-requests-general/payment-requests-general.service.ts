@@ -138,7 +138,7 @@ export class PaymentRequestsGeneralService {
         );
       });
 
-      return createdPaymentRequest;
+      return { ...createdPaymentRequest, ...filesDB };
     } catch (error) {
       throw new BadRequestException(
         'Algo deu errado, confira os campos e tente novamente.',
@@ -216,7 +216,7 @@ export class PaymentRequestsGeneralService {
     const transformedRequests = findRequests.map((request) => ({
       ...request,
       payments: request.PaymentSchedule,
-      files: request.PaymentRequestsFiles.map((file) => file.fileUid),
+      files: request.PaymentRequestsFiles.map((file) => file),
       apportionments: request.Apportionments,
     }));
 
