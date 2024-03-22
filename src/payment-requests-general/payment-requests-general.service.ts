@@ -41,6 +41,10 @@ export class PaymentRequestsGeneralService {
             description: paymentRequestGeneralDTO.description,
             supplier: paymentRequestGeneralDTO.supplier,
             sendReceipt: paymentRequestGeneralDTO.sendReceipt,
+            bankTransfer: JSON.stringify(paymentRequestGeneralDTO.bankTransfer),
+            pix: paymentRequestGeneralDTO.pix,
+            paymentsFormUid: paymentRequestGeneralDTO.paymentMethod.uid,
+            isRateable: paymentRequestGeneralDTO.isRateable,
             totalValue: Number(paymentRequestGeneralDTO.totalValue),
             accountingAccount: paymentRequestGeneralDTO.accountingAccount,
             userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
@@ -75,8 +79,11 @@ export class PaymentRequestsGeneralService {
             uid: true,
             description: true,
             supplier: true,
+            bankTransfer: true,
             totalValue: true,
+            pix: true,
             accountingAccount: true,
+            isRateable: true,
             sendReceipt: true,
             createdAt: true,
             user: {
@@ -97,6 +104,7 @@ export class PaymentRequestsGeneralService {
             Apportionments: true,
             Products: true,
             unregisteredProducts: true,
+            PaymentForm: true,
           },
         });
 
@@ -157,8 +165,11 @@ export class PaymentRequestsGeneralService {
         description: true,
         supplier: true,
         totalValue: true,
+        bankTransfer: true,
         sendReceipt: true,
         accountingAccount: true,
+        pix: true,
+        isRateable: true,
         createdAt: true,
         user: {
           select: {
@@ -192,6 +203,7 @@ export class PaymentRequestsGeneralService {
         },
         Products: true,
         unregisteredProducts: true,
+        PaymentForm: true,
       },
     });
 

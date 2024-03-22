@@ -55,14 +55,43 @@ export class CardHolderType {
   uid: string;
 }
 
+export class PaymentMethodType {
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  name: string;
+
+  @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
+  @IsString({ message: 'O fornecedor deve ser uma string' })
+  uid: string;
+}
+
+export class BankTransferType {
+  accountNumber: string;
+  accountType: string;
+  agency: string;
+  bank: string;
+  cpfOrCnpj: string;
+}
 export class ValidatePaymentRequestGeneralDTO {
   @IsNotEmpty({ message: 'O fornecedor é obrigatório' })
   @IsString({ message: 'O fornecedor deve ser uma string' })
   supplier: string;
 
+  @ValidateNested({ each: true })
+  @Type(() => BankTransferType)
+  bankTransfer?: BankTransferType;
+
+  @IsOptional()
+  @IsString()
+  pix?: string;
+
   @IsNotEmpty({ message: 'A descrição é obrigatória' })
   @IsString({ message: 'A descrição deve ser uma string' })
   description: string;
+
+  @ValidateNested({ each: true })
+  @Type(() => PaymentMethodType)
+  paymentMethod: PaymentMethodType;
 
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
   @IsBoolean({ message: 'O comprovante deve ser um booleano' })
@@ -82,6 +111,9 @@ export class ValidatePaymentRequestGeneralDTO {
   @IsOptional()
   @IsString({ message: 'Conta contábil deve ser uma string' })
   accountingAccount?: string;
+
+  @IsBoolean()
+  isRateable: boolean;
 
   @IsArray()
   products: Products[];
