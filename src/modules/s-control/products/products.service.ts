@@ -50,7 +50,24 @@ export class ProductsService {
   }
 
   async findAll() {
-    const products = await this.prisma.scProducts.findMany({});
+    const products = await this.prisma.scProducts.findMany({
+      select: {
+        uid: true,
+        code: true,
+        name: true,
+        enable: true,
+        description: true,
+        measurement: true,
+        quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
+      },
+    });
 
     return products.map(this.mapToDto);
   }
@@ -105,7 +122,7 @@ export class ProductsService {
     return this.mapToDto(disableProduct);
   }
 
-  private mapToDto(entity: IProductWithRelations): ProductDto {
+  private mapToDto(entity: any): ProductDto {
     let category: ProductDto['category'];
 
     if (entity.category) {
