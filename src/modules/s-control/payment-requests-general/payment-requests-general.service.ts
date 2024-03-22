@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
-import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import {
   ApportionmentsCreatedType,
   FilesCreatedType,

@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import {
   CreateCategoryDto,
@@ -6,7 +7,6 @@ import {
   UpdateCategoryDto,
   UpdateEnableCategoryDto,
 } from './dto/categories-input.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiTags('Categorias')
@@ -30,7 +30,7 @@ export class CategoriesController {
   }
 
   @Put(':uid/disable')
-  dissable(
+  disable(
     @Param() params: ParamDto,
     @Body() categoryDto: UpdateEnableCategoryDto,
   ) {

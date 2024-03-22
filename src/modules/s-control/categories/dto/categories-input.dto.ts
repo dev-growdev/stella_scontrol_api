@@ -1,5 +1,4 @@
 import { IsBoolean, IsNotEmpty, IsString, IsUUID } from 'class-validator';
-import { OmitType } from '@nestjs/swagger';
 export class CreateCategoryDto {
   @IsString({ message: 'Nome deve ser do tipo string' })
   @IsNotEmpty({ message: 'Nome é obrigatório' })
@@ -10,13 +9,9 @@ export class CreateCategoryDto {
   enable: boolean;
 }
 
-export class UpdateCategoryDto extends OmitType(CreateCategoryDto, [
-  'enable',
-]) {}
+export class UpdateCategoryDto extends CreateCategoryDto {}
 
-export class UpdateEnableCategoryDto extends OmitType(CreateCategoryDto, [
-  'name',
-]) {}
+export class UpdateEnableCategoryDto extends CreateCategoryDto {}
 
 export class ParamDto {
   @IsString({ message: 'Uid deve ser do tipo string' })

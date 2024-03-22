@@ -74,7 +74,25 @@ export class ProductsService {
 
   async update(uid: string, updateProductDto: UpdateProductDto) {
     const productsSameNameOrUid = await this.prisma.scProducts.findMany({
-      where: { OR: [{ name: updateProductDto.name }, { uid: uid }] },
+      where: {
+        OR: [{ name: updateProductDto.name }, { uid: uid }],
+      },
+      select: {
+        uid: true,
+        code: true,
+        name: true,
+        enable: true,
+        description: true,
+        measurement: true,
+        quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
+      },
     });
 
     if (productsSameNameOrUid.length === 0) {
@@ -98,6 +116,22 @@ export class ProductsService {
     const updatedProduct = await this.prisma.scProducts.update({
       where: { uid },
       data: updateProductDto,
+      select: {
+        uid: true,
+        code: true,
+        name: true,
+        enable: true,
+        description: true,
+        measurement: true,
+        quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
+      },
     });
 
     return this.mapToDto(updatedProduct);
@@ -105,7 +139,9 @@ export class ProductsService {
 
   async disable(uid: string, enable: boolean) {
     const product = await this.prisma.scProducts.findUnique({
-      where: { uid },
+      where: {
+        uid: uid,
+      },
     });
 
     if (!product) {
@@ -116,6 +152,22 @@ export class ProductsService {
       where: { uid },
       data: {
         enable,
+      },
+      select: {
+        uid: true,
+        code: true,
+        name: true,
+        enable: true,
+        description: true,
+        measurement: true,
+        quantity: true,
+        category: {
+          select: {
+            uid: true,
+            name: true,
+            enable: true,
+          },
+        },
       },
     });
 
