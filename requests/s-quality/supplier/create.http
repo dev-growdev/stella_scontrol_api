@@ -1,0 +1,17 @@
+@HOST = http://localhost:8080/api
+
+POST  {{HOST}}/squality/suppliers
+Content-Type: application/json
+
+{
+  "name": "any name",
+  "email": "any@mail.com",
+  "continent": "asia",
+  "phoneNumber": "+1234567890",
+  "address": "string",
+  "city": "string",
+  "region": "string",
+  "country": "string",
+  "contactName": "string",
+  "enable": true
+}
