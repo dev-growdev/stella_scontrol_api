@@ -9,6 +9,7 @@ import { SControlModule } from './modules/s-control/s-control.module';
 import { SAuthModule } from './modules/s-auth/s-auth.module';
 import { SIntegrationModule } from './modules/s-integration/s-integration.module';
 import { commonProviders } from './app.providers';
+import { SQualityModule } from './modules/s-quality/s-quality.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { commonProviders } from './app.providers';
     SControlModule,
     SAuthModule,
     SIntegrationModule,
+    SQualityModule,
   ],
   controllers: [AppController],
   providers: [AppService, ...commonProviders],

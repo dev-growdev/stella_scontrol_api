@@ -1,0 +1,4 @@
+@HOST = http://localhost:8080/api
+
+GET  {{HOST}}/squality/suppliers
+Content-Type: application/json
