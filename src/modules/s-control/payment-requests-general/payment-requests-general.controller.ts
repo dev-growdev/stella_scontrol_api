@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   Param,
   Post,
   Res,
@@ -34,39 +35,29 @@ export class PaymentRequestsGeneralController {
 
   @Get('file/:filePath')
   listOneFile(@Param('filePath') filePath, @Res() res) {
-    const file = fs.readFileSync(process.env.ROOT_PATH_FILE + '/' + filePath);
+    try {
+      const file = fs.readFileSync(process.env.ROOT_PATH_FILE + '/' + filePath);
 
-    const base64FileConvert = file.toString('base64');
+      const base64FileConvert = file.toString('base64');
 
-    const extension = filePath.split('.').pop();
+      const extension = filePath.split('.').pop();
 
-    const mimeType = mime.lookup(extension) || 'application/octet-stream';
+      const mimeType = mime.lookup(extension) || 'application/octet-stream';
 
-    const base64File = `data:${mimeType};base64,${base64FileConvert}`;
+      const base64File = `data:${mimeType};base64,${base64FileConvert}`;
 
-    const data = {
-      base64: base64File,
-      type: mimeType,
-    };
-    return res.send(data);
+      const data = {
+        base64: base64File,
+        type: mimeType,
+      };
+      return res.send(data);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Get('/:userUid')
   listPaymentsRequestsByUser(@Param('userUid') userUid: string) {
     return this.paymentRequestsGeneralService.listByUser(userUid);
   }
-
-  // @Put('/:userUid/:uid')
-  // updatePaymentsRequestsByUser(
-  //   @Param('userUid') userUid: string,
-  //   @Param('uid') uid: string,
-  //   @Body()
-  //   updateData: any,
-  // ) {
-  //   return this.paymentRequestsGeneralService.updatePaymentsRequestsByUser(
-  //     userUid,
-  //     uid,
-  //     updateData,
-  //   );
-  // }
 }
