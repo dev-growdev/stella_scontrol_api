@@ -1,10 +1,10 @@
-import { Controller, Post, Body, Get, Param, Put } from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import {
   CreateProductDto,
   DisableProductDto,
   UpdateProductDto,
 } from './dto/products-input.dto';
+import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
@@ -26,7 +26,7 @@ export class ProductsController {
   }
 
   @Put(':uid/disable')
-  disable(@Param() uid: string, @Body() productDto: DisableProductDto) {
+  disable(@Param('uid') uid: string, @Body() productDto: DisableProductDto) {
     return this.productsService.disable(uid, productDto.enable);
   }
 }

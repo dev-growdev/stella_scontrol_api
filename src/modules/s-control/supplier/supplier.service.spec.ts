@@ -53,7 +53,7 @@ describe('SupplierService -', () => {
     it('should find supplier by CNPJ in database', async () => {
       const cnpj = '1234567891011';
 
-      const supplierDB = await prisma.tempSuppliersData.create({
+      const supplierDB = await prisma.scTempSuppliersData.create({
         data: {
           cnpj,
           name: 'EMPRESA LTDA',
@@ -74,7 +74,7 @@ describe('SupplierService -', () => {
         source: 'receita',
       });
 
-      await prisma.tempSuppliersData.delete({ where: { uid: supplierDB.uid } });
+      await prisma.scTempSuppliersData.delete({ where: { uid: supplierDB.uid } });
     });
 
     it('should return undefined if not found in siger, database and receita', async () => {
@@ -110,7 +110,7 @@ describe('SupplierService -', () => {
 
       const supplier = await sut.findSupplierByCPForCNPJ(cnpj);
 
-      const supplierDB = await prisma.tempSuppliersData.findFirst({
+      const supplierDB = await prisma.scTempSuppliersData.findFirst({
         where: { cnpj },
       });
 
@@ -127,7 +127,7 @@ describe('SupplierService -', () => {
         source: 'receita',
       });
 
-      await prisma.tempSuppliersData.delete({ where: { uid: supplierDB.uid } });
+      await prisma.scTempSuppliersData.delete({ where: { uid: supplierDB.uid } });
     });
 
     it('should throw error when call siger', async () => {

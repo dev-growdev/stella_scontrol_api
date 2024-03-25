@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  nest-api:
+    container_name: scontrol-api-dev
+    image: ssystem-api-dev
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - 8080:8080
+    env_file:
+      - .env.dev # configurar env de desenvolvimento
+    networks:
+      - ssystem_dev
+    depends_on:
+      - database-dev
+
+  database-dev:
+    image: postgres:14
+    container_name: database-dev
+    environment:
+      POSTGRES_PASSWORD: growdev2023
+      POSTGRES_USER: growdev
+      POSTGRES_DB: scontrol
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - 5434:5432
+    volumes:
+      - postgres_dev:/var/lib/postgresql/data
+    networks:
+      - ssystem_dev
+
+networks:
+  ssystem_dev:
+    driver: bridge
+
+volumes:
+  postgres_dev:

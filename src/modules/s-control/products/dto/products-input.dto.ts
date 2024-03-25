@@ -1,10 +1,9 @@
-import { OmitType } from '@nestjs/swagger';
 import {
-  IsNotEmpty,
   IsBoolean,
-  IsString,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -33,12 +32,25 @@ export class CreateProductDto {
   quantity?: number;
 }
 
-export class UpdateProductDto extends OmitType(CreateProductDto, [
-  'enable',
-] as const) {}
+export class UpdateProductDto extends CreateProductDto {}
 
 export class DisableProductDto {
   @IsBoolean({ message: 'Habilitado deve ser do tipo boolean' })
   @IsNotEmpty({ message: 'Habilitado é obrigatório' })
   enable: boolean;
+}
+
+export interface Entity {
+  uid: string;
+  code: number;
+  name: string;
+  enable: boolean;
+  description: string;
+  measurement: string;
+  quantity: number;
+  category: {
+    uid: string;
+    name: string;
+    enable: boolean;
+  };
 }

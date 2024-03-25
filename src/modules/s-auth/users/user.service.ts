@@ -16,7 +16,7 @@ export class UserService {
         throw new BadRequestException('ID do usuário não fornecido');
       }
 
-      const updatedUser = await this.prisma.user.update({
+      const updatedUser = await this.prisma.saUser.update({
         where: {
           idUserAd: idUserAd,
         },
