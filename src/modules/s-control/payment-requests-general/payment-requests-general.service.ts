@@ -1,13 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FilesService } from 'src/shared/services/files.service';
-import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import {
-  ApportionmentsCreatedType,
   FilesCreatedType,
   PaymentRequestCreatedType,
-  PaymentScheduleCreatedType,
   ValidatePaymentRequestGeneralDto,
 } from './dto/payment-requests-general-input.dto';
 
@@ -19,7 +17,7 @@ export class PaymentRequestsGeneralService {
   ) {}
 
   async create(
-    paymentRequestGeneralDto: ValidatePaymentRequestGeneralDto,
+    paymentRequestGeneralDTO: ValidatePaymentRequestGeneralDto,
     files: Express.Multer.File[],
   ) {
     if (files.length === 0) {
@@ -27,135 +25,138 @@ export class PaymentRequestsGeneralService {
     }
 
     let createdPaymentRequest: PaymentRequestCreatedType;
-    let paymentSchedules: PaymentScheduleCreatedType[];
     let filesDB: FilesCreatedType[];
-    let apportionmentsCreated: ApportionmentsCreatedType[];
 
-    const dirPath = path.join(__dirname, '..', '..', '..', 'files');
+    const dirPath = path.join(__dirname, '..', '..', '..', '..', '..', 'files');
 
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    if (paymentRequestGeneralDto.cardHolder) {
-      const existsHolder = await this.prisma.scCardHolders.findUnique({
-        where: {
-          uid: paymentRequestGeneralDto.cardHolder.uid,
-        },
-      });
-      if (!existsHolder) {
-        throw new BadRequestException(
-          'Não foi possível encontrar um portador.',
-        );
-      }
-    }
-
-    await this.prisma.$transaction(async (prisma) => {
-      createdPaymentRequest = await prisma.scPaymentRequestsGeneral.create({
-        data: {
-          description: paymentRequestGeneralDto.description,
-          supplier: paymentRequestGeneralDto.supplier,
-          totalValue: Number(paymentRequestGeneralDto.totalValue),
-          accountingAccount: paymentRequestGeneralDto.accountingAccount,
-          requiredReceipt: paymentRequestGeneralDto.requiredReceipt,
-          userCreatedUid: paymentRequestGeneralDto.userCreatedUid,
-          cardHoldersUid: paymentRequestGeneralDto.cardHolder?.uid ?? null,
-        },
-        select: {
-          uid: true,
-          description: true,
-          supplier: true,
-          totalValue: true,
-          accountingAccount: true,
-          requiredReceipt: true,
-          createdAt: true,
-          user: {
-            select: {
-              uid: true,
-              name: true,
-              enable: true,
-              email: true,
+    try {
+      await this.prisma.$transaction(async (prisma) => {
+        createdPaymentRequest = await prisma.scPaymentRequestsGeneral.create({
+          data: {
+            description: paymentRequestGeneralDTO.description,
+            supplier: paymentRequestGeneralDTO.supplier,
+            sendReceipt: paymentRequestGeneralDTO.sendReceipt,
+            bankTransfer: JSON.stringify(paymentRequestGeneralDTO.bankTransfer),
+            pix: paymentRequestGeneralDTO.pix,
+            paymentsFormUid: paymentRequestGeneralDTO.paymentMethod.uid,
+            isRateable: paymentRequestGeneralDTO.isRateable,
+            totalValue: Number(paymentRequestGeneralDTO.totalValue),
+            accountingAccount: paymentRequestGeneralDTO.accountingAccount,
+            userCreatedUid: paymentRequestGeneralDTO.userCreatedUid,
+            cardHoldersUid: paymentRequestGeneralDTO.cardHolder?.uid ?? null,
+            unregisteredProducts: paymentRequestGeneralDTO.products
+              .filter((product) => !product.uid)
+              .map((product) => product.name),
+            Products: {
+              connect: paymentRequestGeneralDTO.products
+                .filter((product) => product.uid)
+                .map((product) => ({
+                  uid: product.uid,
+                })),
+            },
+            paymentSchedule: {
+              create: paymentRequestGeneralDTO.payments.map((payment) => ({
+                value: Number(payment.value),
+                dueDate: payment.dueDate,
+              })),
+            },
+            Apportionments: {
+              create: paymentRequestGeneralDTO.apportionments.map(
+                (apportionment) => ({
+                  costCenter: apportionment.costCenter,
+                  accountingAccount: apportionment.accountingAccount,
+                  value: Number(apportionment.value),
+                }),
+              ),
             },
           },
-          cardHolder: true,
-        },
+          select: {
+            uid: true,
+            description: true,
+            supplier: true,
+            totalValue: true,
+            sendReceipt: true,
+            unregisteredProducts: true,
+            accountingAccount: true,
+            bankTransfer: true,
+            pix: true,
+            isRateable: true,
+            createdAt: true,
+            Products: true,
+            user: {
+              select: {
+                uid: true,
+                name: true,
+                enable: true,
+                email: true,
+              },
+            },
+            cardHolder: true,
+            paymentSchedule: {
+              select: {
+                uid: true,
+                value: true,
+                dueDate: true,
+              },
+            },
+            paymentRequestsFiles: {
+              select: {
+                fileUid: true,
+              },
+            },
+            Apportionments: {
+              select: {
+                uid: true,
+                accountingAccount: true,
+                costCenter: true,
+                paymentRequestsGeneralUid: true,
+                value: true,
+              },
+            },
+            PaymentForm: true,
+          },
+        });
+
+        const uploadedFiles = await Promise.all(
+          files.map(async (file) => {
+            const createdFile = await this.filesService.createFileOnDB(file);
+
+            const fileStream = fs.createWriteStream(
+              `${dirPath}/${createdFile.key}`,
+            );
+
+            fileStream.write(file.buffer);
+
+            fileStream.end();
+
+            return createdFile;
+          }),
+        );
+
+        filesDB = uploadedFiles;
+
+        await Promise.all(
+          filesDB.map((file) =>
+            prisma.scPaymentRequestsFiles.create({
+              data: {
+                filesUid: file.uid,
+                paymentRequestsGeneralUid: createdPaymentRequest.uid,
+              },
+            }),
+          ),
+        );
       });
 
-      const uploadedFiles = await Promise.all(
-        files.map(async (file) => {
-          const createdFile = await this.filesService.createFileOnDB(file);
-
-          const fileStream = fs.createWriteStream(
-            `${dirPath}/${createdFile.key}`,
-          );
-
-          fileStream.write(file.buffer);
-
-          fileStream.end();
-
-          return createdFile;
-        }),
+      return { ...createdPaymentRequest, ...filesDB };
+    } catch (error) {
+      throw new BadRequestException(
+        'Algo deu errado, confira os campos e tente novamente.',
       );
-
-      filesDB = uploadedFiles;
-
-      await Promise.all(
-        filesDB.map((file) =>
-          prisma.scPaymentRequestsFiles.create({
-            data: {
-              filesUid: file.uid,
-              paymentRequestsGeneralUid: createdPaymentRequest.uid,
-            },
-          }),
-        ),
-      );
-
-      paymentSchedules = await Promise.all(
-        paymentRequestGeneralDto.payments.map(async (payment) =>
-          prisma.scPaymentSchedule.create({
-            data: {
-              dueDate: payment.dueDate,
-              value: Number(payment.value),
-              paymentRequestsGeneralUid: createdPaymentRequest.uid,
-            },
-            select: {
-              uid: true,
-              value: true,
-              dueDate: true,
-            },
-          }),
-        ),
-      );
-
-      apportionmentsCreated = await Promise.all(
-        paymentRequestGeneralDto.apportionments.map(async (apportionment) =>
-          prisma.scApportionments.create({
-            data: {
-              paymentRequestsGeneralUid: createdPaymentRequest.uid,
-              costCenter: apportionment.costCenter,
-              accountingAccount: apportionment.accountingAccount,
-              value: Number(apportionment.value),
-            },
-            select: {
-              uid: true,
-              accountingAccount: true,
-              costCenter: true,
-              paymentRequestsGeneralUid: true,
-              value: true,
-            },
-          }),
-        ),
-      );
-    });
-
-    return {
-      request: {
-        ...createdPaymentRequest,
-        payments: paymentSchedules,
-        files: filesDB,
-        apportionments: apportionmentsCreated,
-      },
-    };
+    }
   }
 
   async listByUser(userUid: string) {
@@ -177,8 +178,14 @@ export class PaymentRequestsGeneralService {
         description: true,
         supplier: true,
         totalValue: true,
-        requiredReceipt: true,
+        sendReceipt: true,
+        unregisteredProducts: true,
+        accountingAccount: true,
+        bankTransfer: true,
+        pix: true,
+        isRateable: true,
         createdAt: true,
+        Products: true,
         user: {
           select: {
             uid: true,
@@ -200,7 +207,7 @@ export class PaymentRequestsGeneralService {
             fileUid: true,
           },
         },
-        apportionments: {
+        Apportionments: {
           select: {
             uid: true,
             accountingAccount: true,
@@ -209,6 +216,7 @@ export class PaymentRequestsGeneralService {
             value: true,
           },
         },
+        PaymentForm: true,
       },
     });
 
@@ -222,7 +230,7 @@ export class PaymentRequestsGeneralService {
       ...request,
       payments: request.paymentSchedule,
       files: request.paymentRequestsFiles.map((file) => file.fileUid),
-      apportionments: request.apportionments,
+      apportionments: request.Apportionments,
     }));
 
     return transformedRequests;
@@ -254,8 +262,14 @@ export class PaymentRequestsGeneralService {
           description: true,
           supplier: true,
           totalValue: true,
-          requiredReceipt: true,
+          sendReceipt: true,
+          unregisteredProducts: true,
+          accountingAccount: true,
+          bankTransfer: true,
+          pix: true,
+          isRateable: true,
           createdAt: true,
+          Products: true,
           user: {
             select: {
               uid: true,
@@ -277,7 +291,7 @@ export class PaymentRequestsGeneralService {
               fileUid: true,
             },
           },
-          apportionments: {
+          Apportionments: {
             select: {
               uid: true,
               accountingAccount: true,
@@ -286,6 +300,7 @@ export class PaymentRequestsGeneralService {
               value: true,
             },
           },
+          PaymentForm: true,
         },
       });
 

@@ -1,6 +1,6 @@
 @HOST = http://localhost:8080/api
 
-GET  {{HOST}}/accounting-accounts/19 HTTP/1.1
+GET  {{HOST}}/budget-account/accounting-accounts/19 HTTP/1.1
 Content-Type: application/json
 
 

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  InternalServerErrorException,
   Param,
   Post,
   Res,
@@ -9,8 +10,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { PaymentRequestsGeneralService } from './payment-requests-general.service';
+import * as fs from 'fs';
+import * as mime from 'mime';
 import { CreatePaymentRequestGeneralDto } from './dto/payment-requests-general-input.dto';
+import { PaymentRequestsGeneralService } from './payment-requests-general.service';
 
 @Controller('payment-request-general')
 export class PaymentRequestsGeneralController {
@@ -30,21 +33,31 @@ export class PaymentRequestsGeneralController {
     return this.paymentRequestsGeneralService.create(form, files);
   }
 
-  @Get('file/:imgpath')
-  listOneFile(@Param('imgpath') image, @Res() res) {
-    return res.sendFile(image, { root: process.env.ROOT_PATH_FILES });
+  @Get('file/:filePath')
+  listOneFile(@Param('filePath') filePath, @Res() res) {
+    try {
+      const file = fs.readFileSync(process.env.ROOT_PATH_FILE + '/' + filePath);
+
+      const base64FileConvert = file.toString('base64');
+
+      const extension = filePath.split('.').pop();
+
+      const mimeType = mime.lookup(extension) || 'application/octet-stream';
+
+      const base64File = `data:${mimeType};base64,${base64FileConvert}`;
+
+      const data = {
+        base64: base64File,
+        type: mimeType,
+      };
+      return res.send(data);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Get('/:userUid')
   listPaymentsRequestsByUser(@Param('userUid') userUid: string) {
     return this.paymentRequestsGeneralService.listByUser(userUid);
-  }
-
-  @Get('/:userUid/:uid')
-  listPaymentRequest(
-    @Param('userUid') userUid: string,
-    @Param('uid') uid: string,
-  ) {
-    return this.paymentRequestsGeneralService.listPaymentRequest(userUid, uid);
   }
 }
