@@ -60,4 +60,39 @@ export class BudgetAccountService {
 
     return retrievedAccountingAccount;
   }
+
+  async updateTotalBudget(
+    year: string,
+    costCenter: string,
+    accountingAccount: string,
+    month: string,
+    request: { totalValue: number; canceled: boolean },
+  ) {
+    try {
+      const currentBudget = await this.checkAccountBalance(
+        year,
+        costCenter,
+        accountingAccount,
+        month,
+      );
+
+      let newTotal = currentBudget.totalBudget;
+
+      if (request.canceled) {
+        newTotal += request.totalValue;
+      } else {
+        newTotal -= request.totalValue;
+      }
+
+      await this.cesarFacade.updateTotalBudget(
+        year,
+        costCenter,
+        accountingAccount,
+        month,
+        newTotal,
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }
