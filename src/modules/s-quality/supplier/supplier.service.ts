@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSupplierDto } from './dto/supplier-input.dto';
+import { PrismaService } from '@/shared/modules/prisma/prisma.service';
 
 
 @Injectable()
 export class SupplierService {
-  create(createSupplierDto: CreateSupplierDto) {
-    return 'This action adds a new supplier';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createSupplierDto: CreateSupplierDto) {
+    const supplier = await this.prisma.sqSupplier.create({data: createSupplierDto})
+    return supplier;
   }
 
   findAll() {

@@ -214,3 +214,28 @@ model ScApportionments {
   @@map("sc_apportionments")
   @@schema("s_control")
 }
+
+/// SQUALITY
+model SqSupplier {
+  uid String @id @default(uuid()) @db.Uuid
+
+  name        String  @db.VarChar()
+  email       String  @db.VarChar(100)
+  continent   String  @db.VarChar(30)
+  phoneNumber String? @map("phone_number") @db.VarChar(30)
+  address     String? @db.VarChar(100)
+  city        String? @db.VarChar(100)
+  region      String? @db.VarChar(100)
+  country     String? @db.VarChar(100)
+  contactName String? @map("contact_name") @db.VarChar()
+  enable      Boolean @db.Boolean()
+
+  isExcluded Boolean @default(false) @map("is_excluded")
+
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  excludedAt DateTime? @map("excluded_at")
+
+  @@map("sq_suppliers")
+  @@schema("s_quality")
+}
