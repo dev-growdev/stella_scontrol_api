@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import {
   CreateCategoryDto,
+  DisableCategoryDto,
   ParamDto,
   UpdateCategoryDto,
-  UpdateEnableCategoryDto,
 } from './dto/categories-input.dto';
 
 @ApiBearerAuth()
@@ -29,11 +29,8 @@ export class CategoriesController {
     return this.categoriesService.update(params.uid, categoryDto);
   }
 
-  @Put(':uid/disable')
-  disable(
-    @Param() params: ParamDto,
-    @Body() categoryDto: UpdateEnableCategoryDto,
-  ) {
-    return this.categoriesService.disable(params.uid, categoryDto);
+  @Patch(':uid/disable')
+  disable(@Param() params: ParamDto, @Body() categoryDto: DisableCategoryDto) {
+    return this.categoriesService.disable(params.uid, categoryDto.enable);
   }
 }
