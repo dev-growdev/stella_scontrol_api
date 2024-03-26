@@ -356,7 +356,7 @@ export class PaymentRequestsGeneralService {
       bankTransfer,
       pix,
     } = updateData;
-
+    console.log(updateData);
     try {
       await this.prisma.$transaction(async (prisma) => {
         await prisma.scApportionments.deleteMany({
@@ -393,11 +393,6 @@ export class PaymentRequestsGeneralService {
             unregisteredProducts: products
               .filter((item) => !item.uid)
               .map((item) => item.name ?? item) as string[],
-            Products: {
-              connect: products
-                .map((item) => ({ uid: item.uid }))
-                .filter((item) => item.uid),
-            },
             description,
             accountingAccount,
             sendReceipt,
@@ -419,6 +414,7 @@ export class PaymentRequestsGeneralService {
             uid: true,
             isRateable: true,
             paymentSchedule: true,
+            Products: true,
           },
         });
 
@@ -511,20 +507,54 @@ export class PaymentRequestsGeneralService {
           },
         });
 
-        const filesFromFront = getFiles.map((file) => file.key);
-        const dataToDelete = files.filter(
-          (file) => !filesFromFront.includes(file.fileUid.key),
+        //está impossibilitando de adicionar novos produtos
+        const productsDB = await prisma.scProducts.findMany({
+          include: {
+            PaymentRequestsGeneral: {
+              where: {
+                uid: requestUid,
+              },
+            },
+          },
+        });
+
+        const productsFromForm = products.map((product) => product.uid);
+        const productsToDelete = productsDB.filter(
+          (product) => !productsFromForm.includes(product.uid),
+        );
+
+        const productsIds = productsToDelete.map((product) => ({
+          uid: product.uid,
+        }));
+
+        await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
+          data: {
+            Products: {
+              disconnect: productsIds,
+            },
+          },
+          include: {
+            Products: true,
+          },
+        });
+
+        const filesFromForm = getFiles.map((file) => file.key);
+        const filesToDelete = files.filter(
+          (file) => !filesFromForm.includes(file.fileUid.key),
         );
 
         await prisma.scFiles.deleteMany({
           where: {
             key: {
-              in: dataToDelete.map((file) => file.fileUid.key),
+              in: filesToDelete.map((file) => file.fileUid.key),
             },
           },
         });
 
-        dataToDelete.map((item) =>
+        filesToDelete.map((item) =>
           fs.unlink(`${dirPath}/${item.fileUid.key}`, (err) => {
             if (err) {
               throw new BadRequestException(
