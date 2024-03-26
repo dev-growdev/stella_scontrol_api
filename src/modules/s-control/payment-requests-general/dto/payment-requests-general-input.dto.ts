@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -24,6 +25,8 @@ export class CreatePaymentRequestGeneralDto {
   document: string;
 }
 
+export class UpdatePaymentRequestGeneralDto extends CreatePaymentRequestGeneralDto {}
+
 export class ApportionmentsDto {
   @IsNotEmpty({ message: 'É necessário adicionar um centro de custo.' })
   @IsString()
@@ -36,6 +39,10 @@ export class ApportionmentsDto {
   @IsNotEmpty({ message: 'É necessário adicionar um valor.' })
   @IsString()
   value: string;
+
+  @IsOptional()
+  @IsString()
+  uid?: string;
 }
 
 export class CardHolderType {
@@ -43,6 +50,8 @@ export class CardHolderType {
   name: string;
   @IsString()
   uid: string;
+  @IsNumber()
+  code: number;
 }
 
 export class Products {
@@ -126,6 +135,9 @@ export class ValidatePaymentRequestGeneralDto {
   @IsArray({ message: 'uploadedFiles deve ser um array' })
   uploadedFiles: any[];
 
+  @IsArray()
+  getFiles: GetFilesType[];
+
   @IsNotEmpty({ message: 'O comprovante é obrigatório' })
   totalValue: string;
 
@@ -148,11 +160,19 @@ export class ValidatePaymentRequestGeneralDto {
   cardHolder?: CardHolderType;
 }
 
+export class ValidateUpdatePaymentRequestGeneralDto extends ValidatePaymentRequestGeneralDto {}
+
 export class PaymentRequestCreatedType {
   uid: string;
   description: string;
   supplier: string;
   sendReceipt: boolean;
+}
+
+export class GetFilesType {
+  key: string;
+  uid: string;
+  name: string;
 }
 
 export class PaymentScheduleCreatedType {
@@ -178,7 +198,7 @@ export class ApportionmentsCreatedType {
 export class UpdateRequestGeneral {
   description?: string;
   supplier?: string;
-  requiredReceipt?: boolean;
+  sendReceipt?: boolean;
   totalValue?: number;
   accountingAccount?: string;
   CardHolder?: string | null;
