@@ -356,7 +356,7 @@ export class PaymentRequestsGeneralService {
       bankTransfer,
       pix,
     } = updateData;
-    console.log(updateData);
+
     try {
       await this.prisma.$transaction(async (prisma) => {
         await prisma.scApportionments.deleteMany({
@@ -583,7 +583,6 @@ export class PaymentRequestsGeneralService {
         );
       });
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException(error);
     }
   }
