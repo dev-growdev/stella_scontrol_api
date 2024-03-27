@@ -523,33 +523,6 @@ export class PaymentRequestsGeneralService {
           fs.mkdirSync(dirPath, { recursive: true });
         }
 
-        const newFiles = await Promise.all(
-          newFilesForm.map(async (file) => {
-            const createdFile = await this.filesService.createFileOnDB(file);
-
-            const fileStream = fs.createWriteStream(
-              `${dirPath}/${createdFile.key}`,
-            );
-
-            fileStream.write(file.buffer);
-
-            fileStream.end();
-
-            return createdFile;
-          }),
-        );
-
-        await Promise.all(
-          newFiles.map((file) =>
-            prisma.scPaymentRequestsFiles.create({
-              data: {
-                filesUid: file.uid,
-                paymentRequestsGeneralUid: requestUid,
-              },
-            }),
-          ),
-        );
-
         const files = await prisma.scPaymentRequestsFiles.findMany({
           where: {
             paymentRequestsGeneralUid: requestUid,
@@ -580,6 +553,33 @@ export class PaymentRequestsGeneralService {
               );
             }
           }),
+        );
+
+        const newFiles = await Promise.all(
+          newFilesForm.map(async (file) => {
+            const createdFile = await this.filesService.createFileOnDB(file);
+
+            const fileStream = fs.createWriteStream(
+              `${dirPath}/${createdFile.key}`,
+            );
+
+            fileStream.write(file.buffer);
+
+            fileStream.end();
+
+            return createdFile;
+          }),
+        );
+
+        await Promise.all(
+          newFiles.map((file) =>
+            prisma.scPaymentRequestsFiles.create({
+              data: {
+                filesUid: file.uid,
+                paymentRequestsGeneralUid: requestUid,
+              },
+            }),
+          ),
         );
       });
     } catch (error) {
