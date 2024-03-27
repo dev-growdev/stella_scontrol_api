@@ -371,6 +371,58 @@ export class PaymentRequestsGeneralService {
           },
         });
 
+        const productsDB = await prisma.scProducts.findMany({
+          include: {
+            PaymentRequestsGeneral: {
+              where: {
+                uid: requestUid,
+              },
+            },
+          },
+        });
+
+        const productsFromForm = products.map((product) => product.uid);
+        const productsToDelete = productsDB.filter(
+          (product) => !productsFromForm.includes(product.uid),
+        );
+
+        const productsToConnect = productsDB.filter((product) =>
+          productsFromForm.includes(product.uid),
+        );
+
+        const productsToConnectIds = productsToConnect.map((product) => ({
+          uid: product.uid,
+        }));
+
+        await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
+          data: {
+            Products: {
+              connect: productsToConnectIds,
+            },
+          },
+        });
+
+        const productsToDeleteIds = productsToDelete.map((product) => ({
+          uid: product.uid,
+        }));
+
+        await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
+          data: {
+            Products: {
+              disconnect: productsToDeleteIds,
+            },
+          },
+          include: {
+            Products: true,
+          },
+        });
+
         const updateRequest = await prisma.scPaymentRequestsGeneral.update({
           where: {
             uid: requestUid,
@@ -504,40 +556,6 @@ export class PaymentRequestsGeneralService {
           },
           select: {
             fileUid: true,
-          },
-        });
-
-        //está impossibilitando de adicionar novos produtos
-        const productsDB = await prisma.scProducts.findMany({
-          include: {
-            PaymentRequestsGeneral: {
-              where: {
-                uid: requestUid,
-              },
-            },
-          },
-        });
-
-        const productsFromForm = products.map((product) => product.uid);
-        const productsToDelete = productsDB.filter(
-          (product) => !productsFromForm.includes(product.uid),
-        );
-
-        const productsIds = productsToDelete.map((product) => ({
-          uid: product.uid,
-        }));
-
-        await prisma.scPaymentRequestsGeneral.update({
-          where: {
-            uid: requestUid,
-          },
-          data: {
-            Products: {
-              disconnect: productsIds,
-            },
-          },
-          include: {
-            Products: true,
           },
         });
 
