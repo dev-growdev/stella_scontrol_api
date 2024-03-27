@@ -357,6 +357,10 @@ export class PaymentRequestsGeneralService {
       pix,
     } = updateData;
 
+    if (newFilesForm.length === 0 && getFiles.length === 0) {
+      throw new BadRequestException('É necessário anexar documentos.');
+    }
+
     try {
       await this.prisma.$transaction(async (prisma) => {
         await prisma.scApportionments.deleteMany({
