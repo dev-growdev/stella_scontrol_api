@@ -33,4 +33,20 @@ export class CesarFacade {
       month,
     );
   }
+
+  async updateTotalBudget(
+    year: string,
+    costCenter: string,
+    accountingAccount: string,
+    month: string,
+    newTotal: number,
+  ) {
+    return this.cesarService.updateTotalBudget(
+      year,
+      costCenter,
+      accountingAccount,
+      month,
+      newTotal,
+    );
+  }
 }

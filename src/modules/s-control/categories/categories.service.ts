@@ -7,7 +7,6 @@ import {
 import {
   CreateCategoryDto,
   UpdateCategoryDto,
-  UpdateEnableCategoryDto,
 } from './dto/categories-input.dto';
 import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import Prisma from '@prisma/client';
@@ -18,12 +17,7 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(categoryDto: CreateCategoryDto): Promise<CategoryDto> {
-    const findCategory = await this.prisma.scCategories.findFirst({
-      where: {
-        name: categoryDto.name,
-      },
-    });
-
+    const findCategory = await this.findCategory(categoryDto.name);
     if (findCategory) {
       throw new BadRequestException('Essa categoria já existe.');
     }
@@ -63,24 +57,6 @@ export class CategoriesService {
         throw new BadRequestException('Essa categoria já existe.');
       }
     }
-    // const category = await this.prisma.scCategories.findUnique({
-    //   where: { uid },
-    // });
-
-    // if (!category) {
-    //   throw new NotFoundException('Categoria não encontrada.');
-    // }
-
-    // const findCategoryByName = await this.prisma.scCategories.findFirst({
-    //   where: {
-    //     name,
-    //     uid: { not: uid },
-    //   },
-    // });
-
-    // if (findCategoryByName) {
-    //   throw new BadRequestException('Essa categoria já existe.');
-    // }
 
     const updatedCategory = await this.prisma.scCategories.update({
       where: { uid },
@@ -92,13 +68,8 @@ export class CategoriesService {
     return this.mapToDto(updatedCategory);
   }
 
-  async disable(
-    uid: string,
-    data: UpdateEnableCategoryDto,
-  ): Promise<CategoryDto> {
-    const category = await this.prisma.scCategories.findUnique({
-      where: { uid },
-    });
+  async disable(uid: string, enable: boolean): Promise<CategoryDto> {
+    const category = await this.findCategory(uid);
 
     if (!category) {
       throw new NotFoundException('Categoria não encontrada.');
@@ -107,11 +78,21 @@ export class CategoriesService {
     const updatedCategory = await this.prisma.scCategories.update({
       where: { uid },
       data: {
-        enable: data.enable,
+        enable,
       },
     });
 
     return this.mapToDto(updatedCategory);
+  }
+
+  async findCategory(identifier: string) {
+    const findCategory = await this.prisma.scCategories.findFirst({
+      where: {
+        OR: [{ name: identifier }, { uid: identifier }],
+      },
+    });
+
+    return findCategory;
   }
 
   private mapToDto(entity: Prisma.ScCategories): CategoryDto {
