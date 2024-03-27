@@ -146,8 +146,8 @@ model ScPaymentRequestsFiles {
   filesUid                  String @map("file_uid")
   paymentRequestsGeneralUid String @map("payment_request_uid")
 
-  fileUid           ScFiles                  @relation(fields: [filesUid], references: [uid])
-  paymentRequestUid ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  fileUid           ScFiles                  @relation(fields: [filesUid], references: [uid], onDelete: Cascade)
+  paymentRequestUid ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -209,7 +209,7 @@ model ScApportionments {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  paymentRequestGeneralUid ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid])
+  paymentRequestGeneral ScPaymentRequestsGeneral @relation(fields: [paymentRequestsGeneralUid], references: [uid], onDelete: Cascade)
 
   @@map("sc_apportionments")
   @@schema("s_control")

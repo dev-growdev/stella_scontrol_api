@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '@shared/modules/prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,6 +11,7 @@ import {
   FilesCreatedType,
   PaymentRequestCreatedType,
   ValidatePaymentRequestGeneralDto,
+  ValidateUpdatePaymentRequestGeneralDto,
 } from './dto/payment-requests-general-input.dto';
 
 @Injectable()
@@ -328,5 +333,261 @@ export class PaymentRequestsGeneralService {
     }
 
     return findUser;
+  }
+
+  async updatePaymentsRequestsByUser(
+    userUid: string,
+    requestUid: string,
+    updateData: ValidateUpdatePaymentRequestGeneralDto,
+    newFilesForm: Express.Multer.File[],
+  ) {
+    const {
+      apportionments,
+      description,
+      isRateable,
+      paymentMethod,
+      payments,
+      products,
+      sendReceipt,
+      supplier,
+      totalValue,
+      getFiles,
+      accountingAccount,
+      bankTransfer,
+      pix,
+    } = updateData;
+
+    if (newFilesForm.length === 0 && getFiles.length === 0) {
+      throw new BadRequestException('É necessário anexar documentos.');
+    }
+
+    try {
+      await this.prisma.$transaction(async (prisma) => {
+        await prisma.scApportionments.deleteMany({
+          where: {
+            paymentRequestsGeneralUid: requestUid,
+          },
+        });
+
+        await prisma.scPaymentSchedule.deleteMany({
+          where: {
+            paymentRequestsGeneralUid: requestUid,
+          },
+        });
+
+        const productsDB = await prisma.scProducts.findMany({
+          include: {
+            PaymentRequestsGeneral: {
+              where: {
+                uid: requestUid,
+              },
+            },
+          },
+        });
+
+        const productsFromForm = products.map((product) => product.uid);
+        const productsToDelete = productsDB.filter(
+          (product) => !productsFromForm.includes(product.uid),
+        );
+
+        const productsToConnect = productsDB.filter((product) =>
+          productsFromForm.includes(product.uid),
+        );
+
+        const productsToConnectIds = productsToConnect.map((product) => ({
+          uid: product.uid,
+        }));
+
+        await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
+          data: {
+            Products: {
+              connect: productsToConnectIds,
+            },
+          },
+        });
+
+        const productsToDeleteIds = productsToDelete.map((product) => ({
+          uid: product.uid,
+        }));
+
+        await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+          },
+          data: {
+            Products: {
+              disconnect: productsToDeleteIds,
+            },
+          },
+          include: {
+            Products: true,
+          },
+        });
+
+        const updateRequest = await prisma.scPaymentRequestsGeneral.update({
+          where: {
+            uid: requestUid,
+            userCreatedUid: userUid,
+          },
+          data: {
+            Apportionments: {
+              create: apportionments.map((item) => ({
+                accountingAccount: item.accountingAccount,
+                costCenter: item.costCenter,
+                value: item.value,
+              })),
+            },
+            paymentSchedule: {
+              create: payments.map((item) => ({
+                value: item.value,
+                dueDate: item.dueDate,
+              })),
+            },
+            unregisteredProducts: products
+              .filter((item) => !item.uid)
+              .map((item) => item.name ?? item) as string[],
+            description,
+            accountingAccount,
+            sendReceipt,
+            supplier,
+            pix,
+            totalValue,
+            isRateable,
+            bankTransfer: JSON.stringify(bankTransfer),
+            PaymentForm: {
+              connect: {
+                uid: paymentMethod.uid,
+                name: paymentMethod.name,
+              },
+            },
+          },
+          select: {
+            Apportionments: true,
+            sendReceipt,
+            uid: true,
+            isRateable: true,
+            paymentSchedule: true,
+            Products: true,
+          },
+        });
+
+        if (updateRequest.paymentSchedule.length === 0) {
+          throw new BadRequestException(
+            'É necessário adicionar agendamentos de pagamento.',
+          );
+        }
+
+        if (updateRequest.isRateable) {
+          await prisma.scPaymentRequestsGeneral.update({
+            where: {
+              uid: updateRequest.uid,
+            },
+            data: {
+              accountingAccount: null,
+            },
+          });
+        }
+
+        if (!updateData.cardHolder.name) {
+          await prisma.scPaymentRequestsGeneral.update({
+            where: {
+              uid: requestUid,
+            },
+            data: {
+              cardHoldersUid: null,
+            },
+          });
+        }
+
+        if (updateData.cardHolder.name) {
+          await prisma.scPaymentRequestsGeneral.update({
+            where: {
+              uid: requestUid,
+            },
+            data: {
+              cardHoldersUid: updateData.cardHolder.uid,
+            },
+          });
+        }
+
+        const dirPath = path.join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          'files',
+        );
+
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+
+        const files = await prisma.scPaymentRequestsFiles.findMany({
+          where: {
+            paymentRequestsGeneralUid: requestUid,
+          },
+          select: {
+            fileUid: true,
+          },
+        });
+
+        const filesFromForm = getFiles.map((file) => file.key);
+        const filesToDelete = files.filter(
+          (file) => !filesFromForm.includes(file.fileUid.key),
+        );
+
+        await prisma.scFiles.deleteMany({
+          where: {
+            key: {
+              in: filesToDelete.map((file) => file.fileUid.key),
+            },
+          },
+        });
+
+        filesToDelete.map((item) =>
+          fs.unlink(`${dirPath}/${item.fileUid.key}`, (err) => {
+            if (err) {
+              throw new BadRequestException(
+                'Não foi possível deletar esse arquivo.',
+              );
+            }
+          }),
+        );
+
+        const newFiles = await Promise.all(
+          newFilesForm.map(async (file) => {
+            const createdFile = await this.filesService.createFileOnDB(file);
+
+            const fileStream = fs.createWriteStream(
+              `${dirPath}/${createdFile.key}`,
+            );
+
+            fileStream.write(file.buffer);
+
+            fileStream.end();
+
+            return createdFile;
+          }),
+        );
+
+        await Promise.all(
+          newFiles.map((file) =>
+            prisma.scPaymentRequestsFiles.create({
+              data: {
+                filesUid: file.uid,
+                paymentRequestsGeneralUid: requestUid,
+              },
+            }),
+          ),
+        );
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 }
